@@ -47,9 +47,9 @@ export class robot_data extends plugin {
       { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
       { key: 'b', values: ['#'] },
       { key: 'c', values: ['QQ开发平台管理端登录'] },
-      { key: 'd', values: ['> 登录具有时效性，请尽快登录'] },
-      { key: 'e', values: ['***'] },
-      { key: 'f', values: ['当你选择登录，代表你已经同意将数据托管给橙子BOT。'] }
+      { key: 'd', values: [`\r> 登录具有时效性，请尽快登录\r\r`] },
+      { key: 'e', values: [`***`] },
+      { key: 'f', values: [`\r## 当你选择登录，代表你已经同意将数据托管给橙子BOT。`] }
     ];
     let buttonArr = [
       [
@@ -79,16 +79,16 @@ export class robot_data extends plugin {
           { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
           { key: 'b', values: ['#'] },
           { key: 'c', values: ['登录成功'] },
-          { key: 'd', values: [`> ${data.uin}`] },
-          { key: 'e', values: ['***'] },
+          { key: 'd', values: [`\r> ${data.uin}\r\r`] },
+          { key: 'e', values: [`***`] },
           {
-            key: 'f', values: [`## 登录类型：${((appType) => {
+            key: 'f', values: [`\r## 登录类型：${((appType) => {
               if (appType == "0") return '小程序'
               else if (appType == "2") return 'QQ机器人'
               else return '未知'
             })(data.appType)}`]
           },
-          { key: 'g', values: [`## AppId：${data.appId}`] }
+          { key: 'g', values: [`\r## AppId：${data.appId}`] }
         ], commonButtons)
       }
       i++;
@@ -135,14 +135,13 @@ export class robot_data extends plugin {
 
     return replyMarkdownButton(e, [
       { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
-      { key: 'b', values: [`> Uin:${data.uin}\rAppid:${data.appId}\r`] },
-      { key: 'c', values: ['***'] },
-      { key: 'd', values: ['> 以下是最近的通知'] },
+      { key: 'b', values: [`\rUin:${data.uin}\rAppid:${data.appId}\r\r`] },
+      { key: 'c', values: [`***\r`] },
+      { key: 'd', values: [`\r> 以下是最近的通知\r\r`] },
       { key: 'e', values: ['`'] },
-      { key: 'f', values: ['```'] },
-      { key: 'g', values: [`${msgContent.join('\r')}`] },
-      { key: 'h', values: ['```'] },
-      { key: 'i', values: ['`'] }
+      { key: 'f', values: [`\`\`\r${msgContent.join('\r')}`] },
+      { key: 'g', values: ['``'] },
+      { key: 'h', values: ['`'] }
     ], commonButtons)
   }
 
@@ -184,13 +183,12 @@ export class robot_data extends plugin {
       { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
       { key: 'b', values: ['#'] },
       { key: 'c', values: [' Bot列表'] },
-      { key: 'd', values: ['> 当前账户绑定的Bot如下'] },
-      { key: 'e', values: ['***'] },
+      { key: 'd', values: [`\r> 当前账户绑定的Bot如下\r\r`] },
+      { key: 'e', values: [`***\r`] },
       { key: 'f', values: ['`'] },
-      { key: 'g', values: ['```'] },
-      { key: 'h', values: [`${botContent.join('\r')}`] },
-      { key: 'i', values: ['```'] },
-      { key: 'j', values: ['`'] }
+      { key: 'g', values: [`\`\`${botContent.join('\r')}`] },
+      { key: 'h', values: ['``'] },
+      { key: 'i', values: ['`'] }
     ], commonButtons)
   }
 
@@ -234,12 +232,12 @@ export class robot_data extends plugin {
         { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
         { key: 'b', values: ['#'] },
         { key: 'c', values: ['机器人数据'] },
-        { key: 'd', values: ['> 最近三日汇总如下'] },
-        { key: 'e', values: ['***'] },
-        { key: 'f', values: ['\r\r```'] },
-        { key: 'g', values: [`${day1}\r\r——————`] },
-        { key: 'h', values: [`${day2}\r\r——————\r${day3}`] },
-        { key: 'i', values: ['```'] }
+        { key: 'd', values: [`\r> 最近三日汇总如下\r\r`] },
+        { key: 'e', values: [`***`] },
+        { key: 'f', values: ['\r\r``'] },
+        { key: 'g', values: [`\`${day1}\r\r——————`] },
+        { key: 'h', values: [`\r${day2}\r\r——————\r${day3}\`\``] },
+        { key: 'i', values: ['`'] }
       ], commonButtons)
     } catch (e) {
       console.error('Error in get_botdata:', e);
