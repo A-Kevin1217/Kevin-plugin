@@ -68,10 +68,6 @@ class Setting {
         result.groupAdmin = result.groupAdmin || {};
         result.groupAdmin.whiteQQ = result.config.member_whitelist;
       }
-      // 群白名单同步（GSelectGroup 需要数组）
-      if (Array.isArray(result.config.group_whitelist)) {
-        result.config.group_whitelist = result.config.group_whitelist;
-      }
       // --- end ---
       return result;
     }
@@ -108,15 +104,6 @@ class Setting {
           config.config.member_whitelist = config.member_whitelist;
         }
       }
-      // config.group_whitelist -> group_whitelist
-      if (data.config && Array.isArray(data.config.group_whitelist)) {
-        if (!config.config) config.config = {};
-        if (data.config.group_whitelist.length > 0) {
-          config.config.group_whitelist = data.config.group_whitelist;
-        } else if (Array.isArray(config.group_whitelist) && config.group_whitelist.length > 0) {
-          config.config.group_whitelist = config.group_whitelist;
-        }
-      }
       // --- end ---
       // 自动拆分 config 字段
       if (config.config) {
@@ -138,7 +125,6 @@ class Setting {
       });
 
       // 类型修正
-      if (!('group_whitelist' in config) || !Array.isArray(config.group_whitelist)) config.group_whitelist = [];
       if (!('member_whitelist' in config) || !Array.isArray(config.member_whitelist)) config.member_whitelist = [];
       if (typeof config.group_map !== 'object' || config.group_map === null || Array.isArray(config.group_map)) config.group_map = {};
       // 确保 audit_group_mode 有值

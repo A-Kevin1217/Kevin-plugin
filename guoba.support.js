@@ -69,19 +69,6 @@ export function supportGuoba() {
           }
         },
         {
-          field: 'config.audit_group_mode',
-          label: '群审核模式',
-          component: 'RadioGroup',
-          componentProps: {
-            options: [
-              { label: '群号与群名映射（group_map）', value: 'group_map' },
-              { label: '群白名单（group_whitelist）', value: 'group_whitelist' }
-            ],
-            placeholder: '请选择群审核模式'
-          },
-          required: true
-        },
-        {
           field: 'config.level_check',
           label: '是否启用等级验证',
           component: 'Select',
@@ -155,12 +142,6 @@ export function supportGuoba() {
             orientation: 'left',
             plain: true
           }
-        },
-        {
-          field: 'config.group_whitelist',
-          label: '群白名单',
-          bottomHelpMessage: '如果选择了群号与群名映射，这里可留空',
-          component: 'GSelectGroup'
         },
         {
           field: 'groupAdmin.whiteQQ',
