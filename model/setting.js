@@ -76,28 +76,48 @@ class Setting {
      * 保存锅巴配置数据，自动将 config 字段拆分为平铺，使用 YamlReader 保留注释
      */
     this.setConfigData = function (data, { Result }) {
+      // 读取原始 config.yaml 内容
+      let originConfig = {};
+      if (fs.existsSync(configYamlPath)) {
+        const y = new YamlReader(configYamlPath)
+        originConfig = y.jsonData || {};
+      }
+
       let config = JSON.parse(JSON.stringify(data));
       let broadcast = config.broadcast || {};
-      // 确保 broadcast 字段不会写入 config.yaml
       delete config.broadcast;
 
       // --- 白名单同步 ---
       // 只要前端有 groupAdmin.whiteQQ 字段（无论空还是有内容），都以它为准
+      // 否则保留原有内容
+      let finalWhitelist;
       if (data.groupAdmin && Array.isArray(data.groupAdmin.whiteQQ)) {
-        if (!config.config) config.config = {};
-        config.config.member_whitelist = data.groupAdmin.whiteQQ;
-      } else if (Array.isArray(config.member_whitelist)) {
-        // 前端没传字段，保留原有
-        if (!config.config) config.config = {};
-        config.config.member_whitelist = config.member_whitelist;
+        // 前端有字段
+        if (data.groupAdmin.whiteQQ.length > 0) {
+          finalWhitelist = data.groupAdmin.whiteQQ;
+        } else if (Array.isArray(originConfig.member_whitelist) && originConfig.member_whitelist.length > 0) {
+          // 前端传空，保留原有
+          finalWhitelist = originConfig.member_whitelist;
+        } else {
+          finalWhitelist = [];
+        }
+      } else if (Array.isArray(config.member_whitelist) && config.member_whitelist.length > 0) {
+        finalWhitelist = config.member_whitelist;
+      } else if (Array.isArray(originConfig.member_whitelist) && originConfig.member_whitelist.length > 0) {
+        finalWhitelist = originConfig.member_whitelist;
+      } else {
+        finalWhitelist = [];
       }
+
+      if (!config.config) config.config = {};
+      config.config.member_whitelist = finalWhitelist;
       // --- end ---
+
       // 自动拆分 config 字段前，保护 member_whitelist
       if (config.config) {
         const configObj = config.config;
-        // 优先以 configObj 里的 member_whitelist 为准
-        if (!('member_whitelist' in configObj) && Array.isArray(config.member_whitelist)) {
-          configObj.member_whitelist = config.member_whitelist;
+        if (!('member_whitelist' in configObj)) {
+          configObj.member_whitelist = finalWhitelist;
         }
         Object.keys(configObj).forEach(key => {
           if (/^(config|broadcast)\./.test(key)) {
@@ -107,8 +127,9 @@ class Setting {
         config = { ...config, ...configObj };
         delete config.config;
       }
+
       // 类型修正
-      if (!('member_whitelist' in config) || !Array.isArray(config.member_whitelist)) config.member_whitelist = [];
+      if (!('member_whitelist' in config) || !Array.isArray(config.member_whitelist)) config.member_whitelist = finalWhitelist;
       if (typeof config.group_map !== 'object' || config.group_map === null || Array.isArray(config.group_map)) config.group_map = {};
       if (!config.audit_group_mode) config.audit_group_mode = 'group_map';
 
@@ -126,7 +147,6 @@ class Setting {
       if (broadcast.admins && Array.isArray(broadcast.admins)) {
         broadcast.admins = broadcast.admins.map(item => Number(item.qq));
       }
-      // 只在 data.broadcast 存在且有内容时才写入 broadcast_data.json
       if (data.broadcast !== undefined && Object.keys(broadcast).length > 0) {
         try {
           fs.writeFileSync(broadcastJsonPath, JSON.stringify(broadcast, null, 2), 'utf8');
