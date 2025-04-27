@@ -1,0 +1,28 @@
+{
+  "name": "Kevin-plugin",
+  "version": "1.0",
+  "description": "TRSS-Yunzai专用小丞插件，支持多群管理、自动审核、吃喝推荐、点歌等功能",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/A-Kevin1217/Kevin-plugin"
+  },
+  "keywords": [
+    "Yunzai-Bot",
+    "Kevin-plugin",
+    "TRSS-Yunzai"
+  ],
+  "author": "小丞",
+  "license": "MIT",
+  "dependencies": {
+    "fluent-ffmpeg": "^2.1.2",
+    "image-size": "^1.0.2",
+    "yaml": "^2.3.4",
+    "cos-nodejs-sdk-v5": "^2.12.10",
+    "archiver": "^5.3.2"
+  }
+}
