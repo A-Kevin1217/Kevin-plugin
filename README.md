@@ -33,6 +33,12 @@ git clone --depth=1 https://github.com/A-Kevin1217/Kevin-plugin.git ./plugins/Ke
 git clone --depth=1 https://gitee.com/Kevin1217/Kevin-plugin.git ./plugins/Kevin-plugin/
 ```
 
+### 换源指引
+如果你已经安装过本插件，想要切换到 Github 源，可以使用如下命令：
+```
+git -C plugins/Kevin-plugin remote set-url origin https://github.com/A-Kevin1217/Kevin-plugin
+```
+
 ### 使用 pnpm 安装依赖
 
 如果你使用 pnpm 管理依赖，在 Yunzai-Bot 根目录下运行：
