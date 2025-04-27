@@ -88,22 +88,12 @@ class Setting {
       delete config.broadcast;
 
       // --- 白名单同步 ---
-      // 只要前端有 groupAdmin.whiteQQ 字段（无论空还是有内容），都以它为准
-      // 否则保留原有内容
       let finalWhitelist;
       if (data.groupAdmin && Array.isArray(data.groupAdmin.whiteQQ)) {
-        // 前端有字段
-        if (data.groupAdmin.whiteQQ.length > 0) {
-          finalWhitelist = data.groupAdmin.whiteQQ;
-        } else if (Array.isArray(originConfig.member_whitelist) && originConfig.member_whitelist.length > 0) {
-          // 前端传空，保留原有
-          finalWhitelist = originConfig.member_whitelist;
-        } else {
-          finalWhitelist = [];
-        }
-      } else if (Array.isArray(config.member_whitelist) && config.member_whitelist.length > 0) {
-        finalWhitelist = config.member_whitelist;
-      } else if (Array.isArray(originConfig.member_whitelist) && originConfig.member_whitelist.length > 0) {
+        // 前端有字段（允许空，允许清空）
+        finalWhitelist = data.groupAdmin.whiteQQ;
+      } else if (Array.isArray(originConfig.member_whitelist)) {
+        // 前端没传字段，保留原有
         finalWhitelist = originConfig.member_whitelist;
       } else {
         finalWhitelist = [];
