@@ -139,7 +139,7 @@ export class MusicShare extends plugin {
 
       // 使用markdown模板回复
       let replyArr = [
-        { key: 'a', values: [`<@${e.user_id?.slice(11)}>`] },
+        { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
         { key: 'b', values: ['#'] },
         { key: 'c', values: [' 点歌结果'] },
         { key: 'd', values: ['\r> 以下是搜索到的歌曲\r\r'] },
