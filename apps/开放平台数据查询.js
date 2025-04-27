@@ -49,7 +49,7 @@ export class robot_data extends plugin {
       { key: 'c', values: ['QQ开发平台管理端登录'] },
       { key: 'd', values: ['> 登录具有时效性，请尽快登录'] },
       { key: 'e', values: ['***'] },
-      { key: 'f', values: ['## 当你选择登录，代表你已经同意将数据托管给橙子BOT。'] }
+      { key: 'f', values: ['当你选择登录，代表你已经同意将数据托管给橙子BOT。'] }
     ];
     let buttonArr = [
       [
@@ -89,20 +89,14 @@ export class robot_data extends plugin {
             })(data.appType)}`]
           },
           { key: 'g', values: [`## AppId：${data.appId}`] }
-        ], [
-          [
-            { text: '通知', callback: 'bot通知' },
-            { text: '数据', callback: 'bot数据' },
-            { text: '列表', callback: 'bot列表' }
-          ]
-        ])
+        ], commonButtons)
       }
       i++;
       await sleep(3000);
     }
     return replyMarkdownButton(e, [
       { key: 'a', values: [`登录失效`] }
-    ], commonButtons)
+    ])
   }
 
   async get_message(e) {
@@ -149,13 +143,7 @@ export class robot_data extends plugin {
       { key: 'g', values: [`${msgContent.join('\r')}`] },
       { key: 'h', values: ['```'] },
       { key: 'i', values: ['`'] }
-    ], [
-      [
-        { text: '通知', callback: 'bot通知' },
-        { text: '数据', callback: 'bot数据' },
-        { text: '列表', callback: 'bot列表' }
-      ]
-    ])
+    ], commonButtons)
   }
 
   async get_botlist(e) {
@@ -252,13 +240,7 @@ export class robot_data extends plugin {
         { key: 'g', values: [`${day1}\r\r——————`] },
         { key: 'h', values: [`${day2}\r\r——————\r${day3}`] },
         { key: 'i', values: ['```'] }
-      ], [
-        [
-          { text: '通知', callback: 'bot通知' },
-          { text: '数据', callback: 'bot数据' },
-          { text: '列表', callback: 'bot列表' }
-        ]
-      ])
+      ], commonButtons)
     } catch (e) {
       console.error('Error in get_botdata:', e);
       return replyMarkdownButton(e, [
