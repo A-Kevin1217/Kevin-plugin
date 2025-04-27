@@ -102,12 +102,20 @@ class Setting {
       // groupAdmin.whiteQQ -> member_whitelist
       if (data.groupAdmin && Array.isArray(data.groupAdmin.whiteQQ)) {
         if (!config.config) config.config = {};
-        config.config.member_whitelist = data.groupAdmin.whiteQQ;
+        if (data.groupAdmin.whiteQQ.length > 0) {
+          config.config.member_whitelist = data.groupAdmin.whiteQQ;
+        } else if (Array.isArray(config.member_whitelist) && config.member_whitelist.length > 0) {
+          config.config.member_whitelist = config.member_whitelist;
+        }
       }
       // config.group_whitelist -> group_whitelist
       if (data.config && Array.isArray(data.config.group_whitelist)) {
         if (!config.config) config.config = {};
-        config.config.group_whitelist = data.config.group_whitelist;
+        if (data.config.group_whitelist.length > 0) {
+          config.config.group_whitelist = data.config.group_whitelist;
+        } else if (Array.isArray(config.group_whitelist) && config.group_whitelist.length > 0) {
+          config.config.group_whitelist = config.group_whitelist;
+        }
       }
       // --- end ---
       // 自动拆分 config 字段
