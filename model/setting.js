@@ -105,10 +105,13 @@ class Setting {
         }
       }
       // --- end ---
-      // 自动拆分 config 字段
+      // 自动拆分 config 字段前，保护 member_whitelist
       if (config.config) {
-        // 先过滤掉 config 对象里的 config.xxx 和 broadcast.xxx
         const configObj = config.config;
+        if (!('member_whitelist' in configObj) && Array.isArray(config.member_whitelist) && config.member_whitelist.length > 0) {
+          configObj.member_whitelist = config.member_whitelist;
+        }
+        // 先过滤掉 config 对象里的 config.xxx 和 broadcast.xxx
         Object.keys(configObj).forEach(key => {
           if (/^(config|broadcast)\./.test(key)) {
             delete configObj[key];
