@@ -103,24 +103,11 @@ class Setting {
       if (data.groupAdmin && Array.isArray(data.groupAdmin.whiteQQ)) {
         if (!config.config) config.config = {};
         config.config.member_whitelist = data.groupAdmin.whiteQQ;
-      } else if (config.member_whitelist) {
-        config.config = config.config || {};
-        config.config.member_whitelist = config.member_whitelist;
-      } else {
-        config.config = config.config || {};
-        config.config.member_whitelist = [];
       }
-
       // config.group_whitelist -> group_whitelist
       if (data.config && Array.isArray(data.config.group_whitelist)) {
         if (!config.config) config.config = {};
         config.config.group_whitelist = data.config.group_whitelist;
-      } else if (config.group_whitelist) {
-        config.config = config.config || {};
-        config.config.group_whitelist = config.group_whitelist;
-      } else {
-        config.config = config.config || {};
-        config.config.group_whitelist = [];
       }
       // --- end ---
       // 自动拆分 config 字段
