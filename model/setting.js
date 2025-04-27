@@ -74,20 +74,15 @@ class Setting {
 
     /**
      * 保存锅巴配置数据，自动将 config 字段拆分为平铺，使用 YamlReader 保留注释
+     * 支持灵活字段合并，兼容 group_map、broadcast、member_whitelist 等
      */
     this.setConfigData = function (data, { Result }) {
-      // 日志：收到前端数据
-      console.log('收到前端数据:', JSON.stringify(data));
-      if (data.groupAdmin) {
-        console.log('groupAdmin.whiteQQ:', data.groupAdmin.whiteQQ, '类型:', Array.isArray(data.groupAdmin.whiteQQ));
-      }
       // 读取原始 config.yaml 内容
       let originConfig = {};
       if (fs.existsSync(configYamlPath)) {
         const y = new YamlReader(configYamlPath)
         originConfig = y.jsonData || {};
       }
-
       let config = JSON.parse(JSON.stringify(data));
       let broadcast = config.broadcast || {};
       delete config.broadcast;
@@ -95,20 +90,22 @@ class Setting {
       // --- 白名单同步 ---
       let finalWhitelist;
       if (data.groupAdmin && Array.isArray(data.groupAdmin.whiteQQ)) {
-        // 前端有字段（允许空，允许清空）
         finalWhitelist = data.groupAdmin.whiteQQ;
       } else if (Array.isArray(originConfig.member_whitelist)) {
-        // 前端没传字段，保留原有
         finalWhitelist = originConfig.member_whitelist;
       } else {
         finalWhitelist = [];
       }
-      // 日志：最终写入的 member_whitelist
-      console.log('最终写入 member_whitelist:', finalWhitelist);
-
       if (!config.config) config.config = {};
       config.config.member_whitelist = finalWhitelist;
       // --- end ---
+
+      // group_map 数组转对象
+      if (config.config && Array.isArray(config.config.group_map)) {
+        config.config.group_map = Object.fromEntries(
+          config.config.group_map.map(item => [item.group_id, item.group_name])
+        );
+      }
 
       // 自动拆分 config 字段前，保护 member_whitelist
       if (config.config) {
@@ -133,6 +130,13 @@ class Setting {
       // 用 YamlReader 写入，保留注释
       const y = new YamlReader(configYamlPath)
       y.setData(config)
+      // 写入后内容日志
+      try {
+        const yamlContent = fs.readFileSync(configYamlPath, 'utf8');
+        console.log('config.yaml 写入后内容:\n', yamlContent);
+      } catch (e) {
+        console.log('读取 config.yaml 失败:', e.message);
+      }
 
       // 多群广播相关：对象数组转纯数组
       if (broadcast.destinationGroupIds && Array.isArray(broadcast.destinationGroupIds)) {
