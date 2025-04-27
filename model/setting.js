@@ -76,6 +76,11 @@ class Setting {
      * 保存锅巴配置数据，自动将 config 字段拆分为平铺，使用 YamlReader 保留注释
      */
     this.setConfigData = function (data, { Result }) {
+      // 日志：收到前端数据
+      console.log('收到前端数据:', JSON.stringify(data));
+      if (data.groupAdmin) {
+        console.log('groupAdmin.whiteQQ:', data.groupAdmin.whiteQQ, '类型:', Array.isArray(data.groupAdmin.whiteQQ));
+      }
       // 读取原始 config.yaml 内容
       let originConfig = {};
       if (fs.existsSync(configYamlPath)) {
@@ -98,6 +103,8 @@ class Setting {
       } else {
         finalWhitelist = [];
       }
+      // 日志：最终写入的 member_whitelist
+      console.log('最终写入 member_whitelist:', finalWhitelist);
 
       if (!config.config) config.config = {};
       config.config.member_whitelist = finalWhitelist;
