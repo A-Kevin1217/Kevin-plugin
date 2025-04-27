@@ -159,11 +159,13 @@ export function supportGuoba() {
         {
           field: 'config.group_whitelist',
           label: '群白名单',
+          bottomHelpMessage: '如果选择了群号与群名映射，这里可留空',
           component: 'GSelectGroup'
         },
         {
           field: 'groupAdmin.whiteQQ',
           label: '白名单QQ',
+          bottomHelpMessage: '这里配置的是免审核的QQ号',
           component: 'GTags',
           componentProps: {
             allowAdd: true,

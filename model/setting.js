@@ -35,9 +35,7 @@ class Setting {
         const y = new YamlReader(configYamlPath)
         config = y.jsonData || {};
       }
-      // 需要平铺字段名（只保留这些不包进config）
       const reserved = ['plugin_version', 'log_level', 'data_dir', 'enable_demon_roulette'];
-      // 自动包裹
       let configObj = {};
       for (const [k, v] of Object.entries(config)) {
         if (!reserved.includes(k)) configObj[k] = v;
@@ -64,6 +62,17 @@ class Setting {
         }
         result.broadcast = broadcast;
       }
+      // --- 白名单同步 ---
+      // 成员白名单同步到 groupAdmin.whiteQQ
+      if (Array.isArray(result.config.member_whitelist)) {
+        result.groupAdmin = result.groupAdmin || {};
+        result.groupAdmin.whiteQQ = result.config.member_whitelist;
+      }
+      // 群白名单同步（GSelectGroup 需要数组）
+      if (Array.isArray(result.config.group_whitelist)) {
+        result.config.group_whitelist = result.config.group_whitelist;
+      }
+      // --- end ---
       return result;
     }
 
@@ -75,15 +84,6 @@ class Setting {
       let broadcast = config.broadcast || {};
       // 确保 broadcast 字段不会写入 config.yaml
       delete config.broadcast;
-
-      // 保存 config.xxx 中的有效字段
-      const validConfigFields = {};
-      Object.keys(config).forEach(key => {
-        if (key.startsWith('config.')) {
-          const realKey = key.replace('config.', '');
-          validConfigFields[realKey] = config[key];
-        }
-      });
 
       // 彻底过滤所有 config.xxx 和 broadcast.xxx 字段
       Object.keys(config).forEach(key => {
@@ -98,15 +98,30 @@ class Setting {
           config.config.group_map.map(item => [item.group_id, item.group_name])
         );
       }
-
-      // 合并有效的配置字段
-      config = {
-        ...config,
-        ...(config.config || {}),
-        ...validConfigFields
-      };
-      delete config.config;
-
+      // --- 白名单同步 ---
+      // groupAdmin.whiteQQ -> member_whitelist
+      if (data.groupAdmin && Array.isArray(data.groupAdmin.whiteQQ)) {
+        if (!config.config) config.config = {};
+        config.config.member_whitelist = data.groupAdmin.whiteQQ;
+      }
+      // config.group_whitelist -> group_whitelist
+      if (data.config && Array.isArray(data.config.group_whitelist)) {
+        if (!config.config) config.config = {};
+        config.config.group_whitelist = data.config.group_whitelist;
+      }
+      // --- end ---
+      // 自动拆分 config 字段
+      if (config.config) {
+        // 先过滤掉 config 对象里的 config.xxx 和 broadcast.xxx
+        const configObj = config.config;
+        Object.keys(configObj).forEach(key => {
+          if (/^(config|broadcast)\./.test(key)) {
+            delete configObj[key];
+          }
+        });
+        config = { ...config, ...configObj };
+        delete config.config;
+      }
       // 最后再检查一遍，确保没有 config.xxx 和 broadcast.xxx
       Object.keys(config).forEach(key => {
         if (/^(config|broadcast)\./.test(key)) {
