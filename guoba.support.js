@@ -159,16 +159,17 @@ export function supportGuoba() {
         {
           field: 'config.group_whitelist',
           label: '群白名单',
-          component: 'Input',
-          required: false,
-          componentProps: { placeholder: '[群号, ...]' },
+          component: 'GSelectGroup'
         },
         {
-          field: 'config.member_whitelist',
-          label: '成员白名单',
-          component: 'Input',
-          required: false,
-          componentProps: { placeholder: '[QQ号, ...]' },
+          field: 'groupAdmin.whiteQQ',
+          label: '白名单QQ',
+          component: 'GTags',
+          componentProps: {
+            allowAdd: true,
+            allowDel: true,
+            valueFormatter: ((value) => Number.parseInt(value)).toString()
+          }
         },
         { label: '多群广播', component: 'SOFT_GROUP_BEGIN' },
         {

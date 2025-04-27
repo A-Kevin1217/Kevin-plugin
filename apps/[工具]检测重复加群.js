@@ -109,64 +109,90 @@ export class DuplicateJoinDetector extends plugin {
     this._initialized = true;
   }
 
-  async manualCheck(e) {
-    if (!e.isMaster) {
-      await this.reply('只有主人才能执行此命令');
-      return false;
+  async getAllGroupMembers() {
+    const result = new Map();
+    
+    for (const [groupId, groupName] of Object.entries(group_map)) {
+      try {
+        const group = await this.e.bot.pickGroup(Number(groupId));
+        const members = await group.getMemberMap();
+        result.set(groupId, {
+          name: groupName,
+          members: Array.from(members.keys())
+        });
+      } catch (e) {
+        logger.error(`获取群 ${groupId} 成员列表失败`, e);
+      }
     }
+    
+    return result;
+  }
 
-    await this.reply('开始初始化群成员数据并检测白名单群的重复加群情况，请稍候...')
-
-    // 初始化所有群的成员数据
-    await initAllGroupMembers(e.bot);
-
-    let memberGroups = new Map();
-    let duplicateMembers = [];
-
+  analyzeDuplicates(groupMembers) {
+    const memberGroups = {};
+    
     // 将机器人自身添加到白名单
     const botId = this.e.bot.uin.toString();
     if (!member_whitelist.includes(Number(botId))) {
       member_whitelist.push(Number(botId));
     }
-
-    for (const [groupId, groupName] of Object.entries(group_map)) {
-      const members = loadGroupMembers(groupId);
-      for (const memberId of members) {
-        if (!member_whitelist.includes(Number(memberId))) {
-          if (!memberGroups.has(memberId)) {
-            memberGroups.set(memberId, []);
-          }
-          memberGroups.get(memberId).push({id: groupId, name: groupName});
+    
+    for (const [groupId, data] of groupMembers) {
+      for (const memberId of data.members) {
+        // 跳过白名单成员
+        if (member_whitelist.includes(Number(memberId))) {
+          continue;
         }
-      }
-    }
-
-    for (const [memberId, groups] of memberGroups) {
-      if (groups.length > 1) {
-        duplicateMembers.push({
-          userId: memberId,
-          groups: groups
+        
+        if (!memberGroups[memberId]) {
+          memberGroups[memberId] = [];
+        }
+        memberGroups[memberId].push({
+          id: groupId,
+          name: data.name
         });
       }
     }
+    
+    return memberGroups;
+  }
 
-    if (duplicateMembers.length > 0) {
-      let messages = [`检测到 ${duplicateMembers.length} 名成员重复加群：`];
-      for (const member of duplicateMembers) {
-        let memberInfo = await this.e.bot.getStrangerInfo(member.userId);
-        let nickname = memberInfo ? memberInfo.nickname : '未知昵称';
-        let groupList = member.groups.map(g => `${g.name}(${g.id})`).join('\n');
-        messages.push([
-          `QQ：${member.userId}`,
-          `昵称：${nickname}`,
-          `加入的群：\n${groupList}`
-        ].join('\n'));
-      }
-      await this.reply(await common.makeForwardMsg(e, [`检测到 ${duplicateMembers.length} 名成员重复加群：`, ...messages.slice(1)], '重复加群检测结果'));
-    } else {
-      await this.reply('未检测到重复加群的成员。');
+  async manualCheck() {
+    if (!this.e.isMaster) {
+      await this.reply('只有主人才能执行此命令');
+      return false;
     }
 
+    await this.reply('开始检测重复加群情况，请稍候...');
+    
+    // 获取所有群的成员数据
+    const groupMembers = await this.getAllGroupMembers();
+    
+    // 分析重复加群情况
+    const duplicates = this.analyzeDuplicates(groupMembers);
+    
+    // 生成报告
+    let report = ['重复加群检测结果：\n'];
+    
+    for (const [qq, groups] of Object.entries(duplicates)) {
+      if (groups.length > 1) {
+        let userInfo;
+        try {
+          userInfo = await this.e.bot.pickUser(Number(qq)).getSimpleInfo();
+        } catch (e) {
+          userInfo = { nickname: qq };
+        }
+        const groupNames = groups.map(g => g.name).join('、');
+        report.push(`${userInfo.nickname}(${qq}) 加入了 ${groups.length} 个群：${groupNames}`);
+      }
+    }
+    
+    if (report.length === 1) {
+      report.push('未发现重复加群情况');
+    }
+    
+    // 使用 makeForwardMsg 发送
+    await this.reply(await common.makeForwardMsg(this.e, report, '重复加群检测结果'));
     return true;
   }
 
