@@ -56,7 +56,7 @@ export class MusicShare extends plugin {
     fs.writeFileSync(CONFIG_PATH, YAML.stringify(config))
 
     return replyMarkdownButton(e, [
-      { key: 'a', values: [`<@${e.user_id?.slice(11)}>`] },
+      { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
       { key: 'b', values: ['#'] },
       { key: 'c', values: [' 网易云音乐'] },
       { key: 'd', values: ['\r> Cookie设置成功\r\r'] }
@@ -69,7 +69,7 @@ export class MusicShare extends plugin {
     let keyword = msg.replace(/^#?点歌/, "").trim()
     if (!keyword) {
       return replyMarkdownButton(e, [
-        { key: 'a', values: [`<@${e.user_id?.slice(11)}>`] },
+        { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
         { key: 'b', values: ['#'] },
         { key: 'c', values: [' 点歌'] },
         { key: 'd', values: ['\r> 请输入要搜索的歌曲名\r\r'] }
@@ -155,7 +155,7 @@ export class MusicShare extends plugin {
     } catch (err) {
       console.log(err)
       await replyMarkdownButton(e, [
-        { key: 'a', values: [`<@${e.user_id?.slice(11)}>`] },
+        { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
         { key: 'b', values: ['#'] },
         { key: 'c', values: [' 搜索失败'] },
         { key: 'd', values: ['\r> 搜索歌曲时发生错误\r\r'] }
@@ -168,7 +168,7 @@ export class MusicShare extends plugin {
       if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
       return replyMarkdownButton(e, [
         { key: 'a', values: ['#'] },
-        { key: 'b', values: [` <@${e.user_id?.slice(11)}>`] },
+        { key: 'b', values: [` <@${e.user_id?.slice(11)}>\r`] },
         { key: 'c', values: ['播放失败'] },
         { key: 'd', values: ['，请先搜索歌曲\r\r'] }
       ])
@@ -180,7 +180,7 @@ export class MusicShare extends plugin {
     if (index < 0 || index >= songs.length) {
       if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
       return replyMarkdownButton(e, [
-        { key: 'a', values: [`<@${e.user_id?.slice(11)}>`] },
+        { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
         { key: 'b', values: ['#'] },
         { key: 'c', values: [' 播放失败'] },
         { key: 'd', values: ['\r> 无效的序号\r\r'] }
@@ -194,9 +194,9 @@ export class MusicShare extends plugin {
     // 发送正在获取音乐的提示
     if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
     await replyMarkdownButton(e, [
-      { key: 'a', values: [`<@${e.user_id?.slice(11)}>`] },
+      { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
       { key: 'b', values: ['#'] },
-      { key: 'c', values: [' 正在获取音乐'] },
+      { key: 'c', values: ['正在获取音乐'] },
       { key: 'd', values: [`\r> ${songName} - ${artist}\r\r`] },
       { key: 'e', values: ['***\r'] },
       { key: 'f', values: ['\r请稍候...'] }
@@ -231,7 +231,7 @@ export class MusicShare extends plugin {
         } catch (err) {
           if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
           return replyMarkdownButton(e, [
-            { key: 'a', values: [`<@${e.user_id?.slice(11)}>`] },
+            { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
             { key: 'b', values: ['#'] },
             { key: 'c', values: [' 播放失败'] },
             { key: 'd', values: ['\r> 歌曲文件太大，无法发送\r\r'] }
@@ -259,7 +259,7 @@ export class MusicShare extends plugin {
         } catch (err) {
           if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
           return replyMarkdownButton(e, [
-            { key: 'a', values: [`<@${e.user_id?.slice(11)}>`] },
+            { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
             { key: 'b', values: ['#'] },
             { key: 'c', values: [' 播放失败'] },
             { key: 'd', values: ['\r> 歌曲文件太大，无法发送\r\r'] }
@@ -293,7 +293,7 @@ export class MusicShare extends plugin {
         } catch (err) {
           if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
           return replyMarkdownButton(e, [
-            { key: 'a', values: [`<@${e.user_id?.slice(11)}>`] },
+            { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
             { key: 'b', values: ['#'] },
             { key: 'c', values: [' 播放失败'] },
             { key: 'd', values: ['\r> 歌曲文件太大，无法发送\r\r'] }
@@ -314,7 +314,7 @@ export class MusicShare extends plugin {
       console.log(err)
       if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
       return replyMarkdownButton(e, [
-        { key: 'a', values: [`<@${e.user_id?.slice(11)}>`] },
+        { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
         { key: 'b', values: ['#'] },
         { key: 'c', values: [' 播放失败'] },
         { key: 'd', values: ['\r> 播放歌曲时发生错误\r\r'] }
@@ -372,7 +372,7 @@ export class MusicShare extends plugin {
     if (result[3] != 0) {
       if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
       return replyMarkdownButton(e, [
-        { key: 'a', values: [`<@${e.user_id?.slice(11)}>`] },
+        { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
         { key: 'b', values: ['#'] },
         { key: 'c', values: [' 分享失败'] },
         { key: 'd', values: [`\r> 歌曲分享失败：${result[3]}\r\r`] }

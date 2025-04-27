@@ -130,8 +130,8 @@ class Setting {
       });
 
       // 类型修正
-      if (!Array.isArray(config.group_whitelist)) config.group_whitelist = [];
-      if (!Array.isArray(config.member_whitelist)) config.member_whitelist = [];
+      if (!('group_whitelist' in config) || !Array.isArray(config.group_whitelist)) config.group_whitelist = [];
+      if (!('member_whitelist' in config) || !Array.isArray(config.member_whitelist)) config.member_whitelist = [];
       if (typeof config.group_map !== 'object' || config.group_map === null || Array.isArray(config.group_map)) config.group_map = {};
       // 确保 audit_group_mode 有值
       if (!config.audit_group_mode) config.audit_group_mode = 'group_map';
