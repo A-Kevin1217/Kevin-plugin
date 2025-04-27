@@ -103,11 +103,24 @@ class Setting {
       if (data.groupAdmin && Array.isArray(data.groupAdmin.whiteQQ)) {
         if (!config.config) config.config = {};
         config.config.member_whitelist = data.groupAdmin.whiteQQ;
+      } else if (config.member_whitelist) {
+        config.config = config.config || {};
+        config.config.member_whitelist = config.member_whitelist;
+      } else {
+        config.config = config.config || {};
+        config.config.member_whitelist = [];
       }
+
       // config.group_whitelist -> group_whitelist
       if (data.config && Array.isArray(data.config.group_whitelist)) {
         if (!config.config) config.config = {};
         config.config.group_whitelist = data.config.group_whitelist;
+      } else if (config.group_whitelist) {
+        config.config = config.config || {};
+        config.config.group_whitelist = config.group_whitelist;
+      } else {
+        config.config = config.config || {};
+        config.config.group_whitelist = [];
       }
       // --- end ---
       // 自动拆分 config 字段
@@ -201,83 +214,44 @@ class Setting {
         // 递归创建目录
         fs.mkdirSync(path, { recursive: true });
       }
-      fs.writeFileSync(`${path}${filename}.yaml`, YAML.stringify(data),'utf8')
+      fs.writeFileSync(`${path}${filename}.yaml`, YAML.stringify(data), 'utf8');
     } catch (error) {
       logger.error(`[${filename}] 写入失败 ${error}`)
       return false
     }
   }
 
-  // 获取对应模块默认配置
-  getdefSet (app) {
-    return this.getYaml(app, 'defSet')
+  getdefSet (filename) {
+    return this.defSet[filename] || {}
   }
 
-  // 获取对应模块用户配置
-  getConfig (app) {
-    return { ...this.getdefSet(app), ...this.getYaml(app, 'config') }
+  getConfig (filename) {
+    return this.config[filename] || {}
   }
 
-  // 设置对应模块用户配置
-  setConfig (app, Object) {
-    return this.setYaml(app, 'config', { ...this.getdefSet(app), ...Object})
+  setConfig (filename, config) {
+    this.config[filename] = config
   }
 
-  // 将对象写入YAML文件
-  setYaml (app, type, Object){
-    let file = this.getFilePath(app, type)
-    try {
-      fs.writeFileSync(file, YAML.stringify(Object),'utf8')
-    } catch (error) {
-      logger.error(`[${app}] 写入失败 ${error}`)
-      return false
+  setYaml (filename, yaml) {
+    this.defSet[filename] = yaml
+  }
+
+  getYaml (filename) {
+    return this.defSet[filename] || {}
+  }
+
+  getFilePath (filename) {
+    return `${this.defPath}${filename}.yaml`
+  }
+
+  watch (filename) {
+    if (!this.watcher.defSet[filename]) {
+      this.watcher.defSet[filename] = chokidar.watch(this.getFilePath(filename))
+      this.watcher.defSet[filename].on('all', () => {
+        this.defSet[filename] = this.getYaml(filename)
+      })
     }
-  }
-
-  // 读取YAML文件 返回对象
-  getYaml (app, type) {
-    let file = this.getFilePath(app, type)
-    if (this[type][app]) return this[type][app]
-
-    try {
-      this[type][app] = YAML.parse(fs.readFileSync(file, 'utf8'))
-    } catch (error) {
-      logger.error(`[${app}] 格式错误 ${error}`)
-      return false
-    }
-    this.watch(file, app, type)
-    return this[type][app]
-  }
-
-  // 获取YAML文件目录
-  getFilePath (app, type) {
-    if (type === 'defSet') return `${this.defPath}${app}.yaml`
-    else {
-      try {
-        if (!fs.existsSync(`${this.configPath}${app}.yaml`)) {
-          fs.copyFileSync(`${this.defPath}${app}.yaml`, `${this.configPath}${app}.yaml`)
-        }
-      } catch (error) {
-        logger.error(`拓展插件缺失默认文件[${app}]${error}`)
-      }
-      return `${this.configPath}${app}.yaml`
-    }
-  }
-
-
-  // 监听配置文件
-  watch (file, app, type = 'defSet') {
-    if (this.watcher[type][app]) return
-
-    const watcher = chokidar.watch(file)
-    watcher.on('change', path => {
-      delete this[type][app]
-      logger.mark(`[拓展插件][修改配置文件][${type}][${app}]`)
-      if (this[`change_${app}`]) {
-        this[`change_${app}`]()
-      }
-    })
-    this.watcher[type][app] = watcher
   }
 }
 
