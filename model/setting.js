@@ -63,7 +63,7 @@ class Setting {
         result.broadcast = broadcast;
       }
       // --- 白名单同步 ---
-      // 成员白名单同步到 groupAdmin.whiteQQ
+      // 始终保证 groupAdmin.whiteQQ 和 member_whitelist 双向同步
       if (Array.isArray(result.config.member_whitelist)) {
         result.groupAdmin = result.groupAdmin || {};
         result.groupAdmin.whiteQQ = result.config.member_whitelist;
@@ -81,37 +81,24 @@ class Setting {
       // 确保 broadcast 字段不会写入 config.yaml
       delete config.broadcast;
 
-      // 彻底过滤所有 config.xxx 和 broadcast.xxx 字段
-      Object.keys(config).forEach(key => {
-        if (/^(config|broadcast)\./.test(key)) {
-          delete config[key];
-        }
-      });
-
-      // group_map 数组转对象
-      if (config.config && Array.isArray(config.config.group_map)) {
-        config.config.group_map = Object.fromEntries(
-          config.config.group_map.map(item => [item.group_id, item.group_name])
-        );
-      }
       // --- 白名单同步 ---
-      // groupAdmin.whiteQQ -> member_whitelist
+      // 只要前端有 groupAdmin.whiteQQ 字段（无论空还是有内容），都以它为准
       if (data.groupAdmin && Array.isArray(data.groupAdmin.whiteQQ)) {
         if (!config.config) config.config = {};
-        if (data.groupAdmin.whiteQQ.length > 0) {
-          config.config.member_whitelist = data.groupAdmin.whiteQQ;
-        } else if (Array.isArray(config.member_whitelist) && config.member_whitelist.length > 0) {
-          config.config.member_whitelist = config.member_whitelist;
-        }
+        config.config.member_whitelist = data.groupAdmin.whiteQQ;
+      } else if (Array.isArray(config.member_whitelist)) {
+        // 前端没传字段，保留原有
+        if (!config.config) config.config = {};
+        config.config.member_whitelist = config.member_whitelist;
       }
       // --- end ---
       // 自动拆分 config 字段前，保护 member_whitelist
       if (config.config) {
         const configObj = config.config;
-        if (!('member_whitelist' in configObj) && Array.isArray(config.member_whitelist) && config.member_whitelist.length > 0) {
+        // 优先以 configObj 里的 member_whitelist 为准
+        if (!('member_whitelist' in configObj) && Array.isArray(config.member_whitelist)) {
           configObj.member_whitelist = config.member_whitelist;
         }
-        // 先过滤掉 config 对象里的 config.xxx 和 broadcast.xxx
         Object.keys(configObj).forEach(key => {
           if (/^(config|broadcast)\./.test(key)) {
             delete configObj[key];
@@ -120,17 +107,9 @@ class Setting {
         config = { ...config, ...configObj };
         delete config.config;
       }
-      // 最后再检查一遍，确保没有 config.xxx 和 broadcast.xxx
-      Object.keys(config).forEach(key => {
-        if (/^(config|broadcast)\./.test(key)) {
-          delete config[key];
-        }
-      });
-
       // 类型修正
       if (!('member_whitelist' in config) || !Array.isArray(config.member_whitelist)) config.member_whitelist = [];
       if (typeof config.group_map !== 'object' || config.group_map === null || Array.isArray(config.group_map)) config.group_map = {};
-      // 确保 audit_group_mode 有值
       if (!config.audit_group_mode) config.audit_group_mode = 'group_map';
 
       // 用 YamlReader 写入，保留注释
