@@ -865,10 +865,20 @@ export class 光遇_身高查询 extends plugin {
 
     async WF(e) {
         try {
+            if (e.isMaster) {
+                return 0;
+            }
             const GROUP_ID = e.group_id;
             if (!GROUP_ID) {
                 logger.info('[光遇身高查询] 非群聊消息');
-                return -1;
+                return replyMarkdownButton(e, [
+                    { key: 'a', values: ['##'] },
+                    { key: 'b', values: [' 私聊无法查询'] }
+                ], [
+                    [
+                        { text: '加入身高群', link: 'https://qm.qq.com/q/vWkWLP7W36' }
+                    ]
+                ]);
             }
 
             const FREE_GROUP_ID = await GD(OPEN_GROUP_FILE);
