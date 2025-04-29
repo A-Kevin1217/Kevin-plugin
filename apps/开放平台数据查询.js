@@ -231,7 +231,7 @@ export class robot_data extends plugin {
       return replyMarkdownButton(e, [
         { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
         { key: 'b', values: ['#'] },
-        { key: 'c', values: ['机器人数据'] },
+        { key: 'c', values: ['Bot数据'] },
         { key: 'd', values: [`\r> 最近三日汇总如下\r\r`] },
         { key: 'e', values: [`***`] },
         { key: 'f', values: ['\r\r``'] },
