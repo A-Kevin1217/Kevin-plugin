@@ -1,7 +1,5 @@
-import fs from 'fs'
-import path from 'path'
-import { spawn } from 'child_process'
-import { replyMarkdownButton } from '../components/CommonReplyUtil.js'
+import fetch from 'node-fetch'
+import { segment } from '../components/CommonReplyUtil.js'
 
 export class 猫猫糕 extends plugin {
     constructor() {
@@ -27,45 +25,26 @@ export class 猫猫糕 extends plugin {
             '今日份猫猫糕，软萌上线，快来rua一口！',
             '猫猫糕已就位，愿你今天甜甜的，喵~'
         ]
-        this.repoDir = path.join(process.cwd(), 'resources/orange-example')
-        this.countPath = path.join(this.repoDir, 'json/猫猫糕数量.json')
-        this.imgDir = path.join(this.repoDir, 'images/猫猫糕')
-        this.repoUrl = 'https://gitcode.com/Kevin1217/orange-example'
-        this.cloning = false
-        this.ensureRepoAsync()
-    }
-
-    ensureRepoAsync() {
-        if (!fs.existsSync(this.repoDir) && !this.cloning) {
-            this.cloning = true
-            logger.info('[猫猫糕] orange-example资源未检测到，正在异步clone...')
-            const git = spawn('git', ['clone', this.repoUrl, this.repoDir])
-            git.on('close', code => {
-                if (code === 0) {
-                    logger.info('[猫猫糕] orange-example资源clone完成')
-                } else {
-                    logger.error('[猫猫糕] clone orange-example失败，code=' + code)
-                }
-                this.cloning = false
-            })
-        }
+        this.countUrl = 'https://raw.gitcode.com/Kevin1217/orange-example/raw/master/json/%E7%8C%AB%E7%8C%AB%E7%B3%95%E6%95%B0%E9%87%8F.json'
+        this.imgPrefix = 'https://raw.gitcode.com/Kevin1217/orange-example/files/master/images/%E7%8C%AB%E7%8C%AB%E7%B3%95/'
     }
 
     async getTotalCount() {
-        if (!fs.existsSync(this.countPath)) {
-            throw new Error('资源正在初始化，请稍后再试')
-        }
-        const data = JSON.parse(fs.readFileSync(this.countPath, 'utf8'))
+        const res = await fetch(this.countUrl)
+        if (!res.ok) throw new Error('获取猫猫糕数量失败')
+        const data = await res.json()
         if (!data['猫猫糕数量']) throw new Error('猫猫糕数量字段缺失')
         return data['猫猫糕数量']
     }
 
-    getMMGPath(idx) {
+    getMMGUrl(idx) {
         const numStr = idx.toString().padStart(5, '0')
         const exts = ['jpg', 'png', 'gif']
         for (let ext of exts) {
-            const filePath = path.join(this.imgDir, `猫猫糕${numStr}.${ext}`)
-            if (fs.existsSync(filePath)) return filePath
+            const fileName = `猫猫糕${numStr}.${ext}`
+            const url = this.imgPrefix + encodeURIComponent(fileName)
+            // 可以加HEAD判断是否存在，这里直接返回第一个
+            return url
         }
         return ''
     }
@@ -109,16 +88,15 @@ export class 猫猫糕 extends plugin {
         return null
     }
 
-    async sendMMG(e, imgPath) {
-        const msgArr = [];
-        msgArr.push(segment.image(imgPath)); // 先图片
-        msgArr.push(`> ${this.getRandomCuteText()}`); // 再文案
-        // 如果平台支持按钮，可以加上
+    async sendMMG(e, imgUrl) {
+        const msgArr = []
+        msgArr.push(segment.image(imgUrl))
+        msgArr.push(`> ${this.getRandomCuteText()}`)
         msgArr.push(segment.button([
             { text: '换个猫猫糕', callback: '换个猫猫糕', visited_label: '正在换猫猫糕' },
             { text: '今日猫猫糕', callback: '今日猫猫糕', visited_label: '正在获取今日猫猫糕' }
         ]));
-        await e.reply(msgArr, true);
+        await e.reply(msgArr, true)
     }
 
     async TODAY_MMG(e) {
@@ -144,12 +122,12 @@ export class 猫猫糕 extends plugin {
             idx = (new Date().getFullYear() * 10000 + (new Date().getMonth() + 1) * 100 + new Date().getDate()) % total + 1
         }
         await redis.set(redisKey, JSON.stringify({ idx, time: now }))
-        const imgPath = this.getMMGPath(idx)
-        if (!imgPath) {
+        const imgUrl = this.getMMGUrl(idx)
+        if (!imgUrl) {
             await e.reply('未找到今日猫猫糕图片，请联系管理员补图')
             return
         }
-        await this.sendMMG(e, imgPath)
+        await this.sendMMG(e, imgUrl)
     }
 
     async CHANGE_MMG(e) {
@@ -177,25 +155,11 @@ export class 猫猫糕 extends plugin {
             tryCount++
         } while (idx === oldIdx && tryCount < 10)
         await redis.set(redisKey, JSON.stringify({ idx, time: now }))
-        const imgPath = this.getMMGPath(idx)
-        if (!imgPath) {
+        const imgUrl = this.getMMGUrl(idx)
+        if (!imgUrl) {
             await e.reply('未找到猫猫糕图片，请联系管理员补图')
             return
         }
-        await this.sendMMG(e, imgPath)
-    }
-
-    pullRepo() {
-        if (fs.existsSync(this.repoDir)) {
-            logger.info('[猫猫糕] 正在自动pull orange-example资源...')
-            const git = spawn('git', ['-C', this.repoDir, 'pull'])
-            git.on('close', code => {
-                if (code === 0) {
-                    logger.info('[猫猫糕] orange-example资源pull完成')
-                } else {
-                    logger.error('[猫猫糕] pull orange-example失败，code=' + code)
-                }
-            })
-        }
+        await this.sendMMG(e, imgUrl)
     }
 }
