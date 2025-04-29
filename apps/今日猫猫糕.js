@@ -141,12 +141,12 @@ export class 猫猫糕 extends plugin {
             idx = (new Date().getFullYear() * 10000 + (new Date().getMonth() + 1) * 100 + new Date().getDate()) % total + 1
         }
         await redis.set(redisKey, JSON.stringify({ idx, time: now }))
-        const imgUrl = await this.getMMGUrl(idx)
-        if (!imgUrl) {
+        const imgPath = this.getMMGPath(idx)
+        if (!imgPath) {
             await e.reply('未找到今日猫猫糕图片，请联系管理员补图')
             return
         }
-        await this.sendMMGMarkdown(e, imgUrl)
+        await this.sendMMGMarkdown(e, imgPath)
     }
 
     async CHANGE_MMG(e) {
@@ -174,12 +174,12 @@ export class 猫猫糕 extends plugin {
             tryCount++
         } while (idx === oldIdx && tryCount < 10)
         await redis.set(redisKey, JSON.stringify({ idx, time: now }))
-        const imgUrl = await this.getMMGUrl(idx)
-        if (!imgUrl) {
+        const imgPath = this.getMMGPath(idx)
+        if (!imgPath) {
             await e.reply('未找到猫猫糕图片，请联系管理员补图')
             return
         }
-        await this.sendMMGMarkdown(e, imgUrl)
+        await this.sendMMGMarkdown(e, imgPath)
     }
 
     pullRepo() {
