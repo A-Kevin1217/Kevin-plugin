@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { exec } from 'child_process'
 import { promisify } from 'util'
+import { replyMarkdownButton } from '../components/CommonReplyUtil.js'
 const execAsync = promisify(exec)
 
 export class 猫猫糕 extends plugin {
@@ -124,15 +125,23 @@ export class 猫猫糕 extends plugin {
     }
 
     async sendMMG(e, imgPath) {
-        const msgArr = []
-        msgArr.push(segment.image(imgPath))
-        msgArr.push(`\r>${this.getRandomCuteText()}`)
-        msgArr.push(segment.button([
-            { text: '换个猫猫糕', callback: '换个猫猫糕', clicked_text: '正在换猫猫糕' },
-            { text: '今日猫猫糕', callback: '今日猫猫糕', clicked_text: '正在获取今日猫猫糕' }
-        ]));
-        console.log(msgArr)
-        await e.reply(msgArr, true)
+        const cuteText = this.getRandomCuteText()
+        let sizeStr = ''
+        const size = await this.getImageSize(imgPath)
+        if (size && size.width && size.height) {
+            sizeStr = ` #${size.width}px #${size.height}px`
+        }
+        const replyArr = [
+            { key: 'a', values: [`![猫猫糕${sizeStr}](${imgPath}`] },
+            { key: 'b', values: [`)\r> ${cuteText}`] }
+        ]
+        const buttonArr = [
+            [
+                { text: '换个猫猫糕', callback: '换个猫猫糕', clicked_text: '正在换猫猫糕' },
+                { text: '今日猫猫糕', callback: '今日猫猫糕', clicked_text: '正在获取今日猫猫糕' }
+            ]
+        ]
+        await replyMarkdownButton(e, replyArr, buttonArr)
     }
 
     async TODAY_MMG(e) {
