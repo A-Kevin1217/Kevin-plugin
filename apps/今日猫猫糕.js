@@ -27,7 +27,7 @@ export class 猫猫糕 extends plugin {
             '今日份猫猫糕，软萌上线，快来rua一口！',
             '猫猫糕已就位，愿你今天甜甜的，喵~'
         ]
-        this.repoDir = path.join(process.cwd(), 'resources/orange-example')
+        this.repoDir = path.join(process.cwd(), 'plugins/Kevin-plugin/resources/orange-example')
         this.countPath = path.join(this.repoDir, 'json/猫猫糕数量.json')
         this.imgDir = path.join(this.repoDir, 'images/猫猫糕')
         this.repoUrl = 'https://gitcode.com/Kevin1217/orange-example'
