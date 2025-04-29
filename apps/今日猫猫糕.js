@@ -1,62 +1,52 @@
-import fetch from 'node-fetch'
-import { replyMarkdownButton } from '../components/CommonReplyUtil.js'
+import fs from 'fs'
+import path from 'path'
+import { execSync } from 'child_process'
+import { replyMarkdownButton, segment } from '../components/CommonReplyUtil.js'
 
-export class 猫猫糕 extends plugin{
-    constructor(){
+export class 猫猫糕 extends plugin {
+    constructor() {
         super({
             name: '猫猫糕',
             dsc: '猫猫糕',
             event: 'message',
             priority: 1000,
             rule: [
-                {
-                    reg: /^(#|\/)?(今日猫猫糕)$/,
-                    fnc: 'TODAY_MMG'
-                },
-                {
-                    reg: /^(#|\/)?(换个猫猫糕)$/,
-                    fnc: 'CHANGE_MMG'
-                }
+                { reg: /^(#|\/)?(今日猫猫糕)$/, fnc: 'TODAY_MMG' },
+                { reg: /^(#|\/)?(换个猫猫糕)$/, fnc: 'CHANGE_MMG' }
             ]
         })
-        this.cuteTexts = [
-            '喵呜~今日份猫猫糕新鲜出炉，快来尝一口吧！',
-            '猫猫糕来啦，软软糯糯，专属于你的小甜点~',
-            '叮咚！猫猫糕快递送到，今天也要元气满满喵！',
-            '今日猫猫糕已上线，吃一口好运一整天！',
-            '小猫猫亲手做的猫猫糕，送给最可爱的你~',
-            '猫猫糕到货，快抱走你的专属可爱吧！',
-            '喵星人派送的猫猫糕，今天也要开心哦！',
-            '猫猫糕：请签收你的快乐小点心~',
-            '今日份猫猫糕，软萌上线，快来rua一口！',
-            '猫猫糕已就位，愿你今天甜甜的，喵~'
-        ]
-        this.countUrl = 'https://raw.gitcode.com/Kevin1217/orange-example/raw/master/json/%E7%8C%AB%E7%8C%AB%E7%B3%95%E6%95%B0%E9%87%8F.json'
-        this.imgPrefix = 'https://raw.gitcode.com/Kevin1217/orange-example/files/master/images/%E7%8C%AB%E7%8C%AB%E7%B3%95/'
+        this.cuteTexts = [/* ...可爱文案... */]
+        this.repoDir = path.join(process.cwd(), 'resources/orange-example')
+        this.countPath = path.join(this.repoDir, 'json/猫猫糕数量.json')
+        this.imgDir = path.join(this.repoDir, 'images/猫猫糕')
+        this.repoUrl = 'https://gitcode.com/Kevin1217/orange-example'
+        this.ensureRepo()
+    }
+
+    ensureRepo() {
+        if (!fs.existsSync(this.repoDir)) {
+            logger.info('[猫猫糕] 未检测到orange-example资源，正在自动clone...')
+            try {
+                execSync(`git clone ${this.repoUrl} "${this.repoDir}"`, { stdio: 'inherit' })
+                logger.info('[猫猫糕] orange-example资源clone完成')
+            } catch (e) {
+                logger.error('[猫猫糕] clone orange-example失败：' + e.message)
+            }
+        }
     }
 
     async getTotalCount() {
-        // 获取猫猫糕数量
-        const url = this.countUrl
-        const res = await fetch(url)
-        if (!res.ok) throw new Error('获取猫猫糕数量失败')
-        const data = await res.json()
+        const data = JSON.parse(fs.readFileSync(this.countPath, 'utf8'))
         if (!data['猫猫糕数量']) throw new Error('猫猫糕数量字段缺失')
         return data['猫猫糕数量']
     }
 
-    async getMMGUrl(idx) {
+    getMMGPath(idx) {
         const numStr = idx.toString().padStart(5, '0')
         const exts = ['jpg', 'png', 'gif']
         for (let ext of exts) {
-            const fileName = `猫猫糕${numStr}.${ext}`
-            const url = this.imgPrefix + encodeURIComponent(fileName)
-            try {
-                const res = await fetch(url, { method: 'HEAD' })
-                if (res.ok) {
-                    return url
-                }
-            } catch (e) {}
+            const filePath = path.join(this.imgDir, `猫猫糕${numStr}.${ext}`)
+            if (fs.existsSync(filePath)) return filePath
         }
         return ''
     }
@@ -66,15 +56,12 @@ export class 猫猫糕 extends plugin{
         return arr[Math.floor(Math.random() * arr.length)]
     }
 
-    async getImageSize(imgUrl) {
-        // 只支持jpg/png，gif不保证准确
+    async getImageSize(imgPath) {
         try {
-            const res = await fetch(imgUrl)
-            if (!res.ok) return null
-            const buffer = await res.arrayBuffer()
+            const buffer = fs.readFileSync(imgPath)
             const bytes = new Uint8Array(buffer)
             // jpg
-            if (imgUrl.endsWith('.jpg') || imgUrl.endsWith('.jpeg')) {
+            if (imgPath.endsWith('.jpg') || imgPath.endsWith('.jpeg')) {
                 let i = 0;
                 while (i < bytes.length) {
                     if (bytes[i] === 0xFF && bytes[i + 1] === 0xC0) {
@@ -86,7 +73,7 @@ export class 猫猫糕 extends plugin{
                 }
             }
             // png
-            if (imgUrl.endsWith('.png')) {
+            if (imgPath.endsWith('.png')) {
                 if (bytes[12] === 0x49 && bytes[13] === 0x48 && bytes[14] === 0x44 && bytes[15] === 0x52) {
                     const width = (bytes[16] << 24) + (bytes[17] << 16) + (bytes[18] << 8) + bytes[19]
                     const height = (bytes[20] << 24) + (bytes[21] << 16) + (bytes[22] << 8) + bytes[23]
@@ -94,35 +81,36 @@ export class 猫猫糕 extends plugin{
                 }
             }
             // gif
-            if (imgUrl.endsWith('.gif')) {
+            if (imgPath.endsWith('.gif')) {
                 const width = bytes[6] + (bytes[7] << 8)
                 const height = bytes[8] + (bytes[9] << 8)
                 return { width, height }
             }
-        } catch (e) {}
+        } catch (e) { }
         return null
     }
 
-    async sendMMGMarkdown(e, imgUrl) {
-        let size = await this.getImageSize(imgUrl)
+    async sendMMGMarkdown(e, imgPath) {
+        let size = await this.getImageSize(imgPath)
         let altText = '猫猫糕'
         if (size) {
             altText += ` #${size.width}px #${size.height}px`
         }
         const msgArr = [
-            { key: 'a', values: [`![${altText}](${imgUrl}`] },
-            { key: 'b', values: [')\r'] },
-            { key: 'c', values: ['>', this.getRandomCuteText()] }
+            { key: 'a', values: [`![${altText}](本地图片)`] },
+            { key: 'b', values: [this.getRandomCuteText()] }
         ]
+        // 先发markdown，再发本地图片
         await replyMarkdownButton(e, msgArr, [
             [
                 { text: '换个猫猫糕', callback: '换个猫猫糕', visited_label: '正在换猫猫糕' },
                 { text: '今日猫猫糕', callback: '今日猫猫糕', visited_label: '正在获取今日猫猫糕' }
             ]
         ])
+        await e.reply(segment.image(imgPath), true)
     }
 
-    async TODAY_MMG(e){
+    async TODAY_MMG(e) {
         let total
         try {
             total = await this.getTotalCount()
@@ -153,7 +141,7 @@ export class 猫猫糕 extends plugin{
         await this.sendMMGMarkdown(e, imgUrl)
     }
 
-    async CHANGE_MMG(e){
+    async CHANGE_MMG(e) {
         let total
         try {
             total = await this.getTotalCount()
