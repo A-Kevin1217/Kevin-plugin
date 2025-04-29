@@ -64,10 +64,52 @@ export class 猫猫糕 extends plugin{
         return arr[Math.floor(Math.random() * arr.length)]
     }
 
+    async getImageSize(imgUrl) {
+        // 只支持jpg/png，gif不保证准确
+        try {
+            const res = await fetch(imgUrl)
+            if (!res.ok) return null
+            const buffer = await res.arrayBuffer()
+            const bytes = new Uint8Array(buffer)
+            // jpg
+            if (imgUrl.endsWith('.jpg') || imgUrl.endsWith('.jpeg')) {
+                let i = 0;
+                while (i < bytes.length) {
+                    if (bytes[i] === 0xFF && bytes[i + 1] === 0xC0) {
+                        const height = (bytes[i + 5] << 8) + bytes[i + 6]
+                        const width = (bytes[i + 7] << 8) + bytes[i + 8]
+                        return { width, height }
+                    }
+                    i++
+                }
+            }
+            // png
+            if (imgUrl.endsWith('.png')) {
+                if (bytes[12] === 0x49 && bytes[13] === 0x48 && bytes[14] === 0x44 && bytes[15] === 0x52) {
+                    const width = (bytes[16] << 24) + (bytes[17] << 16) + (bytes[18] << 8) + bytes[19]
+                    const height = (bytes[20] << 24) + (bytes[21] << 16) + (bytes[22] << 8) + bytes[23]
+                    return { width, height }
+                }
+            }
+            // gif
+            if (imgUrl.endsWith('.gif')) {
+                const width = bytes[6] + (bytes[7] << 8)
+                const height = bytes[8] + (bytes[9] << 8)
+                return { width, height }
+            }
+        } catch (e) {}
+        return null
+    }
+
     async sendMMGMarkdown(e, imgUrl) {
+        let size = await this.getImageSize(imgUrl)
+        let altText = '猫猫糕'
+        if (size) {
+            altText += ` #${size.width}px #${size.height}px`
+        }
         const msgArr = [
-            { key: 'a', values: [`![猫猫糕](${imgUrl}`] },
-            { key: 'b', values: [')'] },
+            { key: 'a', values: [`![${altText}](${imgUrl}`] },
+            { key: 'b', values: [')\r'] },
             { key: 'c', values: ['>', this.getRandomCuteText()] }
         ]
         await replyMarkdownButton(e, msgArr, [
