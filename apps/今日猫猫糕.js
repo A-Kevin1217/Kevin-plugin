@@ -117,6 +117,7 @@ export class 猫猫糕 extends plugin {
             sizeStr = ` #${size.width}px #${size.height}px`
         }
 
+        console.log(imgPath)
         await e.reply([
             segment.image(imgPath),
             `\n\n> ${cuteText}`,
