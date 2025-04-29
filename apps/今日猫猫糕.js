@@ -66,8 +66,8 @@ export class 猫猫糕 extends plugin{
 
     async sendMMGMarkdown(e, imgUrl) {
         const msg = [
-            `![猫猫糕](${imgUrl})`,
-            `\r${this.getRandomCuteText()}`
+            `![猫猫糕](${imgUrl}`,
+            `)\r${this.getRandomCuteText()}`
         ].join('')
         await replyMarkdownButton(e, [
             { key: 'a', values: [msg] }
