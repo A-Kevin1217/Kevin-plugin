@@ -36,14 +36,18 @@ export class 猫猫糕 extends plugin {
         return data['猫猫糕数量']
     }
 
-    getMMGUrl(idx) {
+    async getMMGUrl(idx) {
         const numStr = idx.toString().padStart(5, '0')
         const exts = ['jpg', 'png', 'gif']
         for (let ext of exts) {
             const fileName = `猫猫糕${numStr}.${ext}`
             const url = this.imgPrefix + encodeURIComponent(fileName)
-            // 可以加HEAD判断是否存在，这里直接返回第一个
-            return url
+            try {
+                const res = await fetch(url, { method: 'HEAD' })
+                if (res.ok) return url
+            } catch (e) {
+                // 忽略错误，尝试下一个格式
+            }
         }
         return ''
     }
@@ -121,7 +125,7 @@ export class 猫猫糕 extends plugin {
             idx = (new Date().getFullYear() * 10000 + (new Date().getMonth() + 1) * 100 + new Date().getDate()) % total + 1
         }
         await redis.set(redisKey, JSON.stringify({ idx, time: now }))
-        const imgUrl = this.getMMGUrl(idx)
+        const imgUrl = await this.getMMGUrl(idx)
         if (!imgUrl) {
             await e.reply('未找到今日猫猫糕图片，请联系管理员补图')
             return
@@ -154,7 +158,7 @@ export class 猫猫糕 extends plugin {
             tryCount++
         } while (idx === oldIdx && tryCount < 10)
         await redis.set(redisKey, JSON.stringify({ idx, time: now }))
-        const imgUrl = this.getMMGUrl(idx)
+        const imgUrl = await this.getMMGUrl(idx)
         if (!imgUrl) {
             await e.reply('未找到猫猫糕图片，请联系管理员补图')
             return
