@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import { execSync } from 'child_process'
+import { execAsync } from '../utils/execAsync'
+import logger from '../utils/logger'
 
 export class 猫猫糕 extends plugin {
     constructor() {
@@ -30,18 +31,39 @@ export class 猫猫糕 extends plugin {
         this.localPath = path.join(process.cwd(), 'plugins/Kevin-plugin/resources/orange-example')
         this.imgDir = path.join(this.localPath, 'images', '猫猫糕')
         this.countJson = path.join(this.localPath, 'json', '猫猫糕数量.json')
-        this.ensureRepo()
+        this.repoReady = false
+        this.repoCloning = false
     }
 
-    ensureRepo() {
-        if (!fs.existsSync(this.localPath)) {
-            execSync(`git clone --depth=1 ${this.repoUrl} \"${this.localPath}\"`)
-        } else {
-            try { execSync('git pull', { cwd: this.localPath }) } catch (e) {}
+    async ensureRepo() {
+        if (this.repoReady) return true
+        if (this.repoCloning) {
+            // 已有clone在进行，等待
+            for (let i = 0; i < 10; i++) {
+                await new Promise(r => setTimeout(r, 500))
+                if (this.repoReady) return true
+            }
+            return false
+        }
+        this.repoCloning = true
+        try {
+            if (!fs.existsSync(this.localPath)) {
+                await execAsync(`git clone --depth=1 ${this.repoUrl} \"${this.localPath}\"`)
+            } else {
+                await execAsync('git pull', { cwd: this.localPath })
+            }
+            this.repoReady = true
+            return true
+        } catch (e) {
+            logger.warn('[猫猫糕] 资源仓库拉取失败：' + e.message)
+            return false
+        } finally {
+            this.repoCloning = false
         }
     }
 
     async getTotalCount() {
+        if (!await this.ensureRepo()) throw new Error('猫猫糕资源未就绪，请稍后再试')
         if (!fs.existsSync(this.countJson)) throw new Error('本地猫猫糕数量文件不存在')
         const data = JSON.parse(fs.readFileSync(this.countJson, 'utf8'))
         if (!data['猫猫糕数量']) throw new Error('猫猫糕数量字段缺失')
