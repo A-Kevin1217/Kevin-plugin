@@ -109,24 +109,16 @@ export class 猫猫糕 extends plugin {
         return null
     }
 
-    async sendMMGMarkdown(e, imgPath) {
-        let size = await this.getImageSize(imgPath)
-        let altText = '猫猫糕'
-        if (size) {
-            altText += ` #${size.width}px #${size.height}px`
-        }
-        const msgArr = [
-            { key: 'a', values: [`![${altText}](本地图片)`] },
-            { key: 'b', values: [this.getRandomCuteText()] }
-        ]
-        // 先发markdown，再发本地图片
-        await replyMarkdownButton(e, msgArr, [
-            [
-                { text: '换个猫猫糕', callback: '换个猫猫糕', visited_label: '正在换猫猫糕' },
-                { text: '今日猫猫糕', callback: '今日猫猫糕', visited_label: '正在获取今日猫猫糕' }
-            ]
-        ])
-        await e.reply(segment.image(imgPath), true)
+    async sendMMG(e, imgPath) {
+        const msgArr = [];
+        msgArr.push(segment.image(imgPath)); // 先图片
+        msgArr.push('> ' + this.getRandomCuteText()); // 再文案
+        // 如果平台支持按钮，可以加上
+        // msgArr.push(segment.button([
+        //     { text: '换个猫猫糕', callback: '换个猫猫糕', visited_label: '正在换猫猫糕' },
+        //     { text: '今日猫猫糕', callback: '今日猫猫糕', visited_label: '正在获取今日猫猫糕' }
+        // ]));
+        await e.reply(msgArr, true);
     }
 
     async TODAY_MMG(e) {
@@ -157,7 +149,7 @@ export class 猫猫糕 extends plugin {
             await e.reply('未找到今日猫猫糕图片，请联系管理员补图')
             return
         }
-        await this.sendMMGMarkdown(e, imgPath)
+        await this.sendMMG(e, imgPath)
     }
 
     async CHANGE_MMG(e) {
@@ -190,7 +182,7 @@ export class 猫猫糕 extends plugin {
             await e.reply('未找到猫猫糕图片，请联系管理员补图')
             return
         }
-        await this.sendMMGMarkdown(e, imgPath)
+        await this.sendMMG(e, imgPath)
     }
 
     pullRepo() {
