@@ -15,7 +15,18 @@ export class 猫猫糕 extends plugin {
                 { reg: /^(#|\/)?(换个猫猫糕)$/, fnc: 'CHANGE_MMG' }
             ]
         })
-        this.cuteTexts = [/* ...可爱文案... */]
+        this.cuteTexts = [
+            '喵呜~今日份猫猫糕新鲜出炉，快来尝一口吧！',
+            '猫猫糕来啦，软软糯糯，专属于你的小甜点~',
+            '叮咚！猫猫糕快递送到，今天也要元气满满喵！',
+            '今日猫猫糕已上线，吃一口好运一整天！',
+            '小猫猫亲手做的猫猫糕，送给最可爱的你~',
+            '猫猫糕到货，快抱走你的专属可爱吧！',
+            '喵星人派送的猫猫糕，今天也要开心哦！',
+            '猫猫糕：请签收你的快乐小点心~',
+            '今日份猫猫糕，软萌上线，快来rua一口！',
+            '猫猫糕已就位，愿你今天甜甜的，喵~'
+        ]
         this.repoDir = path.join(process.cwd(), 'resources/orange-example')
         this.countPath = path.join(this.repoDir, 'json/猫猫糕数量.json')
         this.imgDir = path.join(this.repoDir, 'images/猫猫糕')
