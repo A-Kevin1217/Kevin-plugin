@@ -181,4 +181,18 @@ export class 猫猫糕 extends plugin {
         }
         await this.sendMMGMarkdown(e, imgUrl)
     }
+
+    pullRepo() {
+        if (fs.existsSync(this.repoDir)) {
+            logger.info('[猫猫糕] 正在自动pull orange-example资源...')
+            const git = spawn('git', ['-C', this.repoDir, 'pull'])
+            git.on('close', code => {
+                if (code === 0) {
+                    logger.info('[猫猫糕] orange-example资源pull完成')
+                } else {
+                    logger.error('[猫猫糕] pull orange-example失败，code=' + code)
+                }
+            })
+        }
+    }
 }
