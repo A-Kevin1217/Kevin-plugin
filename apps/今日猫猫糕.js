@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { spawn } from 'child_process'
+import fetch from 'node-fetch'
 
 export class 猫猫糕 extends plugin {
     constructor() {
@@ -59,12 +60,21 @@ export class 猫猫糕 extends plugin {
         return data['猫猫糕数量']
     }
 
-    getMMGPath(idx) {
+    async getMMGPath(idx) {
         const numStr = idx.toString().padStart(5, '0')
-        const exts = ['jpg', 'png', 'gif']
+        const exts = ['jpg', 'png', 'gif', 'webp']
         for (let ext of exts) {
-            const filePath = path.join(this.imgDir, `猫猫糕${numStr}.${ext}`)
-            if (fs.existsSync(filePath)) return filePath
+            const url = `https://vip.123pan.cn/1810660/data/%E7%8C%AB%E7%8C%AB%E7%B3%95/%E7%8C%AB%E7%8C%AB%E7%B3%95${numStr}.${ext}`
+            try {
+                const res = await fetch(url)
+                const text = await res.text()
+                if (!text.includes('文件不存在') && !text.includes('code":1023')) {
+                    return url
+                }
+            } catch (e) {
+                // 网络异常等，尝试下一个
+                continue
+            }
         }
         return ''
     }
@@ -110,11 +120,6 @@ export class 猫猫糕 extends plugin {
 
     async sendMMG(e, imgPath) {
         const cuteText = this.getRandomCuteText()
-        let sizeStr = ''
-        const size = await this.getImageSize(imgPath)
-        if (size && size.width && size.height) {
-            sizeStr = ` #${size.width}px #${size.height}px`
-        }
 
         console.log(imgPath)
         await e.reply([
@@ -158,7 +163,7 @@ export class 猫猫糕 extends plugin {
             idx = (new Date().getFullYear() * 10000 + (new Date().getMonth() + 1) * 100 + new Date().getDate()) % total + 1
         }
         await redis.set(redisKey, JSON.stringify({ idx, time: now }))
-        const imgPath = this.getMMGPath(idx)
+        const imgPath = await this.getMMGPath(idx)
         if (!imgPath) {
             await e.reply('未找到今日猫猫糕图片，请联系管理员补图')
             return
@@ -191,7 +196,7 @@ export class 猫猫糕 extends plugin {
             tryCount++
         } while (idx === oldIdx && tryCount < 10)
         await redis.set(redisKey, JSON.stringify({ idx, time: now }))
-        const imgPath = this.getMMGPath(idx)
+        const imgPath = await this.getMMGPath(idx)
         if (!imgPath) {
             await e.reply('未找到猫猫糕图片，请联系管理员补图')
             return
