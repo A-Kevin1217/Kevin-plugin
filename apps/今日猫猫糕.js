@@ -3,7 +3,6 @@ import path from 'path'
 import { exec } from 'child_process'
 import { promisify } from 'util'
 const execAsync = promisify(exec)
-import logger from '../utils/logger'
 
 export class 猫猫糕 extends plugin {
     constructor() {
@@ -57,7 +56,7 @@ export class 猫猫糕 extends plugin {
             this.repoReady = true
             return true
         } catch (e) {
-            logger.warn('[猫猫糕] 资源仓库拉取失败：' + e.message)
+            console.warn('[猫猫糕] 资源仓库拉取失败：' + e.message)
             return false
         } finally {
             this.repoCloning = false
