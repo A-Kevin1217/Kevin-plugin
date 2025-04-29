@@ -1,6 +1,8 @@
 import fs from 'fs'
 import path from 'path'
-import { execAsync } from '../utils/execAsync'
+import { exec } from 'child_process'
+import { promisify } from 'util'
+const execAsync = promisify(exec)
 import logger from '../utils/logger'
 
 export class 猫猫糕 extends plugin {
