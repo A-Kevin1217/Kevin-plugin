@@ -33,6 +33,10 @@ export class 猫猫糕 extends plugin {
         this.repoUrl = 'https://gitcode.com/Kevin1217/orange-example'
         this.cloning = false
         this.ensureRepoAsync()
+        // 每小时自动拉取仓库更新
+        setInterval(() => {
+            this.pullRepo()
+        }, 1000 * 60 * 60)
     }
 
     ensureRepoAsync() {
