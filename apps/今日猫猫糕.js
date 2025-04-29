@@ -65,13 +65,12 @@ export class 猫猫糕 extends plugin{
     }
 
     async sendMMGMarkdown(e, imgUrl) {
-        const msg = [
-            `![猫猫糕](${imgUrl}`,
-            `)\r${this.getRandomCuteText()}`
-        ].join('')
-        await replyMarkdownButton(e, [
-            { key: 'a', values: [msg] }
-        ], [
+        const msgArr = [
+            { key: 'a', values: [`![猫猫糕](${imgUrl}`] },
+            { key: 'b', values: [')'] },
+            { key: 'c', values: ['>', this.getRandomCuteText()] }
+        ]
+        await replyMarkdownButton(e, msgArr, [
             [
                 { text: '换个猫猫糕', callback: '换个猫猫糕', visited_label: '正在换猫猫糕' },
                 { text: '今日猫猫糕', callback: '今日猫猫糕', visited_label: '正在获取今日猫猫糕' }
