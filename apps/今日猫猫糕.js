@@ -112,12 +112,12 @@ export class 猫猫糕 extends plugin {
     async sendMMG(e, imgPath) {
         const msgArr = [];
         msgArr.push(segment.image(imgPath)); // 先图片
-        msgArr.push('> ' + this.getRandomCuteText()); // 再文案
+        msgArr.push(`> ${this.getRandomCuteText()}`); // 再文案
         // 如果平台支持按钮，可以加上
-        // msgArr.push(segment.button([
-        //     { text: '换个猫猫糕', callback: '换个猫猫糕', visited_label: '正在换猫猫糕' },
-        //     { text: '今日猫猫糕', callback: '今日猫猫糕', visited_label: '正在获取今日猫猫糕' }
-        // ]));
+        msgArr.push(segment.button([
+            { text: '换个猫猫糕', callback: '换个猫猫糕', visited_label: '正在换猫猫糕' },
+            { text: '今日猫猫糕', callback: '今日猫猫糕', visited_label: '正在获取今日猫猫糕' }
+        ]));
         await e.reply(msgArr, true);
     }
 
