@@ -1,7 +1,6 @@
 import fs from 'fs'
 import path from 'path'
 import { spawn } from 'child_process'
-import { replyMarkdownButton } from '../components/CommonReplyUtil.js'
 
 export class 猫猫糕 extends plugin {
     constructor() {
