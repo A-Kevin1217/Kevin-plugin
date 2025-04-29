@@ -186,7 +186,7 @@ export class robot_data extends plugin {
       { key: 'd', values: [`\r> 当前账户绑定的Bot如下\r\r`] },
       { key: 'e', values: [`***\r`] },
       { key: 'f', values: ['`'] },
-      { key: 'g', values: [`\`\`${botContent.join('\r')}`] },
+      { key: 'g', values: [`\`\`\r${botContent.join('\r')}`] },
       { key: 'h', values: ['``'] },
       { key: 'i', values: ['`'] }
     ], commonButtons)
@@ -235,7 +235,7 @@ export class robot_data extends plugin {
         { key: 'd', values: [`\r> 最近三日汇总如下\r\r`] },
         { key: 'e', values: [`***`] },
         { key: 'f', values: ['\r\r``'] },
-        { key: 'g', values: [`\`${day1}\r\r——————`] },
+        { key: 'g', values: [`\`\r${day1}\r\r——————`] },
         { key: 'h', values: [`\r${day2}\r\r——————\r${day3}\`\``] },
         { key: 'i', values: ['`'] }
       ], commonButtons)
