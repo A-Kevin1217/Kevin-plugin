@@ -141,6 +141,7 @@ export class 猫猫糕 extends plugin {
                 { text: '今日猫猫糕', callback: '今日猫猫糕', clicked_text: '正在获取今日猫猫糕' }
             ]
         ]
+        console.log(replyArr, buttonArr)
         await replyMarkdownButton(e, replyArr, buttonArr)
     }
 
