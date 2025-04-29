@@ -116,18 +116,23 @@ export class 猫猫糕 extends plugin {
         if (size && size.width && size.height) {
             sizeStr = ` #${size.width}px #${size.height}px`
         }
-        const replyArr = [
-            { key: 'a', values: [`![猫猫糕${sizeStr}](${imgPath}`] },
-            { key: 'b', values: [`)\r> ${cuteText}`] }
-        ]
-        const buttonArr = [
-            [
-                { text: '换个猫猫糕', callback: '换个猫猫糕', clicked_text: '正在换猫猫糕' },
-                { text: '今日猫猫糕', callback: '今日猫猫糕', clicked_text: '正在获取今日猫猫糕' }
-            ]
-        ]
-        console.log(replyArr, buttonArr)
-        await replyMarkdownButton(e, replyArr, buttonArr)
+
+        await e.reply([
+            segment.image(imgPath),
+            `\n\n> ${cuteText}`,
+            segment.button([
+                {
+                    text: '换个猫猫糕',
+                    callback: '换个猫猫糕',
+                    visited_label: '正在换猫猫糕'
+                },
+                {
+                    text: '今日猫猫糕',
+                    callback: '今日猫猫糕',
+                    visited_label: '正在获取今日猫猫糕'
+                }
+            ])
+        ])
     }
 
     async TODAY_MMG(e) {
