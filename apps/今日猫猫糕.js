@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import { execSync } from 'child_process'
-import { replyMarkdownButton } from '../components/CommonReplyUtil.js'
+import { spawn } from 'child_process'
+import { replyMarkdownButton, segment } from '../components/CommonReplyUtil.js'
 
 export class 猫猫糕 extends plugin {
     constructor() {
@@ -20,22 +20,30 @@ export class 猫猫糕 extends plugin {
         this.countPath = path.join(this.repoDir, 'json/猫猫糕数量.json')
         this.imgDir = path.join(this.repoDir, 'images/猫猫糕')
         this.repoUrl = 'https://gitcode.com/Kevin1217/orange-example'
-        this.ensureRepo()
+        this.cloning = false
+        this.ensureRepoAsync()
     }
 
-    ensureRepo() {
-        if (!fs.existsSync(this.repoDir)) {
-            logger.info('[猫猫糕] 未检测到orange-example资源，正在自动clone...')
-            try {
-                execSync(`git clone ${this.repoUrl} "${this.repoDir}"`, { stdio: 'inherit' })
-                logger.info('[猫猫糕] orange-example资源clone完成')
-            } catch (e) {
-                logger.error('[猫猫糕] clone orange-example失败：' + e.message)
-            }
+    ensureRepoAsync() {
+        if (!fs.existsSync(this.repoDir) && !this.cloning) {
+            this.cloning = true
+            logger.info('[猫猫糕] orange-example资源未检测到，正在异步clone...')
+            const git = spawn('git', ['clone', this.repoUrl, this.repoDir])
+            git.on('close', code => {
+                if (code === 0) {
+                    logger.info('[猫猫糕] orange-example资源clone完成')
+                } else {
+                    logger.error('[猫猫糕] clone orange-example失败，code=' + code)
+                }
+                this.cloning = false
+            })
         }
     }
 
     async getTotalCount() {
+        if (!fs.existsSync(this.countPath)) {
+            throw new Error('资源正在初始化，请稍后再试')
+        }
         const data = JSON.parse(fs.readFileSync(this.countPath, 'utf8'))
         if (!data['猫猫糕数量']) throw new Error('猫猫糕数量字段缺失')
         return data['猫猫糕数量']
@@ -115,7 +123,7 @@ export class 猫猫糕 extends plugin {
         try {
             total = await this.getTotalCount()
         } catch (err) {
-            await e.reply('获取猫猫糕数量失败，请稍后再试')
+            await e.reply(err.message || '获取猫猫糕数量失败，请稍后再试')
             return
         }
         const now = new Date().toLocaleDateString('zh-CN')
@@ -146,7 +154,7 @@ export class 猫猫糕 extends plugin {
         try {
             total = await this.getTotalCount()
         } catch (err) {
-            await e.reply('获取猫猫糕数量失败，请稍后再试')
+            await e.reply(err.message || '获取猫猫糕数量失败，请稍后再试')
             return
         }
         const now = new Date().toLocaleDateString('zh-CN')
