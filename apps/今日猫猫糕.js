@@ -1,9 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import { exec } from 'child_process'
-import { promisify } from 'util'
+import { spawn } from 'child_process'
 import { replyMarkdownButton } from '../components/CommonReplyUtil.js'
-const execAsync = promisify(exec)
 
 export class 猫猫糕 extends plugin {
     constructor() {
@@ -29,58 +27,45 @@ export class 猫猫糕 extends plugin {
             '今日份猫猫糕，软萌上线，快来rua一口！',
             '猫猫糕已就位，愿你今天甜甜的，喵~'
         ]
-        this.repoUrl = 'https://gitcode.com/Kevin1217/orange-example.git'
-        this.localPath = path.join(process.cwd(), 'plugins/Kevin-plugin/resources/orange-example')
-        this.imgDir = path.join(this.localPath, 'images', '猫猫糕')
-        this.countJson = path.join(this.localPath, 'json', '猫猫糕数量.json')
-        this.repoReady = false
-        this.repoCloning = false
+        this.repoDir = path.join(process.cwd(), 'resources/orange-example')
+        this.countPath = path.join(this.repoDir, 'json/猫猫糕数量.json')
+        this.imgDir = path.join(this.repoDir, 'images/猫猫糕')
+        this.repoUrl = 'https://gitcode.com/Kevin1217/orange-example'
+        this.cloning = false
+        this.ensureRepoAsync()
     }
 
-    async ensureRepo() {
-        if (this.repoReady) return true
-        if (this.repoCloning) {
-            // 已有clone在进行，等待
-            for (let i = 0; i < 10; i++) {
-                await new Promise(r => setTimeout(r, 500))
-                if (this.repoReady) return true
-            }
-            return false
-        }
-        this.repoCloning = true
-        try {
-            if (!fs.existsSync(this.localPath)) {
-                await execAsync(`git clone --depth=1 ${this.repoUrl} \"${this.localPath}\"`)
-            } else {
-                await execAsync('git pull', { cwd: this.localPath })
-            }
-            this.repoReady = true
-            return true
-        } catch (e) {
-            console.warn('[猫猫糕] 资源仓库拉取失败：' + e.message)
-            return false
-        } finally {
-            this.repoCloning = false
+    ensureRepoAsync() {
+        if (!fs.existsSync(this.repoDir) && !this.cloning) {
+            this.cloning = true
+            logger.info('[猫猫糕] orange-example资源未检测到，正在异步clone...')
+            const git = spawn('git', ['clone', this.repoUrl, this.repoDir])
+            git.on('close', code => {
+                if (code === 0) {
+                    logger.info('[猫猫糕] orange-example资源clone完成')
+                } else {
+                    logger.error('[猫猫糕] clone orange-example失败，code=' + code)
+                }
+                this.cloning = false
+            })
         }
     }
 
     async getTotalCount() {
-        if (!await this.ensureRepo()) throw new Error('猫猫糕资源未就绪，请稍后再试')
-        if (!fs.existsSync(this.countJson)) throw new Error('本地猫猫糕数量文件不存在')
-        const data = JSON.parse(fs.readFileSync(this.countJson, 'utf8'))
+        if (!fs.existsSync(this.countPath)) {
+            throw new Error('资源正在初始化，请稍后再试')
+        }
+        const data = JSON.parse(fs.readFileSync(this.countPath, 'utf8'))
         if (!data['猫猫糕数量']) throw new Error('猫猫糕数量字段缺失')
         return data['猫猫糕数量']
     }
 
-    async getMMGUrl(idx) {
+    getMMGPath(idx) {
         const numStr = idx.toString().padStart(5, '0')
         const exts = ['jpg', 'png', 'gif']
         for (let ext of exts) {
-            const fileName = `猫猫糕${numStr}.${ext}`
-            const filePath = path.join(this.imgDir, fileName)
-            if (fs.existsSync(filePath)) {
-                return filePath
-            }
+            const filePath = path.join(this.imgDir, `猫猫糕${numStr}.${ext}`)
+            if (fs.existsSync(filePath)) return filePath
         }
         return ''
     }
@@ -141,7 +126,6 @@ export class 猫猫糕 extends plugin {
                 { text: '今日猫猫糕', callback: '今日猫猫糕', clicked_text: '正在获取今日猫猫糕' }
             ]
         ]
-        console.log(replyArr, buttonArr)
         await replyMarkdownButton(e, replyArr, buttonArr)
     }
 
@@ -168,7 +152,7 @@ export class 猫猫糕 extends plugin {
             idx = (new Date().getFullYear() * 10000 + (new Date().getMonth() + 1) * 100 + new Date().getDate()) % total + 1
         }
         await redis.set(redisKey, JSON.stringify({ idx, time: now }))
-        const imgPath = await this.getMMGUrl(idx)
+        const imgPath = this.getMMGPath(idx)
         if (!imgPath) {
             await e.reply('未找到今日猫猫糕图片，请联系管理员补图')
             return
@@ -201,11 +185,25 @@ export class 猫猫糕 extends plugin {
             tryCount++
         } while (idx === oldIdx && tryCount < 10)
         await redis.set(redisKey, JSON.stringify({ idx, time: now }))
-        const imgPath = await this.getMMGUrl(idx)
+        const imgPath = this.getMMGPath(idx)
         if (!imgPath) {
             await e.reply('未找到猫猫糕图片，请联系管理员补图')
             return
         }
         await this.sendMMG(e, imgPath)
+    }
+
+    pullRepo() {
+        if (fs.existsSync(this.repoDir)) {
+            logger.info('[猫猫糕] 正在自动pull orange-example资源...')
+            const git = spawn('git', ['-C', this.repoDir, 'pull'])
+            git.on('close', code => {
+                if (code === 0) {
+                    logger.info('[猫猫糕] orange-example资源pull完成')
+                } else {
+                    logger.error('[猫猫糕] pull orange-example失败，code=' + code)
+                }
+            })
+        }
     }
 }
