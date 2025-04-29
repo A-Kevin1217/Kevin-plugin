@@ -1,5 +1,4 @@
 import fetch from 'node-fetch'
-import { segment } from '../components/CommonReplyUtil.js'
 
 export class 猫猫糕 extends plugin {
     constructor() {
