@@ -31,11 +31,13 @@ export class 猫猫糕 extends plugin{
             '今日份猫猫糕，软萌上线，快来rua一口！',
             '猫猫糕已就位，愿你今天甜甜的，喵~'
         ]
+        this.countUrl = 'https://raw.gitcode.com/Kevin1217/orange-example/raw/master/json/%E7%8C%AB%E7%8C%AB%E7%B3%95%E6%95%B0%E9%87%8F.json'
+        this.imgPrefix = 'https://raw.gitcode.com/Kevin1217/orange-example/files/master/images/%E7%8C%AB%E7%8C%AB%E7%B3%95/'
     }
 
     async getTotalCount() {
         // 获取猫猫糕数量
-        const url = 'https://raw.githubusercontent.com/A-Kevin1217/orange-example/master/json/%E7%8C%AB%E7%8C%AB%E7%B3%95%E6%95%B0%E9%87%8F.json'
+        const url = this.countUrl
         const res = await fetch(url)
         if (!res.ok) throw new Error('获取猫猫糕数量失败')
         const data = await res.json()
@@ -48,7 +50,7 @@ export class 猫猫糕 extends plugin{
         const exts = ['jpg', 'png', 'gif']
         for (let ext of exts) {
             const fileName = `猫猫糕${numStr}.${ext}`
-            const url = `https://raw.githubusercontent.com/A-Kevin1217/orange-example/master/images/%E7%8C%AB%E7%8C%AB%E7%B3%95/${encodeURIComponent(fileName)}`
+            const url = this.imgPrefix + encodeURIComponent(fileName)
             try {
                 const res = await fetch(url, { method: 'HEAD' })
                 if (res.ok) {
