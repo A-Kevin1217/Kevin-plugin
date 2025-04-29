@@ -96,8 +96,8 @@ export class 猫猫糕 extends plugin {
         msgArr.push(segment.image(imgUrl))
         msgArr.push(`\r> ${this.getRandomCuteText()}`)
         msgArr.push(segment.button([
-            { text: '换个猫猫糕', callback: '换个猫猫糕', visited_label: '正在换猫猫糕' },
-            { text: '今日猫猫糕', callback: '今日猫猫糕', visited_label: '正在获取今日猫猫糕' }
+            { text: '换个猫猫糕', callback: '换个猫猫糕', clicked_text: '正在换猫猫糕' },
+            { text: '今日猫猫糕', callback: '今日猫猫糕', clicked_text: '正在获取今日猫猫糕' }
         ]));
         console.log(msgArr)
         await e.reply(msgArr, true)
