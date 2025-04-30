@@ -6,6 +6,10 @@ import Theme from './help/theme.js'
 const _path = process.cwd()
 const helpPath = `${_path}/config`
 
+const path = `${process.cwd()}/plugins/Kevin-plugin/config/menuConfig.js`
+delete require.cache[require.resolve(path)]
+const menuConfig = require(path).default
+
 export class Help extends plugin {
   constructor() {
     super({
@@ -62,12 +66,6 @@ export class Help extends plugin {
       helpGroup.push(group)
     })
     let themeData = await Theme.getThemeData(helpCfg || {}, {})
-
-    // 动态加载 menuConfig
-    const path = `${process.cwd()}/plugins/Kevin-plugin/config/menuConfig.js`
-    delete require.cache[require.resolve(path)]
-    const menuConfig = require(path).default
-
     return await Common.render('help/index', {
       helpCfg,
       helpGroup,
