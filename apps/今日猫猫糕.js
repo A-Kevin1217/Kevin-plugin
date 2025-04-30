@@ -4,6 +4,7 @@ import { spawn } from 'child_process'
 import fetch from 'node-fetch'
 import { promisify } from 'util'
 import sizeOf from 'image-size'
+import { isQQBot, replyMarkdownButton } from '../components/CommonReplyUtil.js'
 
 const unlinkAsync = promisify(fs.unlink)
 
@@ -144,6 +145,10 @@ export class 猫猫糕 extends plugin {
     }
 
     async sendMMG(e, imgPath) {
+        if (!isQQBot(e)) {
+            await e.reply('请艾特橙子BOT使用')
+            return false
+        }
         const cuteText = this.getRandomCuteText()
         let sizeStr = ''
         const size = await this.getImageSizeByDownload(imgPath)
