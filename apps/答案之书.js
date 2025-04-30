@@ -31,19 +31,21 @@ export class example extends plugin {
             const enAnswer = DATA_JSON.data.en;
             return replyMarkdownButton(e, [
                 { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
-                        { key: 'b', values: ['#'] },
-                        { key: 'c', values: [' 答案之书'] },
-                        { key: 'd', values: [`\r> 让答案之书为你解答吧\r\r`] },
-                        { key: 'e', values: [`***`] },
-                        { key: 'f', values: [`\r## ${zhAnswer}`] },
-                        { key: 'g', values: [`\r## ${enAnswer}`] }
+                { key: 'b', values: ['#'] },
+                { key: 'c', values: [' 答案之书'] },
+                { key: 'd', values: [`\r> 让答案之书为你解答吧\r\r`] },
+                { key: 'e', values: [`***`] },
+                { key: 'f', values: [`\r## ${zhAnswer}`] },
+                { key: 'g', values: [`\r## ${enAnswer}`] }
             ], [
-                [{ text: '再看一次', callback: '答案之书' }, { text: '菜单' }]
-                ])
+                [
+                    { text: '再看一次', callback: '答案之书', clicked_text: '正在再看一次' },
+                    { text: '菜单', callback: '菜单', clicked_text: '正在获取菜单' }]
+            ])
         } catch (error) {
             console.error('Fetch error:', error);
             return replyMarkdownButton(e, [
-                    { key: 'a', values: ['获取数据失败，请稍后再试'] }
+                { key: 'a', values: ['获取数据失败，请稍后再试'] }
             ])
         }
     }

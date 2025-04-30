@@ -126,7 +126,8 @@ export class MusicShare extends plugin {
         currentRow.push({
           text: `听${i + 1}`,
           callback: `/听${i + 1}`,
-          permission: e.isGroup ? e.user_id : undefined
+          permission: e.isGroup ? e.user_id : undefined,
+          clicked_text: `正在获取`
         })
 
         if (currentRow.length === 4 || i === Math.min(songs.length, 20) - 1) {

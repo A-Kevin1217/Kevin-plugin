@@ -12,9 +12,9 @@ const file = `${process.cwd().replace(/\\/g, '/')}/data/robot.json`
 
 const commonButtons = [
   [
-    { text: '通知', callback: 'bot通知' },
-    { text: '数据', callback: 'bot数据' },
-    { text: '列表', callback: 'bot列表' }
+    { text: '通知', callback: 'bot通知', clicked_text: '正在获取通知' },
+    { text: '数据', callback: 'bot数据', clicked_text: '正在获取数据' },
+    { text: '列表', callback: 'bot列表', clicked_text: '正在获取列表' }
   ]
 ];
 
@@ -56,7 +56,7 @@ export class robot_data extends plugin {
         {
           text: '点击登录',
           link: url,
-          clicked_text: '已登录',
+          clicked_text: '正在跳转登录',
           style: 4,
           ...(e.isGroup ? {
             permission: user,
@@ -108,7 +108,7 @@ export class robot_data extends plugin {
         { key: 'a', values: [`未查询到你的登录信息`] }
       ], [
         [
-          { text: '登录', callback: '管理登录' }
+          { text: '登录', callback: '管理登录', clicked_text: '正在登录' }
         ]
       ])
     }
@@ -120,7 +120,7 @@ export class robot_data extends plugin {
         { key: 'a', values: [`登录状态失效`] }
       ], [
         [
-          { text: '登录', callback: '管理登录' }
+          { text: '登录', callback: '管理登录', clicked_text: '正在登录' }
         ]
       ])
     }
@@ -154,7 +154,7 @@ export class robot_data extends plugin {
         { key: 'a', values: [`未查询到你的登录信息`] }
       ], [
         [
-          { text: '登录', callback: '管理登录' }
+          { text: '登录', callback: '管理登录', clicked_text: '正在登录' }
         ]
       ])
     }
@@ -166,7 +166,7 @@ export class robot_data extends plugin {
         { key: 'a', values: [`登录状态失效`] }
       ], [
         [
-          { text: '登录', callback: '管理登录' }
+          { text: '登录', callback: '管理登录', clicked_text: '正在登录' }
         ]
       ])
     }
@@ -201,7 +201,7 @@ export class robot_data extends plugin {
         { key: 'a', values: [`未查询到你的登录信息`] }
       ], [
         [
-          { text: '登录', callback: '管理登录' }
+          { text: '登录', callback: '管理登录', clicked_text: '正在登录' }
         ]
       ])
     }
@@ -218,7 +218,7 @@ export class robot_data extends plugin {
         { key: 'a', values: [`登录状态失效`] }
       ], [
         [
-          { text: '登录', callback: '管理登录' }
+          { text: '登录', callback: '管理登录', clicked_text: '正在登录' }
         ]
       ])
     }

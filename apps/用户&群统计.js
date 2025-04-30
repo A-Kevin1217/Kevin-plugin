@@ -129,7 +129,7 @@ export class example extends plugin {
                 { key: 'e', values: ['***'] },
                 { key: 'f', values: [`\r> 更多功能请回复"菜单"查看详情\r\r`] }
             ], [
-                [{ text: '菜单', callback: '菜单' }]
+                [{ text: '菜单', callback: '菜单', clicked_text: '正在获取菜单' }]
             ]);
         }
         await new Promise(resolve => setTimeout(resolve, 1000));

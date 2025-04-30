@@ -161,7 +161,7 @@ export class example extends plugin {
       { key: 'b', values: [isFood ? '今日吃什么' : '今日喝什么'] },
       { key: 'c', values: [`\r> ${message}`] }
     ], [
-      [{ text: buttonText, callback: callback }]
+      [{ text: buttonText, callback: callback, clicked_text: '正在换一个' }]
     ])
   }
 
@@ -256,10 +256,10 @@ export class example extends plugin {
     if (currentPage > 1 || currentPage < totalPages) {
       let buttons = []
       if (currentPage > 1) {
-        buttons.push({ text: '上一页', callback: `查看${isFood ? '食物' : '饮品'}列表 ${currentPage - 1}` })
+        buttons.push({ text: '上一页', callback: `查看${isFood ? '食物' : '饮品'}列表 ${currentPage - 1}`, clicked_text: '正在获取上一页' })
       }
       if (currentPage < totalPages) {
-        buttons.push({ text: '下一页', callback: `查看${isFood ? '食物' : '饮品'}列表 ${currentPage + 1}` })
+        buttons.push({ text: '下一页', callback: `查看${isFood ? '食物' : '饮品'}列表 ${currentPage + 1}`, clicked_text: '正在获取下一页' })
       }
       buttonArr.push(buttons)
     }

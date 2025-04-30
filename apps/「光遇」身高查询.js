@@ -165,9 +165,9 @@ export class 光遇_身高查询 extends plugin {
                 { text: '再次查看', callback: '查询绑定id' }
             ],
             [
-                { text: '查国服身高', callback: '国服身高查询' },
-                { text: '绑定好友码', input: '国服好友码绑定' },
-                { text: '国际服身高', callback: '国际服身高查询' }
+                { text: '查国服身高', callback: '国服身高查询', clicked_text: '正在查询国服身高' },
+                { text: '绑定好友码', input: '国服好友码绑定', clicked_text: '正在绑定好友码' },
+                { text: '国际服身高', callback: '国际服身高查询', clicked_text: '正在查询国际服身高' }
             ]
         ]);
     }
@@ -191,7 +191,7 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'c', values: [`\r> 国服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx`] },
             ], [
                 [
-                    { text: '重新绑定', input: '国服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx' },
+                    { text: '重新绑定', input: '国服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx', clicked_text: '正在重新绑定' },
                 ]
             ]);
         }
@@ -220,9 +220,9 @@ export class 光遇_身高查询 extends plugin {
                 { text: '再次查看', callback: '查询绑定id' }
             ],
             [
-                { text: '查国服身高', callback: '国服身高查询' },
-                { text: '绑定好友码', input: '国服好友码绑定xxxx-xxxx-xxxx' },
-                { text: '国际服身高', callback: '国际服身高查询' }
+                { text: '查国服身高', callback: '国服身高查询', clicked_text: '正在查询国服身高' },
+                { text: '绑定好友码', input: '国服好友码绑定xxxx-xxxx-xxxx', clicked_text: '正在绑定好友码' },
+                { text: '国际服身高', callback: '国际服身高查询', clicked_text: '正在查询国际服身高' }
             ]
         ]);
     }
@@ -245,7 +245,7 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'c', values: [`\r> 国服好友码绑定xxxx-xxxx-xxxx`] },
             ], [
                 [
-                    { text: '重新绑定', input: '国服好友码绑定xxxx-xxxx-xxxx' },
+                    { text: '重新绑定', input: '国服好友码绑定xxxx-xxxx-xxxx', clicked_text: '正在重新绑定' },
                 ]
             ]);
         }
@@ -271,9 +271,9 @@ export class 光遇_身高查询 extends plugin {
             { key: 'c', values: [`\r> 记得不要拉黑加上的好友\r否则下次查身高时数值不会变。`] },
         ], [
             [
-                { text: '查询国服身高', callback: '国服身高查询' },
-                { text: '重新绑定好友码', input: '国服好友码绑定xxxx-xxxx-xxxx' },
-                { text: '查看绑定id及次数', callback: '查询绑定id' },
+                { text: '查询国服身高', callback: '国服身高查询', clicked_text: '正在查询国服身高' },
+                { text: '重新绑定好友码', input: '国服好友码绑定xxxx-xxxx-xxxx', clicked_text: '正在重新绑定好友码' },
+                { text: '查看绑定id及次数', callback: '查询绑定id', clicked_text: '正在查询绑定id及次数' },
             ]
         ]);
     }
@@ -296,7 +296,7 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'b', values: [` ID错误，请检查绑定ID长度是否合理`] },
                 { key: 'c', values: [`\r> 国际服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx`] },
             ], [
-                { text: '重新绑定', input: '国际服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx' },
+                { text: '重新绑定', input: '国际服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx', clicked_text: '正在重新绑定' },
                 { text: '如何获取ID', link: 'https://pan.t1qq.com/view.php/70256ea206338d7268a43ab682d9bdf7.jpg' },
             ]);
         }
@@ -321,8 +321,8 @@ export class 光遇_身高查询 extends plugin {
             { key: 'c', values: [`\r> 记得及时撤回您的ID，以防被坏人拿去干坏事`] },
         ], [
             [
-                { text: '查询国际服身高', callback: '国际服身高查询' },
-                { text: '查看绑定id及次数', callback: '查询绑定id' },
+                { text: '查询国际服身高', callback: '国际服身高查询', clicked_text: '正在查询国际服身高' },
+                { text: '查看绑定id及次数', callback: '查询绑定id', clicked_text: '正在查询绑定id及次数' },
             ]
         ]);
     }
@@ -342,8 +342,8 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'b', values: [` 您尚未绑定光遇长ID，请从小精灵内获取长ID绑定`] },
             ], [
                 [
-                    { text: '绑定国服ID', input: '国服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx' },
-                    { text: '如何获取ID', link: 'https://v.t1qq.com/gfid.jpg' }
+                    { text: '绑定国服ID', input: '国服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx', clicked_text: '正在绑定国服ID' },
+                    { text: '如何获取ID', link: 'https://v.t1qq.com/gfid.jpg', clicked_text: '正在跳转' }
                 ]
             ]);
         }
@@ -356,8 +356,8 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'b', values: [` 您尚未拥有国服查询次数，请购买获得次数`] },
             ], [
                 [
-                    { text: '购买次数', link: 'https://wiki.kevcore.cn/height/' },
-                    { text: '兑换国服次数', input: '兑换国服次数（此处填写兑换码，连同括号一起替换掉）' }
+                    { text: '购买次数', link: 'https://wiki.kevcore.cn/height/', clicked_text: '正在购买次数' },
+                    { text: '兑换国服次数', input: '兑换国服次数（此处填写兑换码，连同括号一起替换掉）', clicked_text: '正在兑换国服次数' }
                 ]
             ]);
         }
@@ -381,8 +381,8 @@ export class 光遇_身高查询 extends plugin {
                     { key: 'c', values: [`\r> ${URL_DATA.msg}`] }
                 ], [
                     [
-                        { text: '重新查询', callback: '国服身高查询' },
-                        { text: '联系主人', link: 'https://qm.qq.com/q/Mfra27jTmQ' }
+                        { text: '重新查询', callback: '国服身高查询', clicked_text: '正在重新查询' },
+                        { text: '联系主人', link: 'https://qm.qq.com/q/Mfra27jTmQ', clicked_text: '正在跳转' }
                     ]
                 ]);
             }
@@ -417,8 +417,8 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'g', values: ['`'] }
             ], [
                 [
-                    { text: '再次查询', callback: '国服身高查询' },
-                    { text: '兑换国服次数', input: '兑换国服次数（此处填写兑换码，连同括号一起替换掉）' }
+                    { text: '再次查询', callback: '国服身高查询', clicked_text: '正在重新查询' },
+                    { text: '兑换国服次数', input: '兑换国服次数（此处填写兑换码，连同括号一起替换掉）', clicked_text: '正在兑换国服次数' }
                 ]
             ]);
 
@@ -430,7 +430,7 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'c', values: [`${error.msg}`] }
             ], [
                 [
-                    { text: '重新查询', callback: '国服身高查询' }
+                    { text: '重新查询', callback: '国服身高查询', clicked_text: '正在重新查询' }
                 ]
             ]);
         }
@@ -454,8 +454,8 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'c', values: [`\r> 请先获取次数再进行查询`] }
             ], [
                 [
-                    { text: '购买次数', link: 'https://wiki.kevcore.cn/height/' },
-                    { text: '兑换国服次数', input: '兑换国服次数（此处填写兑换码，连同括号一起替换掉）' }
+                    { text: '购买次数', link: 'https://wiki.kevcore.cn/height/', clicked_text: '正在购买次数' },
+                    { text: '兑换国服次数', input: '兑换国服次数（此处填写兑换码，连同括号一起替换掉）', clicked_text: '正在兑换国服次数' }
                 ]
             ]);
         }
@@ -467,7 +467,7 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'c', values: [`格式：好友码查询xxxx-xxxx-xxxx`] }
             ], [
                 [
-                    { text: '查询示例', input: '好友码查询1234-5678-9012' }
+                    { text: '查询示例', input: '好友码查询1234-5678-9012', clicked_text: '正在查询示例' }
                 ]
             ]);
         }
@@ -485,7 +485,7 @@ export class 光遇_身高查询 extends plugin {
                     { key: 'c', values: [`错误信息：${URL_DATA.msg}`] }
                 ], [
                     [
-                        { text: '重新查询', input: '好友码查询' }
+                        { text: '重新查询', input: '好友码查询', clicked_text: '正在重新查询' }
                     ]
                 ]);
             }
@@ -523,8 +523,8 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'g', values: ['`'] }
             ], [
                 [
-                    { text: '重新查询', input: '好友码查询' },
-                    { text: '兑换国服次数', input: '兑换国服次数（此处填写兑换码，连同括号一起替换掉）' }
+                    { text: '重新查询', input: '好友码查询', clicked_text: '正在重新查询' },
+                    { text: '兑换国服次数', input: '兑换国服次数（此处填写兑换码，连同括号一起替换掉）', clicked_text: '正在兑换国服次数' }
                 ]
             ]);
 
@@ -536,7 +536,7 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'c', values: [`请稍后重试`] }
             ], [
                 [
-                    { text: '重新查询', input: '好友码查询' }
+                    { text: '重新查询', input: '好友码查询', clicked_text: '正在重新查询' }
                 ]
             ]);
         }
@@ -555,8 +555,8 @@ export class 光遇_身高查询 extends plugin {
             { key: 'b', values: [` 您尚绑定光遇长ID，请从游戏内获取长ID绑定`] },
         ], [
             [
-                { text: '绑定国际服ID', input: '国际服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx' },
-                { text: '如何获取ID', link: 'https://pan.t1qq.com/view.php/70256ea206338d7268a43ab682d9bdf7.jpg' },
+                { text: '绑定国际服ID', input: '国际服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx', clicked_text: '正在绑定国际服ID' },
+                { text: '如何获取ID', link: 'https://pan.t1qq.com/view.php/70256ea206338d7268a43ab682d9bdf7.jpg', clicked_text: '正在跳转' },
             ]
         ]);
 
@@ -567,8 +567,8 @@ export class 光遇_身高查询 extends plugin {
             { key: 'b', values: [` 您尚绑定光遇长ID，请从游戏内获取长ID绑定`] },
         ], [
             [
-                { text: '绑定国际服ID', input: '国际服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx' },
-                { text: '如何获取ID', link: 'https://pan.t1qq.com/view.php/70256ea206338d7268a43ab682d9bdf7.jpg' },
+                { text: '绑定国际服ID', input: '国际服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx', clicked_text: '正在绑定国际服ID' },
+                { text: '如何获取ID', link: 'https://pan.t1qq.com/view.php/70256ea206338d7268a43ab682d9bdf7.jpg', clicked_text: '正在跳转' },
             ]
         ]);
 
@@ -608,8 +608,8 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'b', values: [` ID错误，请重新绑定`] },
             ], [
                 [
-                    { text: '绑定国际服ID', input: '国际服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx' },
-                    { text: '如何获取ID', link: 'https://pan.t1qq.com/view.php/70256ea206338d7268a43ab682d9bdf7.jpg' },
+                    { text: '绑定国际服ID', input: '国际服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx', clicked_text: '正在绑定国际服ID' },
+                    { text: '如何获取ID', link: 'https://pan.t1qq.com/view.php/70256ea206338d7268a43ab682d9bdf7.jpg', clicked_text: '正在跳转' },
                 ]
             ]);
         } else {
@@ -619,8 +619,8 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'c', values: [`\r> 请联系主人反馈问题`] },
             ], [
                 [
-                    { text: '重新查询', callback: '国际服身高查询' },
-                    { text: '联系主人', link: 'https://qm.qq.com/q/Mfra27jTmQ' },
+                    { text: '重新查询', callback: '国际服身高查询', clicked_text: '正在重新查询' },
+                    { text: '联系主人', link: 'https://qm.qq.com/q/Mfra27jTmQ', clicked_text: '正在跳转' },
                 ]
             ]);
         }
@@ -643,8 +643,8 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'c', values: [`\r> 您当前剩余次数：${USER_FILE_DATA[USER_ID]?.times || 0}次\r> 需要生成次数：${times}次`] },
             ], [
                 [
-                    { text: '购买次数', callback: '购买次数' },
-                    { text: '查询剩余次数', callback: '查询绑定id' }
+                    { text: '购买次数', callback: '购买次数', clicked_text: '正在购买次数' },
+                    { text: '查询剩余次数', callback: '查询绑定id', clicked_text: '正在查询绑定id' }
                 ]
             ]);
         }
@@ -710,7 +710,7 @@ export class 光遇_身高查询 extends plugin {
             { key: 'b', values: [` 无此国服兑换码`] },
         ], [
             [
-                { text: '重新兑换', input: `兑换国服次数XIAOCHENG666` },
+                { text: '重新兑换', input: `兑换国服次数XIAOCHENG666`, clicked_text: '正在重新兑换' },
             ]
         ]);
 
@@ -772,8 +772,8 @@ export class 光遇_身高查询 extends plugin {
                     { key: 'a', values: [`##`] },
                     { key: 'b', values: [` 该群已经开放过了，可以查询啦~`] }
                 ], [
-                    { text: '查国服身高', callback: '国服身高查询' },
-                    { text: '国际服身高', callback: '国际服身高查询' }
+                    { text: '查国服身高', callback: '国服身高查询', clicked_text: '正在查询国服身高' },
+                    { text: '国际服身高', callback: '国际服身高查询', clicked_text: '正在查询国际服身高' }
                 ]);
             }
 
@@ -785,8 +785,8 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [` 该群已开放！可以查询啦~\r`] }
             ], [
-                { text: '查国服身高', callback: '国服身高查询' },
-                { text: '国际服身高', callback: '国际服身高查询' }
+                { text: '查国服身高', callback: '国服身高查询', clicked_text: '正在查询国服身高' },
+                { text: '国际服身高', callback: '国际服身高查询', clicked_text: '正在查询国际服身高' }
             ]);
 
         } catch (error) {
@@ -813,8 +813,8 @@ export class 光遇_身高查询 extends plugin {
                 { text: '联系客服', link: 'https://qm.qq.com/q/Mfra27jTmQ' }
             ],
             [
-                { text: '兑换次数', input: '兑换国服次数' },
-                { text: '查询剩余次数', callback: '查询绑定id' }
+                { text: '兑换次数', input: '兑换国服次数', clicked_text: '正在兑换次数' },
+                { text: '查询剩余次数', callback: '查询绑定id', clicked_text: '正在查询绑定id' }
             ]
         ]);
     }
@@ -842,8 +842,8 @@ export class 光遇_身高查询 extends plugin {
                     { key: 'c', values: [`\r> 目前系统剩余总次数：${data['ID剩余次数']}次\r> 今日使用次数：${data['ID今天使用次数']}次\r> 总成功次数：${data['ID总成功次数']}次\r> 总失败次数：${data['ID总失败次数']}次`] }
                 ], [
                     [
-                        { text: '生成十次', callback: '生成国服次数*10' },
-                        { text: '查询个人次数', callback: '查询绑定id' }
+                        { text: '生成十次', callback: '生成国服次数*10', clicked_text: '正在生成十次' },
+                        { text: '查询个人次数', callback: '查询绑定id', clicked_text: '正在查询绑定id' }
                     ]
                 ]);
             } else {

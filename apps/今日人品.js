@@ -33,9 +33,9 @@ export class example extends plugin {
       { key: 'c', values: [' 今日人品'] },
       { key: 'd', values: [`\r> (据说人品好，一整天都会幸运)\r\r***\r你今天的人品是：${comment}`] },
     ], [
-      [{ text: '看看我的', callback: '今日人品' },
-      { text: '看看运势', callback: '今日运势' },
-      { text: '菜单', callback: '菜单' }]
+      [{ text: '看看我的', callback: '今日人品', clicked_text: '正在获取今日人品' },
+      { text: '看看运势', callback: '今日运势', clicked_text: '正在获取今日运势' },
+      { text: '菜单', callback: '菜单', clicked_text: '正在获取菜单' }]
     ])
   }
 

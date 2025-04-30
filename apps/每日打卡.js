@@ -37,8 +37,8 @@ export class example extends plugin {
         segment.at(e.user_id),
         `\n你今天已经打过卡了喵~\n你今天的幸运值是` + zhi1 + `，可别再忘掉哦喵~`,
         segment.button([
-          { text: '我也要打卡', callback: '打卡' },
-          { text: '今日欧皇', callback: '今日欧皇' }
+          { text: '我也要打卡', callback: '打卡', clicked_text: '正在打卡' },
+          { text: '今日欧皇', callback: '今日欧皇', clicked_text: '正在获取今日欧皇' }
         ])
       ]
       await e.reply(msg)
@@ -50,8 +50,8 @@ export class example extends plugin {
       segment.at(e.user_id),
       `\n打卡成功！！\n你今天抽到的幸运值为` + zhi + `点`,
       segment.button([
-        { text: '我也要打卡', callback: '打卡' },
-        { text: '今日欧皇', callback: '今日欧皇' }
+        { text: '我也要打卡', callback: '打卡', clicked_text: '正在打卡' },
+        { text: '今日欧皇', callback: '今日欧皇', clicked_text: '正在获取今日欧皇' }
       ])
     ]//将消息设置为变量msg
     if (zhi === 100) {//判断本次抽取的幸运值是否为100
@@ -87,8 +87,8 @@ export class example extends plugin {
         segment.at(e.user_id),
         `\n本群今天的欧皇还没诞生喵~`,
         segment.button([
-          { text: '我也要打卡', callback: '打卡' },
-          { text: '今日欧皇', callback: '今日欧皇' }
+          { text: '我也要打卡', callback: '打卡', clicked_text: '正在打卡' },
+          { text: '今日欧皇', callback: '今日欧皇', clicked_text: '正在获取今日欧皇' }
         ])
       ]
       await e.reply(msg)
@@ -109,8 +109,8 @@ export class example extends plugin {
         ]
       }),
       segment.button([
-        { text: '我也要打卡', callback: '打卡' },
-        { text: '今日欧皇', callback: '今日欧皇' }
+        { text: '我也要打卡', callback: '打卡', clicked_text: '正在打卡' },
+        { text: '今日欧皇', callback: '今日欧皇', clicked_text: '正在获取今日欧皇' }
       ])
     ])
     return true;
