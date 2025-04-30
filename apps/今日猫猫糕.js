@@ -2,6 +2,10 @@ import fs from 'fs'
 import path from 'path'
 import { spawn } from 'child_process'
 import fetch from 'node-fetch'
+import { promisify } from 'util'
+import sizeOf from 'image-size'
+
+const unlinkAsync = promisify(fs.unlink)
 
 export class 猫猫糕 extends plugin {
     constructor() {
@@ -122,26 +126,41 @@ export class 猫猫糕 extends plugin {
         return null
     }
 
+    async getImageSizeByDownload(url) {
+        const tempPath = path.join('/tmp', `mmg_${Date.now()}_${Math.random().toString(36).slice(2)}${path.extname(url)}`)
+        const res = await fetch(url)
+        if (!res.ok) return null
+        const buffer = await res.buffer()
+        fs.writeFileSync(tempPath, buffer)
+        try {
+            const dimensions = sizeOf(tempPath)
+            return { width: dimensions.width, height: dimensions.height }
+        } catch (e) {
+            return null
+        } finally {
+            await unlinkAsync(tempPath)
+        }
+    }
+
     async sendMMG(e, imgPath) {
         const cuteText = this.getRandomCuteText()
+        let sizeStr = ''
+        const size = await this.getImageSizeByDownload(imgPath)
+        if (size && size.width && size.height) {
+            sizeStr = ` #${size.width}px #${size.height}px`
+        }
 
         console.log(imgPath)
-        await e.reply([
-            segment.image(imgPath),
-            `\n\n> ${cuteText}`,
-            segment.button([
-                {
-                    text: '换个猫猫糕',
-                    callback: '换个猫猫糕',
-                    visited_label: '正在换猫猫糕'
-                },
-                {
-                    text: '今日猫猫糕',
-                    callback: '今日猫猫糕',
-                    visited_label: '正在获取今日猫猫糕'
-                }
-            ])
-        ])
+        await replyMarkdownButton(e, [
+            { key: 'a', values: [`![猫猫糕${sizeStr}]`] },
+            { key: 'b', values: ['(${imgPath})'] },
+            { key: 'c', values: [`\r\r> ${cuteText}`] }
+        ], [
+            [
+                { text: '换个猫猫糕', callback: '换个猫猫糕', visited_label: '正在换猫猫糕' },
+                { text: '今日猫猫糕', callback: '今日猫猫糕', visited_label: '正在获取今日猫猫糕' }
+            ]
+        ]);
     }
 
     async TODAY_MMG(e) {
