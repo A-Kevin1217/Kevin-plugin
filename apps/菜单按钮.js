@@ -1,7 +1,8 @@
-import menuConfig from '../config/menuConfig.js'
-
 // 通用回复函数
 async function sendMenu(e, key) {
+  // 热更新 menuConfig
+  delete require.cache[require.resolve('../config/menuConfig.js')]
+  const menuConfig = require('../config/menuConfig.js')
   const menu = menuConfig[key]
   if (!menu) return false
   const platform = e.bot?.adapter?.name || e.platform || '未知'
