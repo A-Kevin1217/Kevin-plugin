@@ -130,7 +130,8 @@ export class 猫猫糕 extends plugin {
         const tempPath = path.join('/tmp', `mmg_${Date.now()}_${Math.random().toString(36).slice(2)}${path.extname(url)}`)
         const res = await fetch(url)
         if (!res.ok) return null
-        const buffer = await res.buffer()
+        const arrayBuffer = await res.arrayBuffer()
+        const buffer = Buffer.from(arrayBuffer)
         fs.writeFileSync(tempPath, buffer)
         try {
             const dimensions = sizeOf(tempPath)
