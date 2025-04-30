@@ -143,9 +143,9 @@ async function generateFortune(e) {
         { key: 'e', values: [`***`] },
         { key: 'f', values: [`\r## ${msg}`] }
     ], [
-        [{ text: '看看我的', callback: '今日运势', visited_label: '正在获取今日运势' },
-        { text: '重抽', callback: '重新抽取运势', visited_label: '正在重新抽取运势' },
-        { text: '菜单', callback: '菜单', visited_label: '正在获取菜单' }]
+        [{ text: '看看我的', callback: '今日运势', clicked_text: '正在获取今日运势' },
+        { text: '重抽', callback: '重新抽取运势', clicked_text: '正在重新抽取运势' },
+        { text: '猫猫糕', callback: '今日猫猫糕', clicked_text: '正在获取猫猫糕' }]
     ])
 }
 
