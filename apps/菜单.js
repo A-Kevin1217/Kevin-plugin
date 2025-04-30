@@ -6,10 +6,6 @@ import Theme from './help/theme.js'
 const _path = process.cwd()
 const helpPath = `${_path}/config`
 
-const path = `${process.cwd()}/plugins/Kevin-plugin/config/menuConfig.js`
-delete require.cache[require.resolve(path)]
-const menuConfig = require(path).default
-
 export class Help extends plugin {
   constructor() {
     super({
