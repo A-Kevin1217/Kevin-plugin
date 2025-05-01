@@ -35,8 +35,8 @@ export class example extends plugin {
                 { key: 'c', values: [' 答案之书'] },
                 { key: 'd', values: [`\r> 让答案之书为你解答吧\r\r`] },
                 { key: 'e', values: [`***`] },
-                { key: 'f', values: [`\r## ${zhAnswer}`] },
-                { key: 'g', values: [`\r## ${enAnswer}`] }
+                { key: 'f', values: [`\r${zhAnswer}`] },
+                { key: 'g', values: [`\r${enAnswer}`] }
             ], [
                 [
                     { text: '再看一次', callback: '答案之书', clicked_text: '正在再看一次' },

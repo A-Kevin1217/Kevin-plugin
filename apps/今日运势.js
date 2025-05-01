@@ -141,7 +141,7 @@ async function generateFortune(e) {
         { key: 'c', values: [' 今日运势'] },
         { key: 'd', values: [`\r> 我没有迷信！我就是想看看~\r\r`] },
         { key: 'e', values: [`***`] },
-        { key: 'f', values: [`\r## ${msg}`] }
+        { key: 'f', values: [`\r${msg}`] }
     ], [
         [{ text: '看看我的', callback: '今日运势', clicked_text: '正在获取今日运势' },
         { text: '重抽', callback: '重新抽取运势', clicked_text: '正在重新抽取运势' },
