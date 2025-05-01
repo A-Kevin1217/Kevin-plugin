@@ -216,7 +216,7 @@ export class 光遇_身高查询 extends plugin {
         const SKY_UID = ((e.msg.match(GFBINDING_REGEX))[2]).replace(/[\u4e00-\u9fa5()]/g, '').replace(/\s/g, '')
 
         if (SKY_UID.length !== 36) {
-            return e.reply([
+            return e.replyMarkdownButton(e,[
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [` ID错误，请检查绑定ID长度是否合理`] },
                 { key: 'c', values: [`\r> 国服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx`] },
@@ -270,7 +270,7 @@ export class 光遇_身高查询 extends plugin {
         const SKY_CODE = ((e.msg.match(HYBINDING_REGEX))[2]).replace(/[\u4e00-\u9fa5()]/g, '').replace(/\s/g, '')
 
         if (SKY_CODE.length !== 14) {
-            return e.reply([
+            return e.replyMarkdownButton(e,[
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [` 绑定错误，请检查好友码长度是否合理`] },
                 { key: 'c', values: [`\r> 国服好友码绑定xxxx-xxxx-xxxx`] },
@@ -322,7 +322,7 @@ export class 光遇_身高查询 extends plugin {
         const GJFSKY_UID = ((e.msg.match(GJFBINDING_REGEX))[2]).replace(/[\u4e00-\u9fa5()]/g, '').replace(/\s/g, '')
 
         if (GJFSKY_UID.length !== 36) {
-            return e.reply([
+            return e.replyMarkdownButton(e,[
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [` ID错误，请检查绑定ID长度是否合理`] },
                 { key: 'c', values: [`\r> 国际服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx`] },
@@ -368,7 +368,7 @@ export class 光遇_身高查询 extends plugin {
 
         // 检查用户是否存在和绑定
         if (!USER_FILE_DATA[USER_ID] || !USER_FILE_DATA[USER_ID]['SKY_UID']) {
-            return e.reply([
+            return e.replyMarkdownButton(e,[
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [` 您尚未绑定光遇长ID，请从小精灵内获取长ID绑定`] },
             ], [
@@ -388,10 +388,11 @@ export class 光遇_身高查询 extends plugin {
 
         // 计算总可用次数
         const festivalTimes = USER_FILE_DATA[USER_ID].festival_times ? USER_FILE_DATA[USER_ID].festival_times.reduce((sum, item) => sum + item.times, 0) : 0;
-        const totalTimes = (USER_FILE_DATA[USER_ID].times || 0) + festivalTimes;
+        const regularTimes = USER_FILE_DATA[USER_ID].times || 0;
+        const totalTimes = regularTimes + festivalTimes;
 
         if (totalTimes <= 0) {
-            return e.reply([
+            return e.replyMarkdownButton(e,[
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [` 您尚未拥有国服查询次数，请购买获得次数`] },
             ], [
@@ -415,7 +416,7 @@ export class 光遇_身高查询 extends plugin {
             }
 
             if (URL_DATA.code !== 200) {
-                return e.reply([
+                return e.replyMarkdownButton(e,[
                     { key: 'a', values: [`##`] },
                     { key: 'b', values: [` 接口返回异常:${URL_DATA.code}`] },
                     { key: 'c', values: [`\r> ${URL_DATA.msg}`] }
@@ -427,8 +428,21 @@ export class 光遇_身高查询 extends plugin {
                 ]);
             }
 
-            // 更新用户次数
-            USER_FILE_DATA[USER_ID].times = totalTimes - 1;
+            // 优先使用节日次数
+            if (festivalTimes > 0) {
+                // 按过期时间排序
+                USER_FILE_DATA[USER_ID].festival_times.sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
+                // 使用最早过期的次数
+                USER_FILE_DATA[USER_ID].festival_times[0].times--;
+                // 如果次数用完，删除该节日次数记录
+                if (USER_FILE_DATA[USER_ID].festival_times[0].times <= 0) {
+                    USER_FILE_DATA[USER_ID].festival_times.shift();
+                }
+            } else {
+                // 使用常规次数
+                USER_FILE_DATA[USER_ID].times = regularTimes - 1;
+            }
+            
             await SAVE(USER_FILE, USER_FILE_DATA);
 
             // 解数据
@@ -442,16 +456,34 @@ export class 光遇_身高查询 extends plugin {
                 minute: '2-digit',
                 second: '2-digit',
                 hour12: false
-            })
+            });
 
-            const displayTimes = totalTimes >= 10000 ? '∞' : totalTimes;
+            // 获取最近的过期时间
+            let nextExpiry = '';
+            if (USER_FILE_DATA[USER_ID].festival_times && USER_FILE_DATA[USER_ID].festival_times.length > 0) {
+                const nextExpiryDate = new Date(USER_FILE_DATA[USER_ID].festival_times[0].expiry);
+                nextExpiry = `(${nextExpiryDate.toLocaleString('zh-CN', {
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}过期)`;
+            }
+
+            // 计算剩余次数
+            const remainingFestivalTimes = USER_FILE_DATA[USER_ID].festival_times ? 
+                USER_FILE_DATA[USER_ID].festival_times.reduce((sum, item) => sum + item.times, 0) : 0;
+            const remainingRegularTimes = USER_FILE_DATA[USER_ID].times || 0;
+            const remainingTotalTimes = remainingRegularTimes + remainingFestivalTimes;
+
+            const displayTimes = remainingTotalTimes >= 10000 ? '∞' : remainingTotalTimes;
 
             // 返回查询结果
             return replyMarkdownButton(e, [
                 { key: 'a', values: [`<@${USER_ID}>`] },
                 { key: 'b', values: [`\r# 这里是国服数据，请查收\r> ${time}\r\r`] },
                 { key: 'c', values: ["``"] },
-                { key: 'd', values: [`\`\r————用户身高————\r🍊体型S值是：${parseFloat(scale).toFixed(5)}\r🍊身高H值是：${parseFloat(height).toFixed(5)}\r🍊最高是：${parseFloat(maxHeight).toFixed(5)}\r🍊最矮是：${parseFloat(minHeight).toFixed(5)}\r🍊目前身高：${parseFloat(currentHeight).toFixed(5)}\r🍊剩余查询次数：${displayTimes}`] },
+                { key: 'd', values: [`\`\r————用户身高————\r🍊体型S值是：${parseFloat(scale).toFixed(5)}\r🍊身高H值是：${parseFloat(height).toFixed(5)}\r🍊最高是：${parseFloat(maxHeight).toFixed(5)}\r🍊最矮是：${parseFloat(minHeight).toFixed(5)}\r🍊目前身高：${parseFloat(currentHeight).toFixed(5)}\r🍊剩余查询次数：${displayTimes}${nextExpiry}`] },
                 { key: 'e', values: [`\r————用户装扮————\r🍊发型：${hair}\r🍊头饰：${hat}\r🍊面具：${mask}\r🍊面饰：${face}\r🍊耳饰：${horn}\r🍊颈部：${neck}\r🍊裤子：${body}\r🍊鞋子：${feet}\r🍊斗篷：${wing}\r🍊背饰：${prop}`] },
                 { key: 'f', values: ['\r————橙子BOT————``'] },
                 { key: 'g', values: ['`'] }
@@ -464,7 +496,7 @@ export class 光遇_身高查询 extends plugin {
 
         } catch (error) {
             console.error('查询失败:', error);
-            return e.reply([
+            return e.replyMarkdownButton(e,[
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [`接口返回异常:${error.code}`] },
                 { key: 'c', values: [`${error.msg}`] }
@@ -488,7 +520,7 @@ export class 光遇_身高查询 extends plugin {
         // 检查查询次数
         const TIMES = USER_FILE_DATA[USER_ID]?.times || 0;
         if (TIMES <= 0) {
-            return e.reply([
+            return e.replyMarkdownButton(e,[
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [` 您尚未拥有国服查询次数，请购买获得次数`] },
                 { key: 'c', values: [`\r> 请先获取次数再进行查询`] }
@@ -501,7 +533,7 @@ export class 光遇_身高查询 extends plugin {
         }
 
         if (!friendCode) {
-            return e.reply([
+            return e.replyMarkdownButton(e,[
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [` 请输入正确的好友码`] },
                 { key: 'c', values: [`格式：好友码查询xxxx-xxxx-xxxx`] }
@@ -519,7 +551,7 @@ export class 光遇_身高查询 extends plugin {
             const URL_DATA = await (await fetch(URL)).json();
 
             if (URL_DATA.code !== 200) {
-                return e.reply([
+                return e.replyMarkdownButton(e,[
                     { key: 'a', values: [`##`] },
                     { key: 'b', values: [` 查询失败`] },
                     { key: 'c', values: [`错误信息：${URL_DATA.msg}`] }
@@ -570,7 +602,7 @@ export class 光遇_身高查询 extends plugin {
 
         } catch (error) {
             console.error('好友码查询失败:', error);
-            return e.reply([
+            return e.replyMarkdownButton(e,[
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [` 查询失败`] },
                 { key: 'c', values: [`请稍后重试`] }
@@ -590,7 +622,7 @@ export class 光遇_身高查询 extends plugin {
         const USER_ID = e.user_id?.slice(11);
         const USER_FILE_DATA = await GD(USER_FILE);
 
-        if (!USER_FILE_DATA[USER_ID]) return e.reply([
+        if (!USER_FILE_DATA[USER_ID]) return e.replyMarkdownButton(e,[
             { key: 'a', values: [`##`] },
             { key: 'b', values: [` 您尚绑定光遇长ID，请从游戏内获取长ID绑定`] },
         ], [
@@ -602,7 +634,7 @@ export class 光遇_身高查询 extends plugin {
 
         const SKY_UID = USER_FILE_DATA[USER_ID]['GJFSKY_UID'];
 
-        if (SKY_UID === "") return e.reply([
+        if (SKY_UID === "") return e.replyMarkdownButton(e,[
             { key: 'a', values: [`##`] },
             { key: 'b', values: [` 您尚绑定光遇长ID，请从游戏内获取长ID绑定`] },
         ], [
@@ -628,7 +660,7 @@ export class 光遇_身高查询 extends plugin {
             const { voice, attitude } = URL_DATA['action'];
 
             return setTimeout(() => {
-                e.reply([
+                e.replyMarkdownButton(e,[
                     { key: 'a', values: [`<@${USER_ID}>`] },
                     { key: 'b', values: [`\r# 这里是国际服数据，请查收\r> ${TIME}\r\r`] },
                     { key: 'c', values: ["``"] },
@@ -643,7 +675,7 @@ export class 光遇_身高查询 extends plugin {
                 ]);
             });
         } else if (CODE === 201) {
-            return e.reply([
+            return e.replyMarkdownButton(e,[
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [` ID错误，请重新绑定`] },
             ], [
@@ -653,7 +685,7 @@ export class 光遇_身高查询 extends plugin {
                 ]
             ]);
         } else {
-            return e.reply([
+            return e.replyMarkdownButton(e,[
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [` 接口返回异常:${CODE}`] },
                 { key: 'c', values: [`\r> 请联系主人反馈问题`] },
@@ -677,7 +709,7 @@ export class 光遇_身高查询 extends plugin {
 
         // 检查用户是否有足够的次数
         if (!USER_FILE_DATA[USER_ID] || !USER_FILE_DATA[USER_ID]['times'] || USER_FILE_DATA[USER_ID]['times'] < times) {
-            return e.reply([
+            return e.replyMarkdownButton(e,[
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [` 次数不足`] },
                 { key: 'c', values: [`\r> 您当前剩余次数：${USER_FILE_DATA[USER_ID]?.times || 0}次\r> 需要生成次数：${times}次`] },
@@ -737,7 +769,7 @@ export class 光遇_身高查询 extends plugin {
         const USER_ID = e.user_id?.slice(11)
 
         const CDKEY = (e.msg.match(USE_GFCDKEY_REGEX))[2].replace(/\s/g, '')
-        if (CDKEY.length === 0) return e.reply([
+        if (CDKEY.length === 0) return e.replyMarkdownButton(e,[
             { key: 'a', values: [`##`] },
             { key: 'b', values: [` 请在指令后附带兑换码\r`] },
             { key: 'c', values: [`> 如：兑换国服次数XIAOCHENG666`] },
@@ -745,7 +777,7 @@ export class 光遇_身高查询 extends plugin {
             { text: '重新兑换', input: `兑换国服次数XIAOCHENG666` },
         ]);
         const CODE_FILE_DATA = await GD(GFCODE_FILE)
-        if (!CODE_FILE_DATA[CDKEY] || CODE_FILE_DATA[CDKEY] === 0) return e.reply([
+        if (!CODE_FILE_DATA[CDKEY] || CODE_FILE_DATA[CDKEY] === 0) return e.replyMarkdownButton(e,[
             { key: 'a', values: [`##`] },
             { key: 'b', values: [` 无此国服兑换码`] },
         ], [
@@ -794,7 +826,7 @@ export class 光遇_身高查询 extends plugin {
             const GROUP_ID = e.group_id;
             if (!e.isMaster) {
                 logger.info('[光遇身高查询] 非主人尝试开放群聊');
-                return e.reply([
+                return e.replyMarkdownButton(e,[
                     { key: 'a', values: [`##`] },
                     { key: 'b', values: [` 权限不足`] },
                     { key: 'c', values: [`\r> 该指令仅限主人使用`] }
@@ -808,7 +840,7 @@ export class 光遇_身高查询 extends plugin {
 
             if (FREE_GROUP_ID['FREE_GROUP_ID_1'].includes(GROUP_ID)) {
                 logger.info(`[光遇身高查询] 群聊 ${GROUP_ID} 已经开放`);
-                return e.reply([
+                return e.replyMarkdownButton(e,[
                     { key: 'a', values: [`##`] },
                     { key: 'b', values: [` 该群已经开放过了，可以查询啦~`] }
                 ], [
@@ -821,7 +853,7 @@ export class 光遇_身高查询 extends plugin {
             await SAVE(OPEN_GROUP_FILE, FREE_GROUP_ID);
             logger.info(`[光遇身高查询] 成功开放群聊 ${GROUP_ID}`);
 
-            return e.reply([
+            return e.replyMarkdownButton(e,[
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [` 该群已开放！可以查询啦~\r`] }
             ], [
@@ -921,7 +953,7 @@ export class 光遇_身高查询 extends plugin {
         const expiryDays = parseInt(match[4]) || 7; // 默认7天过期
 
         if (!times || times <= 0) {
-            return e.reply([
+            return e.replyMarkdownButton(e,[
                 { key: 'a', values: ['##'] },
                 { key: 'b', values: [' 请输入正确的次数'] },
                 { key: 'c', values: ['\r> 格式：节日发放10 3\r> (发放10次，3天后过期)\r> 不填天数默认7天'] }
@@ -996,7 +1028,7 @@ export class 光遇_身高查询 extends plugin {
 
         } catch (error) {
             logger.error(`[光遇身高查询] 节日次数发放失败: ${error}`);
-            return e.reply([
+            return e.replyMarkdownButton(e,[
                 { key: 'a', values: ['##'] },
                 { key: 'b', values: [' 发放失败'] },
                 { key: 'c', values: ['\r> 请稍后重试'] }
