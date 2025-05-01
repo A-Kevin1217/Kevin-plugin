@@ -184,7 +184,7 @@ export class 光遇_身高查询 extends plugin {
                 key: 'f', values: [
                     `绑定的id信息如下：\r` +
                     `🍊国服：**${maskUID(SKY_UID)}**\r` +
-                    `🍊国服邀请码：**${SKY_CODE}**\r` +
+                    `🍊国服邀请码：${SKY_CODE ? `**${SKY_CODE}**` : '**未绑定**'}\r` +
                     `🍊国际服：**${maskUID(GJFSKY_UID)}**\r` +
                     `🍊常规次数：${regularTimes}\r` +
                     `🍊节日次数：${festivalTimes}（${nextExpiry}过期）\r` +
@@ -411,6 +411,20 @@ export class 光遇_身高查询 extends plugin {
 
             // 如果需要先使用好友码查询
             if (URL_DATA.code !== 200 && URL_DATA.code === 401) {
+                // 检查用户是否绑定了好友码
+                if (!USER_FILE_DATA[USER_ID]['SKY_CODE'] || USER_FILE_DATA[USER_ID]['SKY_CODE'] === "") {
+                    return replyMarkdownButton(e, [
+                        { key: 'a', values: [`##`] },
+                        { key: 'b', values: [` 查询失败`] },
+                        { key: 'c', values: [`\r> 请先绑定好友码再进行查询`] }
+                    ], [
+                        [
+                            { text: '绑定好友码', input: '国服好友码绑定xxxx-xxxx-xxxx', clicked_text: '正在绑定好友码' },
+                            { text: '如何获取好友码', link: 'https://v.t1qq.com/gfid.jpg', clicked_text: '正在跳转' }
+                        ]
+                    ]);
+                }
+                
                 URL = `${API_GUO_FU_FRIEND}?key=${KEY_2}&gy=gf&uid=${USER_FILE_DATA[USER_ID]['SKY_CODE']}`;
                 URL_DATA = await (await fetch(URL)).json();
             }
