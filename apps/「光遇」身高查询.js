@@ -17,6 +17,7 @@ const FRIEND_CODE_RESULT = /^(#|\/)?好友码查询(.*)$/i
 const USE_CDKEY_REGEX = /^(#|\/)?兑换次数(.*)/
 const USE_GFCDKEY_REGEX = /^(#|\/)?兑换国服次数(.*)/
 const SEND_FESTIVAL_TIMES_REGEX = /^(#|\/)?(发放节日次数|节日发放)(\d+)\s*(\d+)?$/
+const SEND_FESTIVAL_REISSUE_REGEX = /^(#|\/)?节日补发([A-Fa-f0-9]{32})\s*(\d+)\s*(\d+)?$/;
 
 // COS 实例
 const cos = new COS({
@@ -116,6 +117,9 @@ export class 光遇_身高查询 extends plugin {
             }, {
                 reg: SEND_FESTIVAL_TIMES_REGEX,
                 fnc: 'SEND_FESTIVAL_TIMES'
+            }, {
+                reg: SEND_FESTIVAL_REISSUE_REGEX,
+                fnc: 'SEND_FESTIVAL_REISSUE'
             }]
         });
     }
@@ -1045,6 +1049,80 @@ export class 光遇_身高查询 extends plugin {
             return replyMarkdownButton(e, [
                 { key: 'a', values: ['##'] },
                 { key: 'b', values: [' 发放失败'] },
+                { key: 'c', values: ['\r> 请稍后重试'] }
+            ]);
+        }
+    }
+
+    async SEND_FESTIVAL_REISSUE(e) {
+        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+        // 检查是否为主人
+        if (!e.isMaster) {
+            return replyMarkdownButton(e, [
+                { key: 'a', values: ['##'] },
+                { key: 'b', values: [' 权限不足'] },
+                { key: 'c', values: ['\r> 该指令仅限主人使用'] }
+            ], []);
+        }
+        // 解析参数
+        const match = e.msg.match(SEND_FESTIVAL_REISSUE_REGEX);
+        const userId = match[2];
+        const times = parseInt(match[3]);
+        const expiryDays = parseInt(match[4]) || 7;
+        if (!userId || !times || times <= 0) {
+            return replyMarkdownButton(e, [
+                { key: 'a', values: ['##'] },
+                { key: 'b', values: [' 参数错误'] },
+                { key: 'c', values: ['\r> 格式：节日补发<用户ID> <次数> <天数(可选)>'] }
+            ]);
+        }
+        try {
+            const USER_FILE_DATA = await GD(USER_FILE);
+            if (!USER_FILE_DATA[userId]) {
+                return replyMarkdownButton(e, [
+                    { key: 'a', values: ['##'] },
+                    { key: 'b', values: [' 用户不存在'] },
+                    { key: 'c', values: [`\r> 用户ID: ${userId}`] }
+                ]);
+            }
+            // 计算过期时间
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + expiryDays);
+            // 补发节日次数
+            if (!USER_FILE_DATA[userId].festival_times) {
+                USER_FILE_DATA[userId].festival_times = [];
+            }
+            // 清理已过期的节日次数
+            USER_FILE_DATA[userId].festival_times = USER_FILE_DATA[userId].festival_times.filter(item => {
+                return new Date(item.expiry) > new Date();
+            });
+            USER_FILE_DATA[userId].festival_times.push({
+                times: times,
+                expiry: expiryDate.toISOString(),
+                addedAt: new Date().toISOString()
+            });
+            await SAVE(USER_FILE, USER_FILE_DATA);
+            const expiryDateStr = expiryDate.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            return replyMarkdownButton(e, [
+                { key: 'a', values: ['##'] },
+                { key: 'b', values: [' 节日补发成功'] },
+                { key: 'c', values: [
+                    `\r> 用户ID：${userId}\r` +
+                    `> 补发数量：${times}次\r` +
+                    `> 过期时间：${expiryDateStr}`
+                ] }
+            ]);
+        } catch (error) {
+            logger.error(`[光遇身高查询] 节日补发失败: ${error}`);
+            return replyMarkdownButton(e, [
+                { key: 'a', values: ['##'] },
+                { key: 'b', values: [' 补发失败'] },
                 { key: 'c', values: ['\r> 请稍后重试'] }
             ]);
         }
