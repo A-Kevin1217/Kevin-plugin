@@ -16,6 +16,7 @@ const GJFBINDING_REGEX = /^(#|\/)?国际服绑定(.*)$/i
 const FRIEND_CODE_RESULT = /^(#|\/)?好友码查询(.*)$/i
 const USE_CDKEY_REGEX = /^(#|\/)?兑换次数(.*)/
 const USE_GFCDKEY_REGEX = /^(#|\/)?兑换国服次数(.*)/
+const SEND_FESTIVAL_TIMES_REGEX = /^(#|\/)?(发放节日次数|节日发放)(\d+)\s*(\d+)?$/
 
 // COS 实例
 const cos = new COS({
@@ -112,6 +113,9 @@ export class 光遇_身高查询 extends plugin {
             }, {
                 reg: /^(#|\/)?(总剩余次数|查看总次数|剩余总次数)$/,
                 fnc: 'CHECK_TOTAL_TIMES'
+            }, {
+                reg: SEND_FESTIVAL_TIMES_REGEX,
+                fnc: 'SEND_FESTIVAL_TIMES'
             }]
         });
     }
@@ -145,6 +149,31 @@ export class 光遇_身高查询 extends plugin {
             return uid.replace(/-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-/, '-xxxxxxx-');
         }
 
+        // 清理过期的节日次数
+        if (userData.festival_times) {
+            userData.festival_times = userData.festival_times.filter(item => {
+                return new Date(item.expiry) > new Date();
+            });
+        }
+
+        // 计算总可用次数和节日次数
+        const festivalTimes = userData.festival_times ? userData.festival_times.reduce((sum, item) => sum + item.times, 0) : 0;
+        const regularTimes = userData.times || 0;
+        const totalTimes = regularTimes + festivalTimes;
+
+        // 获取最近的过期时间
+        let nextExpiry = '无';
+        if (userData.festival_times && userData.festival_times.length > 0) {
+            const sortedTimes = userData.festival_times.sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
+            const nextExpiryDate = new Date(sortedTimes[0].expiry);
+            nextExpiry = nextExpiryDate.toLocaleString('zh-CN', {
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
         return replyMarkdownButton(e, [
             { key: 'a', values: [`##`] },
             { key: 'b', values: [` 小丞三服身高查询\r`] },
@@ -157,7 +186,9 @@ export class 光遇_身高查询 extends plugin {
                     `🍊国服：**${maskUID(SKY_UID)}**\r` +
                     `🍊国服邀请码：**${SKY_CODE}**\r` +
                     `🍊国际服：**${maskUID(GJFSKY_UID)}**\r` +
-                    `🍊国服次数：${times}\r`
+                    `🍊常规次数：${regularTimes}\r` +
+                    `🍊节日次数：${festivalTimes}（${nextExpiry}过期）\r` +
+                    `🍊总计次数：${totalTimes}\r`
                 ]
             },
         ], [
@@ -348,9 +379,18 @@ export class 光遇_身高查询 extends plugin {
             ]);
         }
 
-        // 检查查询次数
-        const TIMES = USER_FILE_DATA[USER_ID]['times'];
-        if (TIMES <= 0) {
+        // 清理过期的节日次数
+        if (USER_FILE_DATA[USER_ID].festival_times) {
+            USER_FILE_DATA[USER_ID].festival_times = USER_FILE_DATA[USER_ID].festival_times.filter(item => {
+                return new Date(item.expiry) > new Date();
+            });
+        }
+
+        // 计算总可用次数
+        const festivalTimes = USER_FILE_DATA[USER_ID].festival_times ? USER_FILE_DATA[USER_ID].festival_times.reduce((sum, item) => sum + item.times, 0) : 0;
+        const totalTimes = (USER_FILE_DATA[USER_ID].times || 0) + festivalTimes;
+
+        if (totalTimes <= 0) {
             return e.reply([
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [` 您尚未拥有国服查询次数，请购买获得次数`] },
@@ -388,7 +428,7 @@ export class 光遇_身高查询 extends plugin {
             }
 
             // 更新用户次数
-            USER_FILE_DATA[USER_ID]['times'] -= 1;
+            USER_FILE_DATA[USER_ID].times = totalTimes - 1;
             await SAVE(USER_FILE, USER_FILE_DATA);
 
             // 解数据
@@ -404,7 +444,7 @@ export class 光遇_身高查询 extends plugin {
                 hour12: false
             })
 
-            const displayTimes = USER_FILE_DATA[USER_ID]['times'] >= 10000 ? '∞' : USER_FILE_DATA[USER_ID]['times'];
+            const displayTimes = totalTimes >= 10000 ? '∞' : totalTimes;
 
             // 返回查询结果
             return replyMarkdownButton(e, [
@@ -860,6 +900,107 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'b', values: [' 查询失败'] },
                 { key: 'c', values: ['\r> 请稍后重试'] }
             ], []);
+        }
+    }
+
+    async SEND_FESTIVAL_TIMES(e) {
+        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+
+        // 检查是否为主人
+        if (!e.isMaster) {
+            return replyMarkdownButton(e, [
+                { key: 'a', values: ['##'] },
+                { key: 'b', values: [' 权限不足'] },
+                { key: 'c', values: ['\r> 该指令仅限主人使用'] }
+            ], []);
+        }
+
+        // 获取要发放的次数和过期天数
+        const match = e.msg.match(SEND_FESTIVAL_TIMES_REGEX);
+        const times = parseInt(match[3]);
+        const expiryDays = parseInt(match[4]) || 7; // 默认7天过期
+
+        if (!times || times <= 0) {
+            return e.reply([
+                { key: 'a', values: ['##'] },
+                { key: 'b', values: [' 请输入正确的次数'] },
+                { key: 'c', values: ['\r> 格式：节日发放10 3\r> (发放10次，3天后过期)\r> 不填天数默认7天'] }
+            ]);
+        }
+
+        try {
+            // 读取用户数据
+            const USER_FILE_DATA = await GD(USER_FILE);
+
+            // 计算过期时间
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + expiryDays);
+
+            let successCount = 0;
+            let totalUsers = 0;
+
+            // 遍历所有用户并发放次数
+            for (const [userId, userData] of Object.entries(USER_FILE_DATA)) {
+                if (userData) {
+                    totalUsers++;
+                    // 更新用户次数和过期信息
+                    if (!userData.festival_times) {
+                        userData.festival_times = [];
+                    }
+                    
+                    // 清理已过期的节日次数
+                    userData.festival_times = userData.festival_times.filter(item => {
+                        return new Date(item.expiry) > new Date();
+                    });
+
+                    // 添加新的节日次数
+                    userData.festival_times.push({
+                        times: times,
+                        expiry: expiryDate.toISOString(),
+                        addedAt: new Date().toISOString()
+                    });
+
+                    // 更新用户总次数（原有次数 + 未过期的节日次数）
+                    userData.times = (userData.times || 0) + times;
+                    
+                    successCount++;
+                }
+            }
+
+            // 保存更新后的数据
+            await SAVE(USER_FILE, USER_FILE_DATA);
+
+            const expiryDateStr = expiryDate.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            return replyMarkdownButton(e, [
+                { key: 'a', values: ['##'] },
+                { key: 'b', values: [' 全服节日次数发放成功'] },
+                { key: 'c', values: [
+                    `\r> 发放数量：${times}次\r` +
+                    `> 过期时间：${expiryDateStr}\r` +
+                    `> 发放用户数：${successCount}人\r` +
+                    `> 总计发放：${successCount * times}次\r` +
+                    `> 发放范围：全部注册用户`
+                ] }
+            ], [
+                [
+                    { text: '查看总次数', callback: '查看总次数', clicked_text: '正在查看总次数' }
+                ]
+            ]);
+
+        } catch (error) {
+            logger.error(`[光遇身高查询] 节日次数发放失败: ${error}`);
+            return e.reply([
+                { key: 'a', values: ['##'] },
+                { key: 'b', values: [' 发放失败'] },
+                { key: 'c', values: ['\r> 请稍后重试'] }
+            ]);
         }
     }
 
