@@ -666,7 +666,7 @@ export class 光遇_身高查询 extends plugin {
 
         e.reply('正在查询，请耐心等待！', false, { recallMsg: 10 });
 
-        let URL = `${API_GUO_FU}?key=${KEY_1}&id=${SKY_UID}`;
+        let URL = `${API_GUO_JI}?key=${KEY_1}&id=${SKY_UID}`;
 
         const URL_DATA = await (await fetch(URL)).json();
         const CODE = URL_DATA['code'];
