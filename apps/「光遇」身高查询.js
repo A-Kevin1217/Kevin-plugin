@@ -922,7 +922,7 @@ export class 光遇_身高查询 extends plugin {
         }
 
         try {
-            const response = await fetch(`${API_GUO_JI}?key=${KEY_2}`);
+            const response = await fetch(`${API_GUO_FU_TIMES}?key=${KEY_2}`);
             const data = await response.json();
 
             if (data && 'ID剩余次数' in data) {
