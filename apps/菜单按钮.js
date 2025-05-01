@@ -30,8 +30,10 @@ export class MenuButton extends plugin {
             priority: 1,
             rule: [
                 { reg: /^[#\/]?(菜单)$/, fnc: 'menuButton' },
+                { reg: /^[#\/]?(游戏功能菜单)$/, fnc: '游戏功能菜单' },
                 { reg: /^[#\/]?(米哈游菜单)$/, fnc: '米哈游菜单' },
                 { reg: /^[#\/]?(TGC菜单)$/, fnc: 'TGC菜单' },
+                { reg: /^[#\/]?(王者荣耀功能)$/, fnc: '王者荣耀功能' },
                 { reg: /^[#\/]?(今日吃喝)$/, fnc: '今日吃喝' },
                 { reg: /^[#\/]?(小游戏)$/, fnc: '小游戏' },
                 { reg: /^[#\/]?(光遇功能)$/, fnc: '光遇功能' },
@@ -46,8 +48,10 @@ export class MenuButton extends plugin {
     }
 
     async menuButton(e) { return sendMenu(e, 'menuButton') }
+    async 游戏功能菜单(e) { return sendMenu(e, '游戏功能菜单') }
     async 米哈游菜单(e) { return sendMenu(e, '米哈游菜单') }
     async TGC菜单(e) { return sendMenu(e, 'TGC菜单') }
+    async 王者荣耀功能(e) { return sendMenu(e, '王者荣耀功能') }
     async 光遇功能(e) { return sendMenu(e, '光遇功能') }
     async BEFORE功能(e) { return sendMenu(e, 'BEFORE功能') }
     async 原神功能(e) { return sendMenu(e, '原神功能') }
