@@ -29,34 +29,37 @@ export class 赞助名单 extends plugin {
         {
           name: '主要开发',
           members: [
-            { person: '小丞', info: '功能开发主要人员', account: 'QQ1354903463', showAccount: true }
+            { person: '小丞', info: '功能开发主要人员', account: 'QQ：1354903463', showAccount: true }
           ]
         },
         {
           name: '技术支持',
           members: [
-            { person: '傅卿何', info: '提供大量技术支持', account: 'QQ3620060826', showAccount: false },
-            { person: '浅巷墨黎_', info: '提供部分技术支持', account: 'QQ2315823357', showAccount: false },
-            { person: 'ZY.霆生', info: '提供部分技术指导', account: 'QQ1918530969', showAccount: false },
-            { person: '为什么不玩原神', info: '提供部分技术支持', account: 'QQ2173302144', showAccount: false }
+            { person: '傅卿何', info: '提供大量技术支持', account: 'QQ：3620060826', showAccount: false },
+            { person: '浅巷墨黎_', info: '提供部分技术支持', account: 'QQ：2315823357', showAccount: false },
+            { person: 'ZY.霆生', info: '提供部分技术指导', account: 'QQ：1918530969', showAccount: false },
+            { person: '翅膀', info: '提供部分技术指导', account: 'QQ：2450785445', showAccount: false },
+            { person: 'Броня Зайчик', info: '提供部分技术指导', account: 'QQ：2644266329', showAccount: false },
+            { person: '为什么不玩原神', info: '提供部分技术支持', account: 'QQ：2173302144', showAccount: false }
 
           ]
         },
         {
           name: '赞助过我的人',
           members: [
-            { person: '霜遇', info: '赞助100元', account: 'QQ1417966938', showAccount: false },
-            { person: '奕酒离', info: '赞助521元', account: 'QQ1702049170', showAccount: false },
-            { person: 'VVthirteeh', info: '赞助666元', account: 'QQ2827805535', showAccount: false },
-            { person: '墨白', info: '赞助1000元', account: 'QQ3206487094', showAccount: false },
-            { person: '耀尘ˡᵒᵛᵉ', info: '赞助99元', account: 'QQ1246663835', showAccount: false },
-            { person: '池砚', info: '赞助100元', account: 'QQ1071806052', showAccount: false }
+            { person: '霜遇', info: '赞助¥100.00元', account: 'QQ：1417966938', showAccount: false },
+            { person: '奕酒离', info: '赞助¥52.10元', account: 'QQ：1702049170', showAccount: false },
+            { person: 'VVthirteeh', info: '赞助¥66.60元', account: 'QQ：2827805535', showAccount: false },
+            { person: '墨白', info: '赞助¥100.00元', account: 'QQ：3206487094', showAccount: false },
+            { person: '耀尘ˡᵒᵛᵉ', info: '赞助¥99.90元', account: 'QQ：1246663835', showAccount: false },
+            { person: '池砚', info: '赞助¥100.00元', account: 'QQ：1071806052', showAccount: false }
           ]
         },
         {
-          name: '提供图库',
+          name: '其他赞助',
           members: [
-            { person: '阿哈', info: '提供猫猫糕图库', account: 'QQ1700286611', showAccount: false }
+            { person: '阿哈', info: '提供猫猫糕图库 435 张', account: 'QQ：1700286611', showAccount: false },
+            { person: '奕酒离', info: '纯手工绘制橙子宠物系统小宠物', account: 'QQ：1702049170', showAccount: false }
           ]
         }
       ]
@@ -64,7 +67,7 @@ export class 赞助名单 extends plugin {
 
     function maskQQ(account) {
       // 只处理以QQ开头的账号，如 QQ1354903463
-      return account.replace(/(QQ\d{2,4})\d{4}(\d+)/, '$1****$2');
+      return account.replace(/(QQ：\d{2,3})\d{4}(\d+)/, '$1****$2');
     }
 
     const html = `
@@ -79,6 +82,8 @@ export class 赞助名单 extends plugin {
               padding: 60px;
               width: 1280px;
               margin: 0 auto;
+              position: relative;
+              min-height: 100vh;
             }
             .group {
               margin-bottom: 60px;
@@ -126,7 +131,7 @@ export class 赞助名单 extends plugin {
               <div class="group-list">
                 ${group.members.map(m => `
                   <div class="member-line">
-                    ${m.account ? `<img class="avatar" src="http://q.qlogo.cn/headimg_dl?dst_uin=${m.account.replace(/^QQ/, '')}&spec=640&img_type=jpg" />` : ''}
+                    ${m.account ? `<img class="avatar" src="http://q.qlogo.cn/headimg_dl?dst_uin=${m.account.replace(/^QQ：/, '')}&spec=640&img_type=jpg" />` : ''}
                     <span class="person">${m.person}</span>：
                     <span class="info">${m.info}</span>
                     ${m.account ? `<span class="account">${m.showAccount ? m.account : maskQQ(m.account)}</span>` : ''}
@@ -135,6 +140,11 @@ export class 赞助名单 extends plugin {
               </div>
             </div>
           `).join('')}
+          <div style="height: 80px;"></div>
+          <div style="position: absolute; left: 0; right: 0; bottom: 60px; text-align: center; width: 100%; font-size: 28px; color: #fff; text-shadow: 0 2px 8px #000a;">
+            <div>以上排名不分先后顺序</div>
+            <div style="margin-top: 8px; font-size: 24px; opacity: 0.85; -webkit-text-stroke: 0.3px black;">Created by 小丞 For 橙子BOT & Version 1.0</div>
+          </div>
         </body>
         </html>
         `
