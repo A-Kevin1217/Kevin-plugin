@@ -625,7 +625,7 @@ export class DemonRoulette extends plugin {
       const playerId = String(p.id).split(':').pop();
       return [
         { key: ['e', 'g'][index], values: [`![玩家 #25px #25px](https://q.qlogo.cn/qqapp/102059511/${playerId}/640`] },
-        { key: ['f', 'h'][index], values: [`)] (${p.hp}❤️)`] }
+        { key: ['f', 'h'][index], values: [`) (${p.hp}❤️)`] }
       ];
     }).flat();
 
@@ -640,7 +640,7 @@ export class DemonRoulette extends plugin {
     ], [
       [
         { text: '开枪', callback: '/开枪', clicked_text: '正在选择目标...' },
-        { text: '使用道具', input: '/道具', clicked_text: '正在选择道具' },
+        { text: '使用道具', input: '/使用道具', clicked_text: '正在选择道具' },
         {
           text: '查看道具',
           input: [
