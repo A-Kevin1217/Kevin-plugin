@@ -334,6 +334,7 @@ export class DemonRoulette extends plugin {
         if (session.turn >= session.chamber.length) {
           session.chamber = this.generateChamber();
           session.turn = 0;
+          session.currentPlayer = (session.currentPlayer + 1) % session.players.length;
         }
         // 重置当前玩家的道具使用状态和放大镜标记
         Object.values(currentPlayer.items).forEach(item => item.used = false);
@@ -361,6 +362,7 @@ export class DemonRoulette extends plugin {
       ]);
       session.chamber = this.generateChamber();
       session.turn = 0;
+      session.currentPlayer = (session.currentPlayer + 1) % session.players.length;
     }
 
     await this.nextTurn(e);
@@ -476,8 +478,6 @@ export class DemonRoulette extends plugin {
         if (session.turn >= session.chamber.length) {
           session.chamber = this.generateChamber();
           session.turn = 0;
-          // 切换到对方回合
-          session.currentPlayer = (session.currentPlayer + 1) % session.players.length;
           await replyMarkdownButton(e, [
             { key: 'a', values: ['#'] },
             { key: 'b', values: ['恶魔轮盘赌\r> 🔄 弹夹已更换\r'] },
