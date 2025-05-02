@@ -875,6 +875,8 @@ export class DemonRoulette extends plugin {
     const opponent = session.players.find(p => p.id !== e.user_id);
     const opponentId = String(opponent.id).split(':').pop();
 
+    const playerIds = session.players.map(p => p.id);
+
     await replyMarkdownButton(e, [
       { key: 'a', values: ['#'] },
       { key: 'b', values: ['恶魔轮盘赌\r> ⚠️ 结束请求\r'] },
