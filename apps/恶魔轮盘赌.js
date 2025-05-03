@@ -191,12 +191,16 @@ export class DemonRoulette extends plugin {
     if (session.players.length === 2) {
       session.status = 'playing';
       session.currentPlayer = 0;
+      // 统计弹匣实弹和空弹数量
+      const live = session.chamber.filter(x => x).length;
+      const empty = session.chamber.length - live;
       await replyMarkdownButton(e, [
         { key: 'a', values: ['#'] },
         { key: 'b', values: ['恶魔轮盘赌\r> 游戏人数已满，游戏开始\r'] },
         { key: 'c', values: [`![${e.sender.card || e.sender.nickname} #25px #25px](https://q.qlogo.cn/qqapp/102059511/${userIdPart}/640`] },
         { key: 'd', values: [') 已加入轮盘赌！\r\r当前玩家：'] },
-        ...playerAvatars
+        ...playerAvatars,
+        { key: 'i', values: [`\r本轮弹匣：${live}发实弹，${empty}发空弹`] }
       ]);
       await this.nextTurn(e);
       return;
@@ -359,13 +363,17 @@ export class DemonRoulette extends plugin {
 
     session.turn += 1;
     if (session.turn >= session.chamber.length) {
+      // 统计新弹匣实弹和空弹数量
+      session.chamber = this.generateChamber();
+      const live = session.chamber.filter(x => x).length;
+      const empty = session.chamber.length - live;
+      session.turn = 0;
       await replyMarkdownButton(e, [
         { key: 'a', values: ['#'] },
-        { key: 'b', values: ['恶魔轮盘赌\r> 🔄 重新装填\r'] },
-        { key: 'c', values: ['弹匣已空，重新装填...'] }
+        { key: 'b', values: ['恶魔轮盘赌\r> 🔄 弹夹已更换\r'] },
+        { key: 'c', values: ['弹夹已更换，继续你的回合！'] },
+        { key: 'd', values: [`\r新弹匣：${live}发实弹，${empty}发空弹`] }
       ]);
-      session.chamber = this.generateChamber();
-      session.turn = 0;
       // 新增：根据规则决定是否切换回合
       if (isSelfLive) {
         session.currentPlayer = (session.currentPlayer + 1) % session.players.length;
@@ -484,11 +492,14 @@ export class DemonRoulette extends plugin {
         // 如果是最后一发子弹
         if (session.turn >= session.chamber.length) {
           session.chamber = this.generateChamber();
+          const live = session.chamber.filter(x => x).length;
+          const empty = session.chamber.length - live;
           session.turn = 0;
           await replyMarkdownButton(e, [
             { key: 'a', values: ['#'] },
             { key: 'b', values: ['恶魔轮盘赌\r> 🔄 弹夹已更换\r'] },
-            { key: 'c', values: ['弹夹已更换，继续你的回合！'] }
+            { key: 'c', values: ['弹夹已更换，继续你的回合！'] },
+            { key: 'd', values: [`\r新弹匣：${live}发实弹，${empty}发空弹`] }
           ]);
         }
         // 继续当前回合
