@@ -259,6 +259,11 @@ export class DemonRoulette extends plugin {
     }
 
     const isLive = session.chamber[session.turn];
+    // 新增：记录本次射击是否打自己空弹或实弹
+    let isSelf = targetType === '自己';
+    let isSelfEmpty = isSelf && !isLive;
+    let isSelfLive = isSelf && isLive;
+
     if (isLive) {
       let damage = 1;
       if (session.damageBoost) {
@@ -334,7 +339,6 @@ export class DemonRoulette extends plugin {
         if (session.turn >= session.chamber.length) {
           session.chamber = this.generateChamber();
           session.turn = 0;
-          session.currentPlayer = (session.currentPlayer + 1) % session.players.length;
         }
         // 重置当前玩家的道具使用状态和放大镜标记
         Object.values(currentPlayer.items).forEach(item => item.used = false);
@@ -362,7 +366,10 @@ export class DemonRoulette extends plugin {
       ]);
       session.chamber = this.generateChamber();
       session.turn = 0;
-      session.currentPlayer = (session.currentPlayer + 1) % session.players.length;
+      // 新增：根据规则决定是否切换回合
+      if (isSelfLive) {
+        session.currentPlayer = (session.currentPlayer + 1) % session.players.length;
+      }
     }
 
     await this.nextTurn(e);
@@ -481,13 +488,11 @@ export class DemonRoulette extends plugin {
           await replyMarkdownButton(e, [
             { key: 'a', values: ['#'] },
             { key: 'b', values: ['恶魔轮盘赌\r> 🔄 弹夹已更换\r'] },
-            { key: 'c', values: ['轮到对方先手！'] }
+            { key: 'c', values: ['弹夹已更换，继续你的回合！'] }
           ]);
-          await this.nextTurn(e);
-        } else {
-          // 继续当前回合
-          await this.showShootTargets(e);
         }
+        // 继续当前回合
+        await this.showShootTargets(e);
         return;
       case '逆转器':
         // 反转当前子弹类型
