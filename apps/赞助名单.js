@@ -42,26 +42,26 @@ export class 赞助名单 extends plugin {
       console.warn(`File not found: ${filePath}. A new file will be created.`)
     }
 
-    if (zzmdData.md5 === currentMD5) {
-      // 如果 MD5 相同，直接使用缓存的数据
-      const { imageUrl, pxValue } = zzmdData
-      // let md = segment.markdown(`![赞助 #${pxValue}](${imageUrl})\n`)
-      await e.reply([segment.image(imageUrl),segment.button([
-        {
-          text: '赞助橙子',
-          link: 'https://afdian.com/a/kevin1217',
-          style: 4,
-          clicked_text: '正在跳转'
-        },
-        {
-          text: '菜单',
-          callback: '/菜单',
-          style: 4,
-          clicked_text: '正在打开菜单'
-        }
-      ])
-    ])
-      return
+    if (zzmdData.md5 === currentMD5 && zzmdData.imageUrl && zzmdData.pxValue) {
+      const { imageUrl } = zzmdData;
+      await e.reply([
+        segment.image(imageUrl),
+        segment.button([
+          {
+            text: '赞助橙子',
+            link: 'https://afdian.com/a/kevin1217',
+            style: 4,
+            clicked_text: '正在跳转'
+          },
+          {
+            text: '菜单',
+            callback: '/菜单',
+            style: 4,
+            clicked_text: '正在打开菜单'
+          }
+        ])
+      ]);
+      return;
     }
 
     const data = {
