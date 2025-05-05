@@ -45,8 +45,22 @@ export class 赞助名单 extends plugin {
     if (zzmdData.md5 === currentMD5) {
       // 如果 MD5 相同，直接使用缓存的数据
       const { imageUrl, pxValue } = zzmdData
-      let md = segment.markdown(`![赞助 #${pxValue}](${imageUrl})\n`)
-      await e.reply([md])
+      // let md = segment.markdown(`![赞助 #${pxValue}](${imageUrl})\n`)
+      await e.reply([segment.image(imageUrl),segment.button([
+        {
+          text: '赞助橙子',
+          link: 'https://afdian.com/a/kevin1217',
+          style: 4,
+          clicked_text: '正在跳转'
+        },
+        {
+          text: '菜单',
+          callback: '/菜单',
+          style: 4,
+          clicked_text: '正在打开菜单'
+        }
+      ])
+    ])
       return
     }
 
@@ -191,7 +205,21 @@ export class 赞助名单 extends plugin {
     await browser.close();
     
     // 直接发送图片Buffer
-    await e.reply(segment.image(image));
+    await e.reply([segment.image(image),segment.button([
+      {
+        text: '赞助橙子',
+        link: 'https://afdian.com/a/kevin1217',
+        style: 4,
+        clicked_text: '正在跳转'
+      },
+      {
+        text: '菜单',
+        callback: '/菜单',
+        style: 4,
+        clicked_text: '正在打开菜单'
+      }
+    ])
+  ]);
 
     // 保存当前 MD5 和生成的图片信息
     const imageUrl = ''; // 这里可以设置生成的图片 URL
