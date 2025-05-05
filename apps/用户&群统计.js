@@ -46,6 +46,11 @@ export class example extends plugin {
                     reg: /^[#/]?验证数据迁移$/,
                     fnc: 'verifyMigration',
                     permission: 'master'
+                },
+                {
+                    reg: /^[#/]?初始化数据库$/,
+                    fnc: 'initDatabase',
+                    permission: 'master'
                 }
             ]
         });
@@ -250,6 +255,28 @@ export class example extends plugin {
         } catch (error) {
             await e.reply('验证数据迁移时出错: ' + error.message);
             console.error('验证数据迁移失败:', error);
+        }
+    }
+
+    async initDatabase(e) {
+        try {
+            await e.reply('开始初始化数据库...');
+            // 创建 bot_users 表
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS bot_users (
+                    user_id VARCHAR(64) PRIMARY KEY
+                )
+            `);
+            // 创建 bot_groups 表
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS bot_groups (
+                    group_id VARCHAR(64) PRIMARY KEY
+                )
+            `);
+            await e.reply('数据库初始化完成！');
+        } catch (error) {
+            await e.reply('数据库初始化失败: ' + error.message);
+            console.error('数据库初始化失败:', error);
         }
     }
 }
