@@ -28,6 +28,16 @@ export class example extends plugin {
                 {
                     reg: /^[#/]?查看用户数量$/,
                     fnc: 'getUserCount'
+                },
+                {
+                    reg: /^[#/]?迁移数据到数据库$/,
+                    fnc: 'migrateData',
+                    permission: 'master'
+                },
+                {
+                    reg: /^[#/]?验证数据迁移$/,
+                    fnc: 'verifyMigration',
+                    permission: 'master'
                 }
             ]
         });
@@ -134,5 +144,103 @@ export class example extends plugin {
         }
         await new Promise(resolve => setTimeout(resolve, 1000));
         return false;
+    }
+
+    async migrateData(e) {
+        try {
+            await e.reply('开始迁移数据到数据库...');
+
+            if (!fs.existsSync(this.dataDir)) {
+                await e.reply('数据目录不存在，无需迁移');
+                return;
+            }
+
+            let userCount = 0;
+            let groupCount = 0;
+
+            if (fs.existsSync(this.userDataFilePath)) {
+                const userData = JSON.parse(fs.readFileSync(this.userDataFilePath, 'utf8'));
+                if (userData && userData.length > 0) {
+                    for (const userId of userData) {
+                        try {
+                            const [result] = await pool.query(
+                                'INSERT IGNORE INTO bot_users (user_id) VALUES (?)',
+                                [userId]
+                            );
+                            if (result.affectedRows > 0) userCount++;
+                        } catch (error) {
+                            console.error(`迁移用户 ${userId} 失败:`, error);
+                        }
+                    }
+                }
+            }
+
+            if (fs.existsSync(this.groupDataFilePath)) {
+                const groupData = JSON.parse(fs.readFileSync(this.groupDataFilePath, 'utf8'));
+                if (groupData && groupData.length > 0) {
+                    for (const groupId of groupData) {
+                        try {
+                            const [result] = await pool.query(
+                                'INSERT IGNORE INTO bot_groups (group_id) VALUES (?)',
+                                [groupId]
+                            );
+                            if (result.affectedRows > 0) groupCount++;
+                        } catch (error) {
+                            console.error(`迁移群组 ${groupId} 失败:`, error);
+                        }
+                    }
+                }
+            }
+
+            await e.reply([
+                '数据迁移完成！',
+                `迁移用户数: ${userCount}`,
+                `迁移群组数: ${groupCount}`,
+                '可以使用"验证数据迁移"命令检查数据一致性'
+            ]);
+        } catch (error) {
+            await e.reply('数据迁移失败: ' + error.message);
+            console.error('数据迁移失败:', error);
+        }
+    }
+
+    async verifyMigration(e) {
+        try {
+            await e.reply('开始验证数据迁移...');
+
+            let fileUserCount = 0;
+            let fileGroupCount = 0;
+            let dbUserCount = 0;
+            let dbGroupCount = 0;
+
+            if (fs.existsSync(this.userDataFilePath)) {
+                const userData = JSON.parse(fs.readFileSync(this.userDataFilePath, 'utf8'));
+                fileUserCount = userData ? userData.length : 0;
+            }
+
+            if (fs.existsSync(this.groupDataFilePath)) {
+                const groupData = JSON.parse(fs.readFileSync(this.groupDataFilePath, 'utf8'));
+                fileGroupCount = groupData ? groupData.length : 0;
+            }
+
+            const [userRows] = await pool.query('SELECT COUNT(*) as count FROM bot_users');
+            dbUserCount = userRows[0].count;
+
+            const [groupRows] = await pool.query('SELECT COUNT(*) as count FROM bot_groups');
+            dbGroupCount = groupRows[0].count;
+
+            await e.reply([
+                '数据验证结果:',
+                `文件用户数: ${fileUserCount}`,
+                `数据库用户数: ${dbUserCount}`,
+                `用户数据状态: ${fileUserCount === dbUserCount ? '✓ 一致' : '✗ 不一致'}`,
+                `文件群组数: ${fileGroupCount}`,
+                `数据库群组数: ${dbGroupCount}`,
+                `群组数据状态: ${fileGroupCount === dbGroupCount ? '✓ 一致' : '✗ 不一致'}`
+            ]);
+        } catch (error) {
+            await e.reply('验证数据迁移时出错: ' + error.message);
+            console.error('验证数据迁移失败:', error);
+        }
     }
 }
