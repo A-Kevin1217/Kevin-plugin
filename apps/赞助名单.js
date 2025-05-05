@@ -3,7 +3,7 @@ import crypto from 'crypto'
 import fs from 'fs'
 
 function getPluginMD5() {
-  const filePath = new URL(import.meta.url).pathname; // 获取当前文件的路径
+  const filePath = decodeURIComponent(new URL(import.meta.url).pathname); // 获取当前文件的路径
   try {
     const code = fs.readFileSync(filePath, 'utf-8') // 获取当前文件的内容
     return crypto.createHash('md5').update(code).digest('hex')
