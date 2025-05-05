@@ -1,4 +1,11 @@
 import puppeteer from 'puppeteer'
+import crypto from 'crypto'
+import fs from 'fs'
+
+function getPluginMD5() {
+  const code = fs.readFileSync(__filename, 'utf-8') // 获取当前文件的内容
+  return crypto.createHash('md5').update(code).digest('hex')
+}
 
 export class 赞助名单 extends plugin {
   constructor() {
@@ -18,6 +25,23 @@ export class 赞助名单 extends plugin {
 
   async 赞助名单(e) {
     e.reply('正在生成最新赞助名单...', false, { recallMsg: 10 })
+    const currentMD5 = getPluginMD5() // 计算当前文件的 MD5
+    const filePath = `${process.cwd()}/data/zzmd.json`
+    let zzmdData = {}
+
+    if (fs.existsSync(filePath)) {
+      const content = fs.readFileSync(filePath, 'utf-8')
+      zzmdData = JSON.parse(content)
+    }
+
+    if (zzmdData.md5 === currentMD5) {
+      // 如果 MD5 相同，直接使用缓存的数据
+      const { imageUrl, pxValue } = zzmdData
+      let md = segment.markdown(`![赞助 #${pxValue}](${imageUrl})\n`)
+      await e.reply([md])
+      return
+    }
+
     const data = {
       bg: 'https://sky.res.netease.com/pc/gw/20221215171426/img/bg_0040d9d.jpg',
       colors: {
@@ -41,7 +65,6 @@ export class 赞助名单 extends plugin {
             { person: '翅膀', info: '提供部分技术指导', account: 'QQ：2450785445', showAccount: false },
             { person: 'Броня Зайчик', info: '提供部分技术指导', account: 'QQ：2644266329', showAccount: false },
             { person: '为什么不玩原神', info: '提供部分技术支持', account: 'QQ：2173302144', showAccount: false }
-
           ]
         },
         {
@@ -143,36 +166,27 @@ export class 赞助名单 extends plugin {
           <div style="height: 80px;"></div>
           <div style="position: absolute; left: 0; right: 0; bottom: 60px; text-align: center; width: 100%; font-size: 28px; color: #fff; text-shadow: 0 2px 8px #000a;">
             <div>以上排名不分先后顺序</div>
-            <div style="margin-top: 8px; font-size: 24px; opacity: 0.85; -webkit-text-stroke: 0.3px black;">Created by 小丞 For 橙子BOT & Version 1.0</div>
           </div>
         </body>
         </html>
-        `
+    `;
 
     // puppeteer渲染html为图片并发送
     const browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox']
-    })
-    const page = await browser.newPage()
-    await page.setViewport({ width: 1400, height: 900, deviceScaleFactor: 1.2 })
-    await page.setContent(html, { waitUntil: 'networkidle0' })
-    const image = await page.screenshot({ type: 'png', fullPage: true })
-    await browser.close()
+    });
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1400, height: 900, deviceScaleFactor: 1.2 });
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+    const image = await page.screenshot({ type: 'png', fullPage: true });
+    await browser.close();
+    
     // 直接发送图片Buffer
-    await e.reply([segment.image(image), segment.button([
-      {
-        text: '赞助橙子',
-        link: 'https://afdian.com/a/kevin1217',
-        style: 4,
-        clicked_text: '正在跳转'
-      },
-      {
-        text: '菜单',
-        callback: '/菜单',
-        style: 4,
-        clicked_text: '正在打开菜单'
-      }
-    ])
-    ])
+    await e.reply(segment.image(image));
+
+    // 保存当前 MD5 和生成的图片信息
+    const imageUrl = ''; // 这里可以设置生成的图片 URL
+    const pxValue = ''; // 这里可以设置图片的尺寸
+    fs.writeFileSync(filePath, JSON.stringify({ md5: currentMD5, imageUrl, pxValue }, null, 2));
   }
 }
