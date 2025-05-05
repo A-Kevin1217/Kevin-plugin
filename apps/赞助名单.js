@@ -3,8 +3,14 @@ import crypto from 'crypto'
 import fs from 'fs'
 
 function getPluginMD5() {
-  const code = fs.readFileSync(new URL(import.meta.url).pathname, 'utf-8') // 获取当前文件的内容
-  return crypto.createHash('md5').update(code).digest('hex')
+  const filePath = new URL(import.meta.url).pathname; // 获取当前文件的路径
+  try {
+    const code = fs.readFileSync(filePath, 'utf-8') // 获取当前文件的内容
+    return crypto.createHash('md5').update(code).digest('hex')
+  } catch (error) {
+    console.error(`Error reading file at ${filePath}:`, error)
+    throw error; // 重新抛出错误以便上层处理
+  }
 }
 
 export class 赞助名单 extends plugin {
