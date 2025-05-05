@@ -47,6 +47,7 @@ export class example extends plugin {
         this.groupDataFilePath = path.join(dataDir, 'groupData.json');
         this.userData = new Set(this.loadData(this.userDataFilePath));
         this.groupData = new Set(this.loadData(this.groupDataFilePath));
+        this.dataDir = dataDir;
     }
 
     getGroupId(e) {
