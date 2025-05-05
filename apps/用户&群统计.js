@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { isQQBot, replyMarkdownButton } from '../components/CommonReplyUtil.js'
+import mysql from 'mysql2/promise';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -12,6 +13,13 @@ const dataDir = path.join(process.cwd(), 'plugins/Kevin-plugin/data');
 if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
 }
+
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'kevin',
+    password: '123456',
+    database: 'kevin_bot'
+});
 
 export class example extends plugin {
     constructor() {
