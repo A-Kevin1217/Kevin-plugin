@@ -61,6 +61,7 @@ export class 赞助名单 extends plugin {
           members: [
             { person: '傅卿何', info: '提供大量技术支持', account: 'QQ：3620060826', showAccount: false },
             { person: '浅巷墨黎_', info: '提供部分技术支持', account: 'QQ：2315823357', showAccount: false },
+            { person: '冷曦', info: '功能开发主要人员', account: 'QQ：2218872014', showAccount: true },
             { person: 'ZY.霆生', info: '提供部分技术指导', account: 'QQ：1918530969', showAccount: false },
             { person: '翅膀', info: '提供部分技术指导', account: 'QQ：2450785445', showAccount: false },
             { person: 'Броня Зайчик', info: '提供部分技术指导', account: 'QQ：2644266329', showAccount: false },
