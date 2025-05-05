@@ -38,6 +38,8 @@ export class 赞助名单 extends plugin {
     if (fs.existsSync(filePath)) {
       const content = fs.readFileSync(filePath, 'utf-8')
       zzmdData = JSON.parse(content)
+    } else {
+      console.warn(`File not found: ${filePath}. A new file will be created.`)
     }
 
     if (zzmdData.md5 === currentMD5) {
