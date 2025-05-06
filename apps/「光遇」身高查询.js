@@ -765,6 +765,9 @@ export class 光遇_身高查询 extends plugin {
             CODE_FILE_DATA[code] = times
         }
 
+        CODE_FILE_DATA[code] = 0
+        await SAVE(GFCODE_FILE, CODE_FILE_DATA)
+        await SAVE(USER_FILE, USER_FILE_DATA)
         return replyMarkdownButton(e, [
             { key: 'a', values: [`##`] },
             { key: 'b', values: [` 生成成功`] },
@@ -776,7 +779,6 @@ export class 光遇_身高查询 extends plugin {
                 { text: '生成十次', callback: `生成国服次数*10` },
             ]
         ]);
-        await SAVE(GFCODE_FILE, CODE_FILE_DATA)
     }
 
     async USE_GFCDKEY(e) {
@@ -821,6 +823,9 @@ export class 光遇_身高查询 extends plugin {
             }
         }
 
+        CODE_FILE_DATA[CDKEY] = 0
+        await SAVE(GFCODE_FILE, CODE_FILE_DATA)
+        await SAVE(USER_FILE, USER_FILE_DATA)
         return replyMarkdownButton(e, [
             { key: 'a', values: [`##`] },
             { key: 'b', values: [` 兑换成功！\r`] },
@@ -830,9 +835,6 @@ export class 光遇_身高查询 extends plugin {
                 { text: '查询国服身高', callback: '国服身高查询' },
             ]
         ]);
-        CODE_FILE_DATA[CDKEY] = 0
-        await SAVE(GFCODE_FILE, CODE_FILE_DATA)
-        await SAVE(USER_FILE, USER_FILE_DATA)
     }
 
     async OPEN_GROUP(e) {
