@@ -50,7 +50,7 @@ export class example extends plugin {
         // 直接查询数据库
         const [rows] = await pool.query('SELECT COUNT(*) as count FROM bot_users');
         const userCount = rows[0].count;
-        const imagesDir = path.join(__dirname, './usercount');
+        const imagesDir = '../resources/img/usercount';
         const countString = userCount.toString().padStart(5, '0');
         let msg = countString.split('').map(num => {
             const imagePath = path.join(imagesDir, `${num}.gif`);
