@@ -59,7 +59,11 @@ export class example extends plugin {
         console.log(`图片消息数组: ${msg}`);
         const [groupRows] = await pool.query('SELECT COUNT(*) as count FROM bot_groups');
         const groupCount = groupRows[0].count;
-        await e.reply(`当前橙子BOT用户数量: ${userCount}\n当前橙子BOT群组总数: ${groupCount}`);
+        await e.reply([
+            `\n📊 橙子BOT统计信息：`,
+            `👤 用户总数：${userCount}`,
+            `👥 群组总数：${groupCount}`
+        ].join('\n'));
     }
 
     async handleMessage(e) {
