@@ -60,7 +60,7 @@ export class example extends plugin {
         const [groupRows] = await pool.query('SELECT COUNT(*) as count FROM bot_groups');
         const groupCount = groupRows[0].count;
         await e.reply([
-            `\n📊 橙子BOT统计信息：`,
+            `📊 橙子BOT统计信息：`,
             `👤 用户总数：${userCount}`,
             `👥 群组总数：${groupCount}`
         ].join('\n'));
