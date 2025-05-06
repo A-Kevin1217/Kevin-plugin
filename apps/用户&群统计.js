@@ -57,11 +57,7 @@ export class example extends plugin {
             return segment.image(imagePath);
         });
         console.log(`图片消息数组: ${msg}`);
-        if (isQQBot(e)) {
-            await e.reply(msg);
-        } else {
-            await e.reply(`当前橙子BOT用户数量: ${userCount}\n如果需要查看图片形式请艾特橙子BOT再次发送指令查看`);
-        }
+        await e.reply(`当前橙子BOT用户数量: ${userCount}`);
     }
 
     async handleMessage(e) {
