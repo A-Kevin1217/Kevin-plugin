@@ -238,6 +238,8 @@ export class robot_data extends plugin {
       }
       let avgDAU = dauCount ? Math.round(totalDAU / dauCount) : 0;
 
+      console.log('msg_data天数:', msgDataArr.length)
+
       return replyMarkdownButton(e, [
         { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
         { key: 'b', values: ['#'] },
