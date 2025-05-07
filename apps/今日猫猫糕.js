@@ -160,7 +160,7 @@ export class 猫猫糕 extends plugin {
             { key: 'a', values: [`${idx}号猫猫糕前来报道啦～\r`] },
             { key: 'b', values: [`![猫猫糕${sizeStr}]`] },
             { key: 'c', values: [`(${imgPath})`] },
-            { key: 'd', values: [`\r\r> ${cuteText}\r(部分猫猫糕由于格式问题，可以联系主人修复呀)`] }
+            { key: 'd', values: [`\r\r> ${cuteText}\r(部分猫猫糕无法显示，可以联系主人修复呀)`] }
         ]
         let btn = [
             [
