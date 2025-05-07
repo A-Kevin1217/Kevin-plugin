@@ -33,6 +33,7 @@ export class 赞助名单 extends plugin {
     e.reply('正在生成最新赞助名单...', false, { recallMsg: 10 })
     const currentMD5 = getPluginMD5() // 计算当前文件的 MD5
     const filePath = `${process.cwd()}/data/zzmd.json`
+    const imagePath = `${process.cwd()}/data/zzmd.png`
     let zzmdData = {}
 
     if (fs.existsSync(filePath)) {
@@ -42,10 +43,9 @@ export class 赞助名单 extends plugin {
       console.warn(`File not found: ${filePath}. A new file will be created.`)
     }
 
-    if (zzmdData.md5 === currentMD5 && zzmdData.imageUrl && zzmdData.pxValue) {
-      const { imageUrl } = zzmdData;
+    if (zzmdData.md5 === currentMD5 && fs.existsSync(zzmdData.imageUrl)) {
       await e.reply([
-        segment.image(imageUrl),
+        segment.image(fs.readFileSync(zzmdData.imageUrl)),
         segment.button([
           {
             text: '赞助橙子',
@@ -60,7 +60,7 @@ export class 赞助名单 extends plugin {
             clicked_text: '正在打开菜单'
           }
         ])
-      ]);
+      ])
       return;
     }
 
@@ -194,7 +194,7 @@ export class 赞助名单 extends plugin {
         </html>
     `;
 
-    // puppeteer渲染html为图片并发送
+    // puppeteer渲染html为图片并保存到本地
     const browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
@@ -203,27 +203,29 @@ export class 赞助名单 extends plugin {
     await page.setContent(html, { waitUntil: 'networkidle0' });
     const image = await page.screenshot({ type: 'png', fullPage: true });
     await browser.close();
-    
-    // 直接发送图片Buffer
-    await e.reply([segment.image(image),segment.button([
-      {
-        text: '赞助橙子',
-        link: 'https://afdian.com/a/kevin1217',
-        style: 4,
-        clicked_text: '正在跳转'
-      },
-      {
-        text: '菜单',
-        callback: '/菜单',
-        style: 4,
-        clicked_text: '正在打开菜单'
-      }
-    ])
-  ]);
 
-    // 保存当前 MD5 和生成的图片信息
-    const imageUrl = ''; // 这里可以设置生成的图片 URL
-    const pxValue = ''; // 这里可以设置图片的尺寸
-    fs.writeFileSync(filePath, JSON.stringify({ md5: currentMD5, imageUrl, pxValue }, null, 2));
+    // 保存图片到本地
+    fs.writeFileSync(imagePath, image);
+
+    // 保存当前 MD5 和图片路径到 zzmd.json
+    fs.writeFileSync(filePath, JSON.stringify({ md5: currentMD5, imageUrl: imagePath }, null, 2));
+
+    await e.reply([
+      segment.image(image),
+      segment.button([
+        {
+          text: '赞助橙子',
+          link: 'https://afdian.com/a/kevin1217',
+          style: 4,
+          clicked_text: '正在跳转'
+        },
+        {
+          text: '菜单',
+          callback: '/菜单',
+          style: 4,
+          clicked_text: '正在打开菜单'
+        }
+      ])
+    ]);
   }
 }
