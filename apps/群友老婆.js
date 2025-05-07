@@ -1,5 +1,5 @@
-import mysql from'mysql2';
-import { createPool } from'mysql2/promise';
+import mysql from 'mysql2';
+import { createPool } from 'mysql2/promise';
 import { replyMarkdownButton } from '../components/CommonReplyUtil.js'
 
 const pool = createPool({
@@ -44,8 +44,9 @@ function buildReplyParamsAndButtons(userId, result1, imgUrl, atMode = false, noM
         ],
         [
             { text: '不@对方', callback: '群友老婆-@', clicked_text: '不@对方' },
+            { text: '离婚', callback: '离婚', clicked_text: '离婚' },
             { text: '📖今日运势', callback: '/今日运势', clicked_text: '正在获取今日运势' }
-            
+
         ]
     ];
     return { params, buttons };
@@ -139,7 +140,7 @@ export class example extends plugin {
             const [results] = await pool.query(sql, [groupId, userId, userId]);
             if (results && results.length > 0) {
                 const result = results[0];
-                return result.userid === userId? result.wifeid : result.userid;
+                return result.userid === userId ? result.wifeid : result.userid;
             }
             return null;
         } catch (e) {
@@ -352,9 +353,6 @@ export class example extends plugin {
                 let buttons = [
                     [
                         { text: '💞群友老婆', callback: '群友老婆', clicked_text: '正在获取群友老婆' },
-                        { text: '不@对方', callback: '群友老婆-@', clicked_text: '不@对方' }
-                    ],
-                    [
                         { text: '🐾猫猫糕', callback: '/今日猫猫糕', clicked_text: '正在获取猫猫糕' }
                     ]
                 ];
@@ -371,9 +369,6 @@ export class example extends plugin {
             let buttons = [
                 [
                     { text: '💞群友老婆', callback: '群友老婆', clicked_text: '正在获取群友老婆' },
-                    { text: '不@对方', callback: '群友老婆-@', clicked_text: '不@对方' }
-                ],
-                [
                     { text: '🐾猫猫糕', callback: '/今日猫猫糕', clicked_text: '正在获取猫猫糕' }
                 ]
             ];
