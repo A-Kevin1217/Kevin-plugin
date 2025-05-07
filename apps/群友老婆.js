@@ -90,7 +90,7 @@ export class example extends plugin {
                 if (result) {
                     logger.info(`User data found: ${result}`);
                     let result1 = result.slice(11);
-                    let newUrlReplaced = `https://q.qlogo.cn/qqapp/102134274/${result1}/640?${Math.floor(10000000 + Math.random() * 90000000)}`;
+                    let newUrlReplaced = `https://q.qlogo.cn/qqapp/102059511/${result1}/640?${Math.floor(10000000 + Math.random() * 90000000)}`;
                     let atMode = e.raw_message.endsWith('-@');
                     let { params, buttons } = buildReplyParamsAndButtons(userId, result1, newUrlReplaced, atMode);
                     await replyMarkdownButton(e, params, buttons);
@@ -107,7 +107,7 @@ export class example extends plugin {
                 const user = randomWife.user_id;
                 await this.insertDataToTables(e, userId, user);
                 let replacement = user.slice(11);
-                let newUrlReplaced = `https://q.qlogo.cn/qqapp/102134274/${replacement}/640?${Math.floor(10000000 + Math.random() * 90000000)}`;
+                let newUrlReplaced = `https://q.qlogo.cn/qqapp/102059511/${replacement}/640?${Math.floor(10000000 + Math.random() * 90000000)}`;
                 let atMode = e.raw_message.endsWith('-@');
                 let { params, buttons } = buildReplyParamsAndButtons(userId, replacement, newUrlReplaced, atMode);
                 await replyMarkdownButton(e, params, buttons);

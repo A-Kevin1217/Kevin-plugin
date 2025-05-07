@@ -189,7 +189,7 @@ export class zifuhua extends plugin {
                 } else {
                     targetId = row.userid;
                 }
-                const qqAppId = "102134274";
+                const qqAppId = "102059511";
                 const idPart = targetId.substring(11);
                 const fixedImageUrl = `https://q.qlogo.cn/qqapp/${qqAppId}/${idPart}/640`;
 
