@@ -88,7 +88,7 @@ export class robot_data extends plugin {
               else return '未知'
             })(data.appType)}`]
           },
-          { key: 'g', values: [`\r## AppId：${data.appId}`] }
+          { key: 'g', values: [`\rAppId：${data.appId}`] }
         ], commonButtons)
       }
       i++;
