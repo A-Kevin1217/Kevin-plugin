@@ -30,7 +30,7 @@ export class 赞助名单 extends plugin {
   }
 
   async 赞助名单(e) {
-    e.reply('正在生成最新赞助名单...', false, { recallMsg: 10 })
+    await e.reply('正在生成最新赞助名单...', false, { recallMsg: 10 })
     const currentMD5 = getPluginMD5() // 计算当前文件的 MD5
     const filePath = `${process.cwd()}/data/zzmd.json`
     const imagePath = `${process.cwd()}/data/zzmd.png`
