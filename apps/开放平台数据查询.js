@@ -49,7 +49,7 @@ export class robot_data extends plugin {
       { key: 'c', values: ['QQ开发平台管理端登录'] },
       { key: 'd', values: [`\r> 登录具有时效性，请尽快登录\r\r`] },
       { key: 'e', values: [`***`] },
-      { key: 'f', values: [`\r## 当你选择登录，代表你已经同意将数据托管给橙子BOT。`] }
+      { key: 'f', values: [`\r> 当你选择登录，代表你已经同意将数据托管给橙子BOT。`] }
     ];
     let buttonArr = [
       [
@@ -82,7 +82,7 @@ export class robot_data extends plugin {
           { key: 'd', values: [`\r> ${data.uin}\r\r`] },
           { key: 'e', values: [`***`] },
           {
-            key: 'f', values: [`\r## 登录类型：${((appType) => {
+            key: 'f', values: [`\r> 登录类型：${((appType) => {
               if (appType == "0") return '小程序'
               else if (appType == "2") return 'QQ机器人'
               else return '未知'
@@ -228,6 +228,16 @@ export class robot_data extends plugin {
       let day2 = formatDayData(data1.data.msg_data, data2.data.group_data, data3.data.friend_data, 1)
       let day3 = formatDayData(data1.data.msg_data, data2.data.group_data, data3.data.friend_data, 2)
 
+      // 计算月均DAU（月平均上行消息人数）
+      let msgDataArr = data1.data.msg_data || [];
+      let totalDAU = 0, dauCount = 0;
+      for (let item of msgDataArr) {
+        let val = Number(item['上行消息人数'] || 0);
+        totalDAU += val;
+        dauCount++;
+      }
+      let avgDAU = dauCount ? Math.round(totalDAU / dauCount) : 0;
+
       return replyMarkdownButton(e, [
         { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
         { key: 'b', values: ['#'] },
@@ -237,7 +247,8 @@ export class robot_data extends plugin {
         { key: 'f', values: ['\r\r``'] },
         { key: 'g', values: [`\`\r${day1}\r\r——————`] },
         { key: 'h', values: [`\r${day2}\r\r——————\r${day3}\`\``] },
-        { key: 'i', values: ['`'] }
+        { key: 'i', values: ['`'] },
+        { key: 'j', values: [`\r> 月均DAU：${avgDAU}`] }
       ], commonButtons)
     } catch (e) {
       console.error('Error in get_botdata:', e);
