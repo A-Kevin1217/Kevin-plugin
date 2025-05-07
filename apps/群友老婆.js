@@ -1,6 +1,6 @@
 import mysql from'mysql2';
 import { createPool } from'mysql2/promise';
-import { replyMarkdownButton } from '../Kevin-plugin/components/CommonReplyUtil.js'
+import { replyMarkdownButton } from '../components/CommonReplyUtil.js'
 
 const pool = createPool({
     host: 'localhost',

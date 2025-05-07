@@ -1,10 +1,8 @@
 import axios from "axios";
 import _ from "lodash";
-import { segment } from "oicq";
 import mysql from "mysql2/promise";
 import { tuchuang } from './tool.js'
-import { tool } from "./tool.js";
-import { replyMarkdownButton } from '../Kevin-plugin/components/CommonReplyUtil.js'
+import { replyMarkdownButton } from '../components/CommonReplyUtil.js'
 import probe from 'probe-image-size';
 // 配置文件读取
 const commandConfig = {
