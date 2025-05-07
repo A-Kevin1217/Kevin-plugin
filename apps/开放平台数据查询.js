@@ -250,7 +250,7 @@ export class robot_data extends plugin {
         { key: 'g', values: [`\`\r${day1}\r\r——————`] },
         { key: 'h', values: [`\r${day2}\r\r——————\r${day3}\`\``] },
         { key: 'i', values: ['`'] },
-        { key: 'j', values: [`\r> 月均DAU：${avgDAU}`] }
+        { key: 'j', values: [`\r> ${msgDataArr.length}日平均DAU：${avgDAU}`] }
       ], commonButtons)
     } catch (e) {
       console.error('Error in get_botdata:', e);
