@@ -4,8 +4,8 @@ import { replyMarkdownButton } from '../components/CommonReplyUtil.js'
 
 const pool = createPool({
     host: 'localhost',
-    user: 'root',
-    password: '211217',
+    user: 'marry',
+    password: 'NeGHiFNbEC2fn7cx',
     database: 'marry',
     waitForConnections: true,
     connectionLimit: 10

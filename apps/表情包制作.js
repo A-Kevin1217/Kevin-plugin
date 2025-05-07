@@ -111,8 +111,8 @@ const commandConfig = {
 const connection = mysql.createPool({
     queueLimit: 0,
     host: 'localhost',
-    user: 'root',
-    password: '211217',
+    user: 'yunzai',
+    password: 'D7GxtmtHn32at87S',
     database: 'yunzai',
     waitForConnections: true,
     connectionLimit: 10
