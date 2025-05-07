@@ -44,8 +44,8 @@ function buildReplyParamsAndButtons(userId, result1, imgUrl, atMode = false, noM
         ],
         [
             { text: '不@对方', callback: '群友老婆-@', clicked_text: '不@对方' },
-            { text: '丢', callback: 'meme-15', clicked_text: '丢' },
-            { text: '更多表情', callback: '更多表情meme', clicked_text: '正在获取更多表情' }
+            { text: '📖今日运势', callback: '/今日运势', clicked_text: '正在获取今日运势' }
+            
         ]
     ];
     return { params, buttons };
@@ -337,8 +337,7 @@ export class example extends plugin {
                         { text: '🐾猫猫糕', callback: '/今日猫猫糕', clicked_text: '正在获取猫猫糕' }
                     ],
                     [
-                        { text: '丢', callback: 'meme-15', clicked_text: '丢' },
-                        { text: '更多表情', callback: '更多表情meme', clicked_text: '正在获取更多表情' }
+                        { text: '📖今日运势', callback: '/今日运势', clicked_text: '正在获取今日运势' }
                     ]
                 ];
                 await replyMarkdownButton(e, params, buttons);
