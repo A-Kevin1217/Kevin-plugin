@@ -1,7 +1,6 @@
 import axios from "axios";
 import _ from "lodash";
 import mysql from "mysql2/promise";
-import { tuchuang } from './tool.js'
 import { replyMarkdownButton } from '../components/CommonReplyUtil.js'
 import probe from 'probe-image-size';
 // 配置文件读取
@@ -228,7 +227,8 @@ export class zifuhua extends plugin {
                     responseType: 'arraybuffer'
                 });
                 const resultBuffer = Buffer.from(res.data);
-                const imgurl = await tuchuang(resultBuffer);
+                // 此处需替换为实际图床上传实现
+                const imgurl = '请在此处实现图片上传并返回图片链接';
                 let width = 0, height = 0;
                 try {
                     const info = await probe(imgurl);
@@ -255,7 +255,11 @@ export class zifuhua extends plugin {
                         { text: '给我亲亲', callback: 'meme-5', clicked_text: '给我亲亲' }
                     ]
                 ];
-                await replyMarkdownButton(e, params, buttons);
+                await e.reply([
+                    segment.at(e.user_id),
+                    segment.image(resultBuffer),
+                    await replyMarkdownButton(e, params, buttons)
+                ]);
             } else {
                 const userId = String(e.user_id);
                 let params = [
