@@ -157,14 +157,18 @@ export class 猫猫糕 extends plugin {
         }
 
         let md = [
-            { key: 'a', values: [`![猫猫糕${sizeStr}]`] },
-            { key: 'b', values: [`(${imgPath})`] },
-            { key: 'c', values: [`\r\r> ${cuteText}\r(部分猫猫糕由于格式问题，可能无法显示)`] }
+            { key: 'a', values: [`${idx}号猫猫糕前来报道啦～\r`] },
+            { key: 'b', values: [`![猫猫糕${sizeStr}]`] },
+            { key: 'c', values: [`(${imgPath})`] },
+            { key: 'd', values: [`\r\r> ${cuteText}\r(部分猫猫糕由于格式问题，可能无法显示)`] }
         ]
         let btn = [
             [
                 { text: '换个猫猫糕', callback: '换个猫猫糕', clicked_text: '正在换猫猫糕' },
                 { text: '今日猫猫糕', callback: '今日猫猫糕', clicked_text: '正在获取今日猫猫糕' }
+            ],
+            [
+                { text: '联系主人', input: '/联系主人', clicked_text: '正在联系主人' }
             ]
         ]
         await replyMarkdownButton(e, md, btn);
