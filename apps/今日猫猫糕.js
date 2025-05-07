@@ -144,7 +144,7 @@ export class 猫猫糕 extends plugin {
         }
     }
 
-    async sendMMG(e, imgPath) {
+    async sendMMG(e, imgPath, idx) {
         if (!isQQBot(e)) {
             await e.reply('请艾特橙子BOT使用')
             return false
@@ -203,7 +203,7 @@ export class 猫猫糕 extends plugin {
             await e.reply('未找到今日猫猫糕图片，请联系管理员补图')
             return
         }
-        await this.sendMMG(e, imgPath)
+        await this.sendMMG(e, imgPath, idx)
     }
 
     async CHANGE_MMG(e) {
@@ -236,7 +236,7 @@ export class 猫猫糕 extends plugin {
             await e.reply('未找到猫猫糕图片，请联系管理员补图')
             return
         }
-        await this.sendMMG(e, imgPath)
+        await this.sendMMG(e, imgPath, idx)
     }
 
     pullRepo() {
