@@ -2,7 +2,6 @@ import axios from "axios";
 import _ from "lodash";
 import mysql from "mysql2/promise";
 import { replyMarkdownButton } from '../components/CommonReplyUtil.js'
-import probe from 'probe-image-size';
 // 配置文件读取
 const commandConfig = {
     "-1": {
@@ -227,22 +226,6 @@ export class zifuhua extends plugin {
                     responseType: 'arraybuffer'
                 });
                 const resultBuffer = Buffer.from(res.data);
-                // 此处需替换为实际图床上传实现
-                const imgurl = '请在此处实现图片上传并返回图片链接';
-                let width = 0, height = 0;
-                try {
-                    const info = await probe(imgurl);
-                    width = info.width;
-                    height = info.height;
-                } catch (err) {
-                    width = 0; height = 0;
-                }
-                let pxStr = (width && height) ? ` #${width}px #${height}px` : '';
-                let params = [
-                    { key: 'a', values: [`<@${userId?.slice(11)}>`] },
-                    { key: 'b', values: [`![伊蕾娜${pxStr}](${imgurl})`] },
-                    { key: 'd', values: ['\n---\n>您使用该作图功能代表您的头像无任何违法违规内容，如有违反则上报安全。'] }
-                ];
                 let buttons = [
                     [
                         { text: '爬', callback: 'meme-4', clicked_text: '爬' },
@@ -258,7 +241,7 @@ export class zifuhua extends plugin {
                 await e.reply([
                     segment.at(e.user_id),
                     segment.image(resultBuffer),
-                    await replyMarkdownButton(e, params, buttons)
+                    segment.button(buttons)
                 ]);
             } else {
                 const userId = String(e.user_id);
