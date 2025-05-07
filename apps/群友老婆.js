@@ -30,9 +30,12 @@ function buildReplyParamsAndButtons(userId, result1, imgUrl, atMode = false, noM
         if (!atMode) {
             params.push({ key: 'c', values: [`<@${result1}>`] });
         }
-        params.push({ key: 'd', values: [`\r![橙子BOT #100px #100px](${imgUrl})`] });
+        params.push({ key: 'd', values: [`\r![橙子BOT #100px #100px]`] });
+        params.push({ key: 'e', values: [`(${imgUrl})`] });
     } else {
-        params.push({ key: 'd', values: [`\r![橙子BOT #100px #100px](${imgUrl})\r***\r>暂时没有记录的群员了，叫大家一起来用橙子BOT吧`] });
+        params.push({ key: 'd', values: [`\r![橙子BOT #100px #100px]`] });
+        params.push({ key: 'e', values: [`(${imgUrl})`] });
+        params.push({ key: 'f', values: [`\r***\r>暂时没有记录的群员了，叫大家一起来用橙子BOT吧`] });
     }
     let buttons = [
         [
