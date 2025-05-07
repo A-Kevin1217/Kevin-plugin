@@ -140,7 +140,7 @@ export class zifuhua extends plugin {
         let params = [
             { key: 'a', values: [`<@${userId?.slice(11)}>`] },
             { key: 'b', values: ['可以为今日的群友老婆作图哦'] },
-            { key: 'd', values: ['\n---\n>您使用该作图功能代表您的头像无任何违法违规内容，如有违反则上报安全。'] }
+            { key: 'd', values: ['\r***\r>您使用该作图功能代表您的头像无任何违法违规内容，如有违反则上报安全。'] }
         ];
         let buttons = [
             [

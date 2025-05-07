@@ -24,15 +24,15 @@ const handleDatabaseError = async (reply, e, operation, error) => {
 function buildReplyParamsAndButtons(userId, result1, imgUrl, atMode = false, noMember = false) {
     let params = [
         { key: 'a', values: [`<@${userId?.slice(11)}>`] },
-        { key: 'b', values: ['\n你的群友老婆是\n'] },
+        { key: 'b', values: ['\r你的群友老婆是\r'] },
     ];
     if (!noMember) {
         if (!atMode) {
             params.push({ key: 'c', values: [`<@${result1}>`] });
         }
-        params.push({ key: 'd', values: [`\n![伊蕾娜 #100px #100px](${imgUrl})`] });
+        params.push({ key: 'd', values: [`\r![橙子BOT #100px #100px](${imgUrl})`] });
     } else {
-        params.push({ key: 'd', values: [`\n![伊蕾娜 #100px #100px](${imgUrl})\n---\n>暂时没有记录的群员了，叫大家一起来用伊蕾娜吧`] });
+        params.push({ key: 'd', values: [`\r![橙子BOT #100px #100px](${imgUrl})\r***\r>暂时没有记录的群员了，叫大家一起来用橙子BOT吧`] });
     }
     let buttons = [
         [
