@@ -159,11 +159,9 @@ export class zifuhua extends plugin {
     }
     async zfh(e) {
         let params1 = [
-            { key: 'a', values: [''] },
-            { key: 'b', values: ['开始制作meme表情，请等待约7秒。'] }
+            { key: 'a', values: ['开始制作meme表情，请等待约7秒。'] }
         ];
-        let buttons1 = [];
-        await replyMarkdownButton(e, params1, buttons1);
+        await replyMarkdownButton(e, params1);
         const groupId = String(e.group_id);
         const userId = String(e.user_id);
         const now = new Date();
