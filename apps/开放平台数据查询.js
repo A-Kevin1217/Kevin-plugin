@@ -29,7 +29,7 @@ export class robot_data extends plugin {
         { reg: "^(#|\/)?管理登录$", fnc: 'login' },
         { reg: "^(#|\/)?bot通知$", fnc: 'get_message' },
         { reg: "^(#|\/)?bot列表$", fnc: 'get_botlist' },
-        { reg: "^(#|\/)?bot数据$", fnc: 'get_botdata' },
+        { reg: "^(#|\/)?bot数据(\\d*)?$", fnc: 'get_botdata' },
       ]
     });
     this.user = {}
@@ -211,8 +211,6 @@ export class robot_data extends plugin {
     let data2 = await (await fetch(`${botdata}?appid=${data.appId}&uin=${data.uin}&ticket=${data.ticket}&developerId=${data.developerId}&type=2`)).json()
     let data3 = await (await fetch(`${botdata}?appid=${data.appId}&uin=${data.uin}&ticket=${data.ticket}&developerId=${data.developerId}&type=3`)).json()
 
-    console.log('API Response:', { data1, data2, data3 });
-
     if ([data1.retcode, data2.retcode, data3.retcode].some(code => code !== 0)) {
       return replyMarkdownButton(e, [
         { key: 'a', values: [`登录状态失效`] }
@@ -224,12 +222,15 @@ export class robot_data extends plugin {
     }
 
     try {
-      let day1 = formatDayData(data1.data.msg_data, data2.data.group_data, data3.data.friend_data, 0)
-      let day2 = formatDayData(data1.data.msg_data, data2.data.group_data, data3.data.friend_data, 1)
-      let day3 = formatDayData(data1.data.msg_data, data2.data.group_data, data3.data.friend_data, 2)
-
-      // 计算月均DAU（月平均上行消息人数）
+      // 获取展示天数
+      let match = e.msg?.match(/bot数据(\d*)/);
+      let showDays = 4;
+      if (match && match[1]) {
+        showDays = parseInt(match[1], 10) || 4;
+      }
       let msgDataArr = data1.data.msg_data || [];
+      let groupDataArr = data2.data.group_data || [];
+      let friendDataArr = data3.data.friend_data || [];
       let totalDAU = 0, dauCount = 0;
       for (let item of msgDataArr) {
         let val = Number(item['上行消息人数'] || 0);
@@ -237,20 +238,20 @@ export class robot_data extends plugin {
         dauCount++;
       }
       let avgDAU = dauCount ? Math.round(totalDAU / dauCount) : 0;
-
-      console.log('msg_data天数:', msgDataArr.length)
-
+      let resultArr = [];
+      for (let i = 0; i < Math.min(showDays, msgDataArr.length); i++) {
+        resultArr.push(formatDayDataV2(msgDataArr, groupDataArr, friendDataArr, i));
+      }
       return replyMarkdownButton(e, [
-        { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
+        { key: 'a', values: [`<@${user?.slice(11)}>`] },
         { key: 'b', values: ['#'] },
         { key: 'c', values: ['Bot数据'] },
-        { key: 'd', values: [`\r> 最近三日汇总如下\r\r`] },
-        { key: 'e', values: [`***`] },
+        { key: 'd', values: [`\r> 最近${resultArr.length}日汇总如下\r${msgDataArr.length}日平均DAU：${avgDAU}`] },
+        { key: 'e', values: ['***'] },
         { key: 'f', values: ['\r\r``'] },
-        { key: 'g', values: [`\`\r${day1}\r\r——————`] },
-        { key: 'h', values: [`\r${day2}\r\r——————\r${day3}\`\``] },
-        { key: 'i', values: ['`'] },
-        { key: 'j', values: [`\r> ${msgDataArr.length}日平均DAU：${avgDAU}`] }
+        { key: 'g', values: [`\`\r${resultArr.join('\r\r——————\r')}`] },
+        { key: 'h', values: ['``'] },
+        { key: 'i', values: ['`'] }
       ], commonButtons)
     } catch (e) {
       console.error('Error in get_botdata:', e);
@@ -317,6 +318,27 @@ function formatDayData(msg_data, group_data, friend_data, index) {
     console.error('Error in formatDayData:', e);
     return '数据格式化错误';
   }
+}
+
+function formatDayDataV2(msg_data, group_data, friend_data, index) {
+  const getVal = (arr, idx, key) => {
+    if (!arr || !arr[idx] || arr[idx][key] === undefined || arr[idx][key] === null) return '0';
+    return String(arr[idx][key]).replace(/\n/g, '\r');
+  };
+  const date = getVal(msg_data, index, '报告日期');
+  const upMsg = getVal(msg_data, index, '上行消息量');
+  const upUser = getVal(msg_data, index, '上行消息人数');
+  const downMsg = getVal(msg_data, index, '下行消息量');
+  const totalMsg = getVal(msg_data, index, '总消息量');
+  const groupNew = getVal(group_data, index, '新增群组');
+  const groupDel = getVal(group_data, index, '移除群组');
+  const groupNow = getVal(group_data, index, '现有群组');
+  const groupUsed = getVal(group_data, index, '已使用群组');
+  const friendNew = getVal(friend_data, index, '新增好友数');
+  const friendDel = getVal(friend_data, index, '移除好友数');
+  const friendNow = getVal(friend_data, index, '现有好友数');
+  const friendUsed = getVal(friend_data, index, '已使用好友数');
+  return `【日期：${date}】\r消息统计:\r上行：${upMsg}  人数：${upUser}\r总量：${totalMsg}  下行：${downMsg}\r群组统计：\r新增：${groupNew}  减少：${groupDel}\r已有：${groupNow}  使用：${groupUsed}\r好友统计：\r新增：${friendNew}  减少：${friendDel}\r已有：${friendNow}  使用：${friendUsed}`;
 }
 
 function sleep(ms) {
