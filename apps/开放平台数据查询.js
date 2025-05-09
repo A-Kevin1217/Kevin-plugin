@@ -246,7 +246,7 @@ export class robot_data extends plugin {
         { key: 'a', values: [`<@${user?.slice(11)}>`] },
         { key: 'b', values: ['#'] },
         { key: 'c', values: ['Bot数据'] },
-        { key: 'd', values: [`\r> 最近${resultArr.length}日汇总如下\r${msgDataArr.length}日平均DAU：${avgDAU}`] },
+        { key: 'd', values: [`\r> 最近${resultArr.length}日汇总如下\r${msgDataArr.length}日平均DAU：${avgDAU}\r`] },
         { key: 'e', values: ['***'] },
         { key: 'f', values: ['\r\r``'] },
         { key: 'g', values: [`\`\r${resultArr.join('\r\r——————\r')}`] },
