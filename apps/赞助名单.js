@@ -87,7 +87,8 @@ export class 赞助名单 extends plugin {
             { person: 'ZY.霆生', info: '提供部分技术指导', account: 'QQ：1918530969', showAccount: false },
             { person: '翅膀', info: '提供部分技术指导', account: 'QQ：2450785445', showAccount: false },
             { person: 'Броня Зайчик', info: '提供部分技术指导', account: 'QQ：2644266329', showAccount: false },
-            { person: '为什么不玩原神', info: '提供部分技术支持', account: 'QQ：2173302144', showAccount: false }
+            { person: '为什么不玩原神', info: '提供部分技术支持', account: 'QQ：2173302144', showAccount: false },
+            { person: 'Jiaozi', info: '部分插件UI渲染', account: 'QQ：1602833550', showAccount: false }
           ]
         },
         {
