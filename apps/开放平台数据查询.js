@@ -243,7 +243,7 @@ export class robot_data extends plugin {
         resultArr.push(formatDayDataV2(msgDataArr, groupDataArr, friendDataArr, i));
       }
       return replyMarkdownButton(e, [
-        { key: 'a', values: [`<@${user?.slice(11)}>`] },
+        { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
         { key: 'b', values: ['#'] },
         { key: 'c', values: ['Bot数据'] },
         { key: 'd', values: [`\r> 最近${resultArr.length}日汇总如下\r${msgDataArr.length}日平均DAU：${avgDAU}\r`] },
