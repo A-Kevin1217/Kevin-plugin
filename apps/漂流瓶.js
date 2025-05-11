@@ -466,18 +466,26 @@ export class plp extends plugin {
         return true
     }
     async viewComments(e) {
-        // #查看漂流瓶评论 123456
         const match = e.msg.match(/查看漂流瓶评论\s*(\d+)/)
         if (!match) return false;
         const dbid = match[1]
-        // 检查漂流瓶是否存在
-        let dbdata = await redis.get(`Yunzai:giplugin_plp_${dbid}`)
-        if (!dbdata) {
-            await replyMarkdownButton(e, [
-                { key: 'a', values: ['没有找到你说的这个漂流瓶哦，请检查漂流瓶ID是否正确~'] }
-            ], defaultButtons())
-            return true
+        // 先查数据库
+        let exists = false;
+        try {
+            const [rows] = await bottlePool.query('SELECT * FROM plp_bottle WHERE plp_id = ?', [dbid])
+            if (rows && rows.length > 0) exists = true;
+        } catch {}
+        // 如果数据库没有，再查redis
+        if (!exists) {
+            let dbdata = await redis.get(`Yunzai:giplugin_plp_${dbid}`)
+            if (!dbdata) {
+                await replyMarkdownButton(e, [
+                    { key: 'a', values: ['没有找到你说的这个漂流瓶哦，请检查漂流瓶ID是否正确~'] }
+                ], defaultButtons())
+                return true
+            }
         }
+        // 查评论
         let comment = []
         try {
             const [rows] = await bottlePool.query('SELECT * FROM plp_comments WHERE plp_id = ? ORDER BY create_time ASC', [dbid])
