@@ -313,7 +313,7 @@ export class plp extends plugin {
                 CREATE TABLE IF NOT EXISTS plp_bottle (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     plp_id VARCHAR(32) NOT NULL,
-                    user_id VARCHAR(32) NOT NULL,
+                    user_id VARCHAR(128) NOT NULL,
                     nickname VARCHAR(64) NOT NULL,
                     group_id VARCHAR(32),
                     type VARCHAR(16) NOT NULL,
@@ -326,7 +326,7 @@ export class plp extends plugin {
                 CREATE TABLE IF NOT EXISTS plp_comments (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     plp_id VARCHAR(32) NOT NULL,
-                    user_id VARCHAR(32) NOT NULL,
+                    user_id VARCHAR(128) NOT NULL,
                     nickname VARCHAR(64) NOT NULL,
                     message TEXT NOT NULL,
                     create_time DATETIME NOT NULL
@@ -336,7 +336,7 @@ export class plp extends plugin {
                 CREATE TABLE IF NOT EXISTS plp_id_map (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     plp_id VARCHAR(32) NOT NULL,
-                    user_id VARCHAR(32) NOT NULL,
+                    user_id VARCHAR(128) NOT NULL,
                     date DATE NOT NULL
                 ) CHARSET=utf8mb4;
             `)
