@@ -425,7 +425,6 @@ export class plp extends plugin {
         if (page > 1) navBtns.push({ text: '上一页', input: `我的漂流瓶 ${page - 1}`, clicked_text: '上一页' });
         if (page * pageSize < total) navBtns.push({ text: '下一页', input: `我的漂流瓶 ${page + 1}`, clicked_text: '下一页' });
         const buttons = [
-            [
                 [
                     { text: '扔漂流瓶', input: '扔漂流瓶', clicked_text: '扔漂流瓶' },
                     { text: '捡漂流瓶', callback: '捡漂流瓶', clicked_text: '捡漂流瓶' }
@@ -433,8 +432,7 @@ export class plp extends plugin {
                 [
                     { text: '我的漂流瓶', callback: '我的漂流瓶', clicked_text: '我的漂流瓶' }
                 ]
-            ]
-        ];
+            ];
         if (navBtns.length > 0) buttons.push(navBtns);
         await replyMarkdownButton(e, params, buttons);
         return true;
