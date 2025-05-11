@@ -277,7 +277,7 @@ export class plp extends plugin {
             plpcontent = JSON.parse(await redis.get(`Yunzai:giplugin_plp_${plp_id1.number}`))
         }
         let params = [
-            { key: 'a', values: [`你捡到漂流瓶了~\n`] },
+            { key: 'a', values: [`你捡到漂流瓶了~\r`] },
             { key: 'b', values: [`内容：${plpcontent.plp_text}`] },
             { key: 'c', values: [`漂流瓶  ID：${plp_id1.number}`] },
             { key: 'd', values: [`漂流时间：${plpcontent.create_time ? (typeof plpcontent.create_time === 'string' ? plpcontent.create_time : plpcontent.create_time.toLocaleString?.() || plpcontent.create_time) : ''}`] },
@@ -386,7 +386,7 @@ export class plp extends plugin {
         ];
         for (let item of rows) {
             params.push({ key: 'b', values: [
-                `ID:${item.plp_id}\n内容:${item.text}\n时间:${item.create_time.toLocaleString?.() || item.create_time}`
+                `ID:${item.plp_id}\r内容:${item.text}\r时间:${item.create_time.toLocaleString?.() || item.create_time}`
             ] })
         }
         let navBtns = [];
