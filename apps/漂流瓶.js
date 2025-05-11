@@ -115,8 +115,8 @@ export class plp extends plugin {
         }
         try {
             await bottlePool.query(
-                'INSERT INTO plp_comments (plp_id, user_id, nickname, message, create_time) VALUES (?, ?, ?, ?, NOW())',
-                [dbid, e.user_id, e.nickname, this.e.message]
+                'INSERT INTO plp_comments (plp_id, user_id, message, create_time) VALUES (?, ?, ?, NOW())',
+                [dbid, e.user_id, this.e.message]
             )
         } catch (err) {
             await replyMarkdownButton(e, [
@@ -197,8 +197,8 @@ export class plp extends plugin {
         }
         try {
             await bottlePool.query(
-                'INSERT INTO plp_bottle (plp_id, user_id, nickname, group_id, type, text, img_url, create_time) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())',
-                [plp_id, e.user_id, e.nickname, e.group_id, type, plp_content, plp_imgUrl]
+                'INSERT INTO plp_bottle (plp_id, user_id, group_id, type, text, img_url, create_time) VALUES (?, ?, ?, ?, ?, ?, NOW())',
+                [plp_id, e.user_id, e.group_id, type, plp_content, plp_imgUrl]
             )
             let date = getDateTimeStr()
             await addPlpIdMap(plp_id, e.user_id, date)
@@ -211,7 +211,6 @@ export class plp extends plugin {
         let plp = {
             plp_id,
             plp_userid: e.user_id,
-            plp_nickname: e.nickname,
             plp_groupid: e.group_id,
             plp_type: type,
             plp_text: plp_content,
@@ -278,9 +277,11 @@ export class plp extends plugin {
             plpcontent = JSON.parse(await redis.get(`Yunzai:giplugin_plp_${plp_id1.number}`))
         }
         let params = [
-            { key: 'a', values: [`【你捡到一个漂流瓶】\r`] },
-            { key: 'b', values: [`漂流瓶ID：${plp_id1.number}`] },
-            { key: 'c', values: [`内容：${plpcontent.plp_text}`] }
+            { key: 'a', values: [`你捡到漂流瓶了~\n`] },
+            { key: 'b', values: [`内容：${plpcontent.plp_text}`] },
+            { key: 'c', values: [`漂流瓶  ID：${plp_id1.number}`] },
+            { key: 'd', values: [`漂流时间：${plpcontent.create_time ? (typeof plpcontent.create_time === 'string' ? plpcontent.create_time : plpcontent.create_time.toLocaleString?.() || plpcontent.create_time) : ''}`] },
+            { key: 'e', values: [`今日第${userPDBnumber?.number || 1}/${config.Jplp}个`] }
         ]
         let day = dateCalculation(plp_id1.date)
         let comment = []
@@ -288,18 +289,18 @@ export class plp extends plugin {
             const [rows] = await bottlePool.query('SELECT * FROM plp_comments WHERE plp_id = ? ORDER BY create_time ASC', [plp_id1.number])
             comment = rows
         } catch {}
-        if(config.dbcomment && day && day < 3){
-            params.push({ key: 'd', values: [`评论指令：评论漂流瓶 ${plp_id1.number} 内容`] })
-        } else {
-            params.push({ key: 'd', values: ['漂流瓶已过期销毁'] })
-        }
-        if(comment && comment.length > 0) {
-            params.push({ key: 'e', values: [`以下是这个漂流瓶的评论区`] })
-            for (let item of comment) {
-                params.push({ key: 'f', values: [`${item.nickname}：${item.message}`] })
-            }
-        }
-        await replyMarkdownButton(e, params, defaultButtons())
+        // 按钮区
+        const buttons = [
+            [
+                { text: '🖊评论该瓶', input: `评论漂流瓶 ${plp_id1.number} `, clicked_text: '评论该瓶' },
+                { text: '📜查看评论', input: `查看漂流瓶评论 ${plp_id1.number}`, clicked_text: '查看评论' }
+            ],[
+                { text: '扔漂流瓶', callback: '扔漂流瓶', clicked_text: '扔漂流瓶' },
+                { text: '捡漂流瓶', callback: '捡漂流瓶', clicked_text: '捡漂流瓶' },
+                { text: '我的漂流瓶', callback: '我的漂流瓶', clicked_text: '我的漂流瓶' }
+            ]
+        ];
+        await replyMarkdownButton(e, params, buttons)
         if(!day || day > 3 || !config.dbcomment) {
             await delPlpIdMap(plp_id1.number)
             await redis.del(`Yunzai:giplugin_plp_${plp_id1.number}`)
@@ -314,7 +315,6 @@ export class plp extends plugin {
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     plp_id VARCHAR(32) NOT NULL,
                     user_id VARCHAR(128) NOT NULL,
-                    nickname VARCHAR(64) NOT NULL,
                     group_id VARCHAR(32),
                     type VARCHAR(16) NOT NULL,
                     text TEXT,
@@ -327,7 +327,6 @@ export class plp extends plugin {
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     plp_id VARCHAR(32) NOT NULL,
                     user_id VARCHAR(128) NOT NULL,
-                    nickname VARCHAR(64) NOT NULL,
                     message TEXT NOT NULL,
                     create_time DATETIME NOT NULL
                 ) CHARSET=utf8mb4;
@@ -420,8 +419,8 @@ export class plp extends plugin {
         }
         try {
             await bottlePool.query(
-                'INSERT INTO plp_comments (plp_id, user_id, nickname, message, create_time) VALUES (?, ?, ?, ?, NOW())',
-                [dbid, e.user_id, e.nickname, content]
+                'INSERT INTO plp_comments (plp_id, user_id, message, create_time) VALUES (?, ?, ?, NOW())',
+                [dbid, e.user_id, content]
             )
         } catch (err) {
             await replyMarkdownButton(e, [
@@ -457,7 +456,7 @@ export class plp extends plugin {
         ]
         if(comment && comment.length > 0) {
             for (let item of comment) {
-                params.push({ key: 'b', values: [`${item.nickname}：${item.message}`] })
+                params.push({ key: 'b', values: [`${item.message}（${item.create_time ? (typeof item.create_time === 'string' ? item.create_time : item.create_time.toLocaleString?.() || item.create_time) : ''}）`] })
             }
         } else {
             params.push({ key: 'b', values: ['暂无评论'] })
