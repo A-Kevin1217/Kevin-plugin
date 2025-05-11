@@ -119,8 +119,8 @@ export class plp extends plugin {
         }
         try {
             await bottlePool.query(
-                'INSERT INTO plp_comments (plp_id, user_id, message, create_time) VALUES (?, ?, ?, NOW())',
-                [dbid, e.user_id, this.e.message]
+                'INSERT INTO plp_comments (plp_id, user_id, message, create_time, status) VALUES (?, ?, ?, NOW(), ?)',
+                [dbid, e.user_id, this.e.message, '审核中']
             )
         } catch (err) {
             await replyMarkdownButton(e, [
@@ -462,8 +462,8 @@ export class plp extends plugin {
         }
         try {
             await bottlePool.query(
-                'INSERT INTO plp_comments (plp_id, user_id, message, create_time) VALUES (?, ?, ?, NOW())',
-                [dbid, e.user_id, content]
+                'INSERT INTO plp_comments (plp_id, user_id, message, create_time, status) VALUES (?, ?, ?, NOW(), ?)',
+                [dbid, e.user_id, content, '审核中']
             )
         } catch (err) {
             await replyMarkdownButton(e, [
