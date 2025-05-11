@@ -69,7 +69,7 @@ export class plp extends plugin {
                     fnc: 'delBottle'
                 },
                 {
-                    reg: '^(#|/)?审核漂流瓶(\s*(审核中|已通过|已拒绝)?\s*(\d*)?)?$',
+                    reg: '^(#|/)?审核漂流瓶(\s*([\u4e00-\u9fa5]+)?\s*(\d+)?)?$',
                     fnc: 'reviewBottle',
                     permission: 'master'
                 },
@@ -543,22 +543,11 @@ export class plp extends plugin {
     }
     async reviewBottle(e) {
         if (!e.isMaster) return false;
-        // 支持：审核漂流瓶、审核漂流瓶 审核中 2、审核漂流瓶 已通过 1、审核漂流瓶 已拒绝 3
-        const match = e.msg.match(/审核漂流瓶\s*(审核中|已通过|已拒绝)?\s*(\d*)?\s*(\d+)?\s*(通过|拒绝)?/)
-        const type = match && match[1] ? match[1] : null;
-        let page = match && match[2] ? parseInt(match[2], 10) : 1;
-        if (!page || page < 1) page = 1;
-        const plp_id = match && match[3];
-        const action = match && match[4];
-        const pageSize = 5;
-        // 审核操作
-        if (plp_id && action) {
-            if (!['通过', '拒绝'].includes(action)) {
-                await replyMarkdownButton(e, [
-                    { key: 'a', values: ['格式错误，请使用：审核漂流瓶 漂流瓶ID 通过 或 审核漂流瓶 漂流瓶ID 拒绝'] }
-                ], defaultButtons())
-                return true;
-            }
+        // 优先匹配审核操作：审核漂流瓶 123456 通过/拒绝
+        let opMatch = e.msg.match(/审核漂流瓶\s*(\d+)\s*(通过|拒绝)/);
+        if (opMatch) {
+            const plp_id = opMatch[1];
+            const action = opMatch[2];
             let status = action === '通过' ? '已通过' : '已拒绝';
             let bottleRow;
             try {
@@ -588,11 +577,17 @@ export class plp extends plugin {
             }
             return true;
         }
+        // 匹配列表翻页：审核漂流瓶 [状态] [页码]
+        let listMatch = e.msg.match(/审核漂流瓶\s*([\u4e00-\u9fa5]+)?\s*(\d+)?$/);
+        let type = listMatch && listMatch[1] && ['审核中','已通过','已拒绝'].includes(listMatch[1]) ? listMatch[1] : '审核中';
+        let page = listMatch && listMatch[2] ? parseInt(listMatch[2], 10) : 1;
+        if (!page || page < 1) page = 1;
+        const pageSize = 5;
         // 列表展示
         let params = [];
         let navBtns = [];
         let statusList = ['审核中', '已通过', '已拒绝'];
-        let showType = type || '审核中';
+        let showType = type;
         // 查询总数
         const [[{ total } = { total: 0 }]] = await bottlePool.query(
             'SELECT COUNT(*) as total FROM plp_bottle WHERE status = ?', [showType]
@@ -607,11 +602,16 @@ export class plp extends plugin {
         } else {
             params.push({ key: 'a', values: [`${showType}漂流瓶列表（第${page}页/共${Math.ceil(total / pageSize)}页）：`] });
             rows.forEach(item => {
-                params.push({
-                    key: 'b', values: [
-                        `ID:${item.plp_id}\r内容：${item.text}\r时间：${formatDateTime(item.create_time)}`
+                params.push({ key: 'b', values: [
+                    `ID:${item.plp_id}\r内容：${item.text}\r时间：${formatDateTime(item.create_time)}`
+                ] });
+                // 在每条漂流瓶后面插入审核按钮，不与主buttons共用
+                params.push({ buttons: [
+                    [
+                        { text: '通过审核', input: `审核漂流瓶 ${item.plp_id} 通过`, clicked_text: '通过审核' },
+                        { text: '拒绝审核', input: `审核漂流瓶 ${item.plp_id} 拒绝`, clicked_text: '拒绝审核' }
                     ]
-                });
+                ] });
             });
         }
         // 翻页按钮
@@ -619,7 +619,8 @@ export class plp extends plugin {
         if (page * pageSize < total) navBtns.push({ text: '下一页', input: `审核漂流瓶 ${showType} ${page + 1}`, clicked_text: '下一页' });
         // 状态切换按钮
         let typeBtns = statusList.filter(t => t !== showType).map(t => ({ text: t, input: `审核漂流瓶 ${t} 1`, clicked_text: t }));
-        const buttons = [typeBtns];
+        const buttons = [];
+        if (typeBtns.length > 0) buttons.push(typeBtns);
         if (navBtns.length > 0) buttons.push(navBtns);
         await replyMarkdownButton(e, params, buttons);
         return true;
