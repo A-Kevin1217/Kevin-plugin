@@ -67,7 +67,12 @@ export class plp extends plugin {
                 {
                     reg: '^(#|/)?删除漂流瓶\\s*(\\d+)$',
                     fnc: 'delBottle'
-                }
+                },
+                {
+                    reg: '^(#|/)?审核漂流瓶(\s*(审核中|已通过|已拒绝)?\s*(\d*)?)?$',
+                    fnc: 'reviewBottle',
+                    permission: 'master'
+                },
             ]
         })
     }
@@ -189,8 +194,8 @@ export class plp extends plugin {
         }
         try {
             await bottlePool.query(
-                'INSERT INTO plp_bottle (plp_id, user_id, group_id, type, text, img_url, create_time) VALUES (?, ?, ?, ?, ?, ?, NOW())',
-                [plp_id, e.user_id, e.group_id, type, plp_content, plp_imgUrl]
+                'INSERT INTO plp_bottle (plp_id, user_id, group_id, type, text, img_url, create_time, status) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)',
+                [plp_id, e.user_id, e.group_id, type, plp_content, plp_imgUrl, '审核中']
             )
             let date = getDateTimeStr()
             await addPlpIdMap(plp_id, e.user_id, date)
@@ -272,7 +277,7 @@ export class plp extends plugin {
             { key: 'a', values: [`你捡到漂流瓶了~\r`] },
             { key: 'b', values: [`内容：${plpcontent.plp_text}`] },
             { key: 'c', values: [`漂流瓶  ID：${plp_id1.number}`] },
-            { key: 'd', values: [`漂流时间：${plpcontent.create_time ? (typeof plpcontent.create_time === 'string' ? plpcontent.create_time : plpcontent.create_time.toLocaleString?.() || plpcontent.create_time) : ''}`] },
+            { key: 'd', values: [`漂流时间：${plpcontent.create_time ? formatDateTime(plpcontent.create_time) : ''}`] },
             { key: 'e', values: [`今日第${userPDBnumber?.number || 1}/${config.Jplp}个`] }
         ]
         let day = dateCalculation(plp_id1.date)
@@ -311,7 +316,8 @@ export class plp extends plugin {
                     type VARCHAR(16) NOT NULL,
                     text TEXT,
                     img_url TEXT,
-                    create_time DATETIME NOT NULL
+                    create_time DATETIME NOT NULL,
+                    status VARCHAR(16) NOT NULL
                 ) CHARSET=utf8mb4;
             `)
             await bottlePool.query(`
@@ -374,19 +380,19 @@ export class plp extends plugin {
             return true;
         }
         let params = [
-            { key: 'a', values: ['你的漂流瓶相关内容'] },
+            { key: 'a', values: ['你的漂流瓶相关内容\r'] },
             { key: 'b', values: ['``'] },
-            { key: 'c', values: ['`\r你的漂流瓶列表：'] }
+            { key: 'c', values: ['`\r你的漂流瓶列表：\r'] }
         ];
         rows.forEach((item, idx) => {
             params.push({ key: 'd', values: [
                 `【漂流瓶 ${idx+1}】ID: ${item.plp_id}\r` +
                 `内容：${item.status === '审核中' ? '（审核中，暂不可见）' : item.text}\r` +
-                `时间：${item.create_time}\r` +
+                `时间：${formatDateTime(item.create_time)}\r` +
                 `状态：${item.status === '审核中' ? '⏳审核中' : (item.status === '已通过' ? '✅已通过' : '❌已拒绝')}`
             ]});
         });
-        params.push({ key: 'e', values: ['你的漂流瓶评论：'] });
+        params.push({ key: 'e', values: ['\r你的漂流瓶评论：\r'] });
         // 查询别人对我所有漂流瓶的评论
         const plpIds = rows.map(item => item.plp_id);
         let commentList = [];
@@ -400,7 +406,7 @@ export class plp extends plugin {
         if (commentList.length > 0) {
             commentList.forEach(item => {
                 params.push({ key: 'f', values: [
-                    `ID:${item.plp_id} 评论：${item.message}（${item.create_time ? (typeof item.create_time === 'string' ? item.create_time : item.create_time.toLocaleString?.() || item.create_time) : ''}）`
+                    `ID:${item.plp_id} 评论：${item.message}（${formatDateTime(item.create_time)}）\r`
                 ] });
             });
         } else {
@@ -473,7 +479,7 @@ export class plp extends plugin {
         ]
         if(comment && comment.length > 0) {
             for (let item of comment) {
-                params.push({ key: 'b', values: [`${item.message}（${item.create_time ? (typeof item.create_time === 'string' ? item.create_time : item.create_time.toLocaleString?.() || item.create_time) : ''}）`] })
+                params.push({ key: 'b', values: [`${item.message}（${formatDateTime(item.create_time)}）`] })
             }
         } else {
             params.push({ key: 'b', values: ['暂无评论'] })
@@ -524,6 +530,87 @@ export class plp extends plugin {
         }
         return true
     }
+    async reviewBottle(e) {
+        if (!e.isMaster) return false;
+        // 支持：审核漂流瓶、审核漂流瓶 审核中 2、审核漂流瓶 已通过 1、审核漂流瓶 已拒绝 3
+        const match = e.msg.match(/审核漂流瓶\s*(审核中|已通过|已拒绝)?\s*(\d*)?\s*(\d+)?\s*(通过|拒绝)?/)
+        const type = match && match[1] ? match[1] : null;
+        let page = match && match[2] ? parseInt(match[2], 10) : 1;
+        if (!page || page < 1) page = 1;
+        const plp_id = match && match[3];
+        const action = match && match[4];
+        const pageSize = 5;
+        // 审核操作
+        if (plp_id && action) {
+            if (!['通过', '拒绝'].includes(action)) {
+                await replyMarkdownButton(e, [
+                    { key: 'a', values: ['格式错误，请使用：审核漂流瓶 漂流瓶ID 通过 或 审核漂流瓶 漂流瓶ID 拒绝'] }
+                ], defaultButtons())
+                return true;
+            }
+            let status = action === '通过' ? '已通过' : '已拒绝';
+            let bottleRow;
+            try {
+                const [rows] = await bottlePool.query('SELECT * FROM plp_bottle WHERE plp_id = ?', [plp_id])
+                if (!rows || rows.length === 0) {
+                    await replyMarkdownButton(e, [
+                        { key: 'a', values: ['没有找到你说的这个漂流瓶哦，请检查漂流瓶ID是否正确~'] }
+                    ], defaultButtons())
+                    return true;
+                }
+                bottleRow = rows[0];
+            } catch {
+                await replyMarkdownButton(e, [
+                    { key: 'a', values: ['数据库查询失败'] }
+                ], defaultButtons())
+                return true;
+            }
+            try {
+                await bottlePool.query('UPDATE plp_bottle SET status = ? WHERE plp_id = ?', [status, plp_id])
+                await replyMarkdownButton(e, [
+                    { key: 'a', values: [`漂流瓶ID:${plp_id} 已被设置为"${status}"`] }
+                ], defaultButtons())
+            } catch (err) {
+                await replyMarkdownButton(e, [
+                    { key: 'a', values: ['审核失败：' + err.message] }
+                ], defaultButtons())
+            }
+            return true;
+        }
+        // 列表展示
+        let params = [];
+        let navBtns = [];
+        let statusList = ['审核中', '已通过', '已拒绝'];
+        let showType = type || '审核中';
+        // 查询总数
+        const [[{ total } = { total: 0 }]] = await bottlePool.query(
+            'SELECT COUNT(*) as total FROM plp_bottle WHERE status = ?', [showType]
+        );
+        const offset = (page - 1) * pageSize;
+        const [rows] = await bottlePool.query(
+            'SELECT * FROM plp_bottle WHERE status = ? ORDER BY create_time ASC LIMIT ? OFFSET ?',
+            [showType, pageSize, offset]
+        );
+        if (!rows || rows.length === 0) {
+            params.push({ key: 'a', values: [`当前没有${showType}的漂流瓶`] });
+        } else {
+            params.push({ key: 'a', values: [`${showType}漂流瓶列表（第${page}页/共${Math.ceil(total/pageSize)}页）：`] });
+            rows.forEach(item => {
+                params.push({ key: 'b', values: [
+                    `ID:${item.plp_id}\r内容：${item.text}\r时间：${formatDateTime(item.create_time)}`
+                ] });
+            });
+        }
+        // 翻页按钮
+        if (page > 1) navBtns.push({ text: '上一页', input: `审核漂流瓶 ${showType} ${page-1}`, clicked_text: '上一页' });
+        if (page * pageSize < total) navBtns.push({ text: '下一页', input: `审核漂流瓶 ${showType} ${page+1}`, clicked_text: '下一页' });
+        // 状态切换按钮
+        let typeBtns = statusList.filter(t => t !== showType).map(t => ({ text: t, input: `审核漂流瓶 ${t} 1`, clicked_text: t }));
+        const buttons = [typeBtns];
+        if (navBtns.length > 0) buttons.push(navBtns);
+        await replyMarkdownButton(e, params, buttons);
+        return true;
+    }
 }
 
 // 工具函数：默认按钮
@@ -551,4 +638,17 @@ function dateCalculation(dateStr) {
     const date = new Date(dateStr);
     const diff = Math.floor((now - date) / (1000 * 60 * 60 * 24));
     return diff;
+}
+
+// 新增格式化时间函数
+function formatDateTime(dt) {
+    if (!dt) return '';
+    const date = new Date(dt);
+    const y = date.getFullYear();
+    const m = (date.getMonth() + 1).toString().padStart(2, '0');
+    const d = date.getDate().toString().padStart(2, '0');
+    const h = date.getHours().toString().padStart(2, '0');
+    const min = date.getMinutes().toString().padStart(2, '0');
+    const s = date.getSeconds().toString().padStart(2, '0');
+    return `${y}-${m}-${d} ${h}:${min}:${s}`;
 }
