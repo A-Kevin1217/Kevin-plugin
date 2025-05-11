@@ -67,12 +67,7 @@ export class plp extends plugin {
                 {
                     reg: '^(#|/)?删除漂流瓶\\s*(\\d+)$',
                     fnc: 'delBottle'
-                },
-                {
-                    reg: '^(#|/)?审核漂流瓶(\s*([\u4e00-\u9fa5]+)?\s*(\d+)?)?$',
-                    fnc: 'reviewBottle',
-                    permission: 'master'
-                },
+                }
             ]
         })
     }
@@ -274,11 +269,13 @@ export class plp extends plugin {
         } catch {
             plpcontent = JSON.parse(await redis.get(`Yunzai:giplugin_plp_${plp_id1.number}`))
         }
+        let content = plpcontent.plp_text || plpcontent.text || '（无内容）'
+        let time = plpcontent.create_time ? formatDateTime(plpcontent.create_time) : ''
         let params = [
             { key: 'a', values: [`你捡到漂流瓶了~\r`] },
-            { key: 'b', values: [`内容：${plpcontent.plp_text}`] },
-            { key: 'c', values: [`漂流瓶  ID：${plp_id1.number}`] },
-            { key: 'd', values: [`漂流时间：${plpcontent.create_time ? formatDateTime(plpcontent.create_time) : ''}`] },
+            { key: 'b', values: [`内容：${content}\r`] },
+            { key: 'c', values: [`漂流瓶  ID：${plp_id1.number}\r`] },
+            { key: 'd', values: [`漂流时间：${time}\r`] },
             { key: 'e', values: [`今日第${userPDBnumber?.number || 1}/${config.Jplp}个`] }
         ]
         let day = dateCalculation(plp_id1.date)
@@ -541,91 +538,6 @@ export class plp extends plugin {
             ], defaultButtons())
         }
         return true
-    }
-    async reviewBottle(e) {
-        if (!e.isMaster) return false;
-        // 优先匹配审核操作：审核漂流瓶 123456 通过/拒绝
-        let opMatch = e.msg.replace(/\s+/g, ' ').trim().match(/审核漂流瓶\s*(\d+)\s*(通过|拒绝)/);
-        if (opMatch) {
-            const plp_id = opMatch[1];
-            const action = opMatch[2];
-            let status = action === '通过' ? '已通过' : '已拒绝';
-            let bottleRow;
-            try {
-                const [rows] = await bottlePool.query('SELECT * FROM plp_bottle WHERE plp_id = ?', [plp_id])
-                if (!rows || rows.length === 0) {
-                    await replyMarkdownButton(e, [
-                        { key: 'a', values: ['没有找到你说的这个漂流瓶哦，请检查漂流瓶ID是否正确~'] }
-                    ], defaultButtons())
-                    return true;
-                }
-                bottleRow = rows[0];
-            } catch {
-                await replyMarkdownButton(e, [
-                    { key: 'a', values: ['数据库查询失败'] }
-                ], defaultButtons())
-                return true;
-            }
-            try {
-                await bottlePool.query('UPDATE plp_bottle SET status = ? WHERE plp_id = ?', [status, plp_id])
-                await replyMarkdownButton(e, [
-                    { key: 'a', values: [`漂流瓶ID:${plp_id} 已被设置为\"${status}\"`] }
-                ], defaultButtons())
-            } catch (err) {
-                await replyMarkdownButton(e, [
-                    { key: 'a', values: ['审核失败：' + err.message] }
-                ], defaultButtons())
-            }
-            return true;
-        }
-        // 匹配列表翻页：审核漂流瓶 [状态] [页码]
-        let msgNorm = e.msg.replace(/\s+/g, ' ').trim();
-        let listMatch = msgNorm.match(/审核漂流瓶\s*([\u4e00-\u9fa5]+)?\s*(\d+)?$/);
-        let type = listMatch && listMatch[1] && ['审核中','已通过','已拒绝'].includes(listMatch[1].trim()) ? listMatch[1].trim() : '审核中';
-        let page = listMatch && listMatch[2] ? parseInt(listMatch[2], 10) : 1;
-        if (!page || page < 1) page = 1;
-        const pageSize = 5;
-        // 列表展示
-        let params = [];
-        let navBtns = [];
-        let statusList = ['审核中', '已通过', '已拒绝'];
-        let showType = type;
-        // 查询总数
-        const [[{ total } = { total: 0 }]] = await bottlePool.query(
-            'SELECT COUNT(*) as total FROM plp_bottle WHERE status = ?', [showType]
-        );
-        const offset = (page - 1) * pageSize;
-        const [rows] = await bottlePool.query(
-            'SELECT * FROM plp_bottle WHERE status = ? ORDER BY create_time ASC LIMIT ? OFFSET ?',
-            [showType, pageSize, offset]
-        );
-        if (!rows || rows.length === 0) {
-            params.push({ key: 'a', values: [`当前没有${showType}的漂流瓶`] });
-        } else {
-            params.push({ key: 'a', values: [`${showType}漂流瓶列表（第${page}页/共${Math.ceil(total / pageSize)}页）：`] });
-            rows.forEach(item => {
-                params.push({ key: 'b', values: [
-                    `ID:${item.plp_id}\r内容：${item.text}\r时间：${formatDateTime(item.create_time)}`
-                ] });
-                // 审核操作按钮
-                params.push({ buttons: [
-                    [
-                        { text: '通过审核', input: `审核漂流瓶 ${item.plp_id} 通过`, clicked_text: '通过审核' },
-                        { text: '拒绝审核', input: `审核漂流瓶 ${item.plp_id} 拒绝`, clicked_text: '拒绝审核' }
-                    ]
-                ] });
-            });
-        }
-        // 翻页按钮
-        if (page > 1) navBtns.push({ text: '上一页', input: `审核漂流瓶 ${showType} ${page - 1}`, clicked_text: '上一页' });
-        if (page * pageSize < total) navBtns.push({ text: '下一页', input: `审核漂流瓶 ${showType} ${page + 1}`, clicked_text: '下一页' });
-        // 状态切换按钮
-        let typeBtns = statusList.filter(t => t !== showType).map(t => ({ text: t, input: `审核漂流瓶 ${t} 1`, clicked_text: t }));
-        const buttons = [];
-        if (typeBtns.length > 0) buttons.push(typeBtns);
-        if (navBtns.length > 0) buttons.push(navBtns);
-        await replyMarkdownButton(e, params, buttons);
-        return true;
     }
 }
 
