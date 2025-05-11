@@ -54,7 +54,7 @@ export class plp extends plugin {
                     fnc: 'initDb',
                     permission: 'master'
                 },{
-                    reg: '^(#|/)?漂流瓶(帮助|教程)$',
+                    reg: '^(#|/)?漂流瓶(帮助|教程)?$',
                     fnc: 'help'
                 },{
                     reg: '^(#|/)?评论漂流瓶\s*(\d+)\s+(.+)$',
