@@ -237,6 +237,17 @@ export class plp extends plugin {
             ], defaultButtons())
             return true;
         }
+        // 只保留已通过的漂流瓶
+        let validPlpid = []
+        for (let item of plpid) {
+            try {
+                const [rows] = await bottlePool.query('SELECT status FROM plp_bottle WHERE plp_id = ?', [item.number])
+                if (rows.length > 0 && rows[0].status === '已通过') {
+                    validPlpid.push(item)
+                }
+            } catch {}
+        }
+        plpid = validPlpid
         plpid = plpid.filter(item => item.qq != e.user_id)
         if (userPDBnumber && userPDBnumber.number >= config.Jplp && userPDBnumber.date == date_time && !e.isMaster) {
             await replyMarkdownButton(e, [
