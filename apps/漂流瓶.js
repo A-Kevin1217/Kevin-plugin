@@ -242,6 +242,7 @@ export class plp extends plugin {
             ], defaultButtons())
             return true;
         }
+        plpid = plpid.filter(item => item.qq != e.user_id)
         if (userPDBnumber && userPDBnumber.number >= config.Jplp && userPDBnumber.date == date_time && !e.isMaster) {
             await replyMarkdownButton(e, [
                 { key: 'a', values: [`你今天已经捡过${userPDBnumber.number}次漂流瓶，每天只能捡${config.Jplp}次哦`] }
@@ -544,7 +545,7 @@ export class plp extends plugin {
     async reviewBottle(e) {
         if (!e.isMaster) return false;
         // 优先匹配审核操作：审核漂流瓶 123456 通过/拒绝
-        let opMatch = e.msg.match(/审核漂流瓶\s*(\d+)\s*(通过|拒绝)/);
+        let opMatch = e.msg.replace(/\s+/g, ' ').trim().match(/审核漂流瓶\s*(\d+)\s*(通过|拒绝)/);
         if (opMatch) {
             const plp_id = opMatch[1];
             const action = opMatch[2];
@@ -568,7 +569,7 @@ export class plp extends plugin {
             try {
                 await bottlePool.query('UPDATE plp_bottle SET status = ? WHERE plp_id = ?', [status, plp_id])
                 await replyMarkdownButton(e, [
-                    { key: 'a', values: [`漂流瓶ID:${plp_id} 已被设置为"${status}"`] }
+                    { key: 'a', values: [`漂流瓶ID:${plp_id} 已被设置为\"${status}\"`] }
                 ], defaultButtons())
             } catch (err) {
                 await replyMarkdownButton(e, [
@@ -578,8 +579,9 @@ export class plp extends plugin {
             return true;
         }
         // 匹配列表翻页：审核漂流瓶 [状态] [页码]
-        let listMatch = e.msg.match(/审核漂流瓶\s*([\u4e00-\u9fa5]+)?\s*(\d+)?$/);
-        let type = listMatch && listMatch[1] && ['审核中','已通过','已拒绝'].includes(listMatch[1]) ? listMatch[1] : '审核中';
+        let msgNorm = e.msg.replace(/\s+/g, ' ').trim();
+        let listMatch = msgNorm.match(/审核漂流瓶\s*([\u4e00-\u9fa5]+)?\s*(\d+)?$/);
+        let type = listMatch && listMatch[1] && ['审核中','已通过','已拒绝'].includes(listMatch[1].trim()) ? listMatch[1].trim() : '审核中';
         let page = listMatch && listMatch[2] ? parseInt(listMatch[2], 10) : 1;
         if (!page || page < 1) page = 1;
         const pageSize = 5;
@@ -605,7 +607,7 @@ export class plp extends plugin {
                 params.push({ key: 'b', values: [
                     `ID:${item.plp_id}\r内容：${item.text}\r时间：${formatDateTime(item.create_time)}`
                 ] });
-                // 在每条漂流瓶后面插入审核按钮，不与主buttons共用
+                // 审核操作按钮
                 params.push({ buttons: [
                     [
                         { text: '通过审核', input: `审核漂流瓶 ${item.plp_id} 通过`, clicked_text: '通过审核' },
