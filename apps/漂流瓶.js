@@ -39,7 +39,7 @@ export class plp extends plugin {
             priority: 500,
             rule:[
                 {
-                    reg: '^(#|/)?扔漂流瓶$',
+                    reg: '^(#|/)?扔漂流瓶\\s+(.+)$',
                     fnc: '扔漂流瓶'
                 },{
                     reg: '^(#|/)?捡漂流瓶$',
@@ -63,6 +63,10 @@ export class plp extends plugin {
                 },{
                     reg: '^(#|/)?查看漂流瓶评论\s*(\d+)$',
                     fnc: 'viewComments'
+                },
+                {
+                    reg: '^(#|/)?删除漂流瓶\\s*(\\d+)$',
+                    fnc: 'delBottle'
                 }
             ]
         })
@@ -130,6 +134,16 @@ export class plp extends plugin {
         return true
     }
     async 扔漂流瓶(e){
+        // 一步扔漂流瓶：#扔漂流瓶你想说的话
+        const match = e.msg.match(/扔漂流瓶\s+(.+)/)
+        if (!match) return false;
+        const plp_content = match[1].trim()
+        if (!plp_content) {
+            await replyMarkdownButton(e, [
+                { key: 'a', values: ['扔漂流瓶内容不能为空哦~'] }
+            ], defaultButtons())
+            return true
+        }
         const date_time = getDateTimeStr();
         let date_time2 = await redis.get(`giplugin_db:${e.user_id}`);
         date_time2 = JSON.parse(date_time2);
@@ -153,40 +167,18 @@ export class plp extends plugin {
                 await redis.set(`giplugin_db:${e.user_id}`, JSON.stringify(date_time2))
             }
         }
-        await replyMarkdownButton(e, [
-            { key: 'a', values: ['发送你想要扔漂流瓶的内容(仅支持文字)'] },
-            { key: 'b', values: ['发送[0]取消扔漂流瓶'] }
-        ], defaultButtons())
-        this.setContext(`扔漂流瓶1`)
-    }
-    async 扔漂流瓶1(e){
-        this.finish(`扔漂流瓶1`)
-        if(this.e.msg == `0`|| this.e.msg == `[0]`){
-            await replyMarkdownButton(e, [
-                { key: 'a', values: ['已取消扔漂流瓶'] }
-            ], defaultButtons())
-            return true;
+        let userDBnumber = JSON.parse(await redis.get(`giplugin_db:${e.user_id}`))
+        if(userDBnumber) {
+            userDBnumber.number++
+            await redis.set(`giplugin_db:${e.user_id}`, JSON.stringify(userDBnumber))
         } else {
-            let userDBnumber = JSON.parse(await redis.get(`giplugin_db:${e.user_id}`))
-            if(userDBnumber) {
-                userDBnumber.number++
-                await redis.set(`giplugin_db:${e.user_id}`, JSON.stringify(userDBnumber))
-            } else {
-                userDBnumber = {
-                    date: getDateTimeStr(),
-                    number: 1
-                }
-                await redis.set(`giplugin_db:${e.user_id}`, JSON.stringify(userDBnumber))
+            userDBnumber = {
+                date: getDateTimeStr(),
+                number: 1
             }
-        }
-        if(!this.e.msg || this.e.img) {
-            await replyMarkdownButton(e, [
-                { key: 'a', values: ['扔漂流瓶只支持文字内容，不支持图片或图文混合。'] }
-            ], defaultButtons())
-            return true;
+            await redis.set(`giplugin_db:${e.user_id}`, JSON.stringify(userDBnumber))
         }
         let type = 'text';
-        let plp_content = this.e.msg;
         let plp_imgUrl = '';
         let plp_id = await redis.get(`Yunzai:giplugin-plpid`)
         plp_id = JSON.parse(plp_id)
@@ -221,7 +213,7 @@ export class plp extends plugin {
         await replyMarkdownButton(e, [
             { key: 'a', values: ['你的漂流瓶成功扔出去了~'] }
         ], defaultButtons())
-        logger.mark(`[Gi互动:扔漂流瓶]用户${e.user_id}扔了一个漂流瓶【${plp}】`)
+        logger.mark(`[Gi互动:扔漂流瓶]用户${e.user_id}一步扔了一个漂流瓶【${plp}】`)
         return true;
     }
     async 捡漂流瓶(e){
@@ -295,7 +287,7 @@ export class plp extends plugin {
                 { text: '🖊评论该瓶', input: `评论漂流瓶 ${plp_id1.number} `, clicked_text: '评论该瓶' },
                 { text: '📜查看评论', input: `查看漂流瓶评论 ${plp_id1.number}`, clicked_text: '查看评论' }
             ],[
-                { text: '扔漂流瓶', callback: '扔漂流瓶', clicked_text: '扔漂流瓶' },
+                { text: '扔漂流瓶', input: '扔漂流瓶', clicked_text: '扔漂流瓶' },
                 { text: '捡漂流瓶', callback: '捡漂流瓶', clicked_text: '捡漂流瓶' },
                 { text: '我的漂流瓶', callback: '我的漂流瓶', clicked_text: '我的漂流瓶' }
             ]
@@ -354,7 +346,7 @@ export class plp extends plugin {
         ];
         const buttons = [
             [
-                { text: '扔漂流瓶', callback: '扔漂流瓶', clicked_text: '扔漂流瓶' },
+                { text: '扔漂流瓶', input: '扔漂流瓶', clicked_text: '扔漂流瓶' },
                 { text: '捡漂流瓶', callback: '捡漂流瓶', clicked_text: '捡漂流瓶' },
                 { text: '我的漂流瓶', callback: '我的漂流瓶', clicked_text: '我的漂流瓶' }
             ]
@@ -382,19 +374,44 @@ export class plp extends plugin {
             return true;
         }
         let params = [
-            { key: 'a', values: [`【我的漂流瓶】第${page}页 共${Math.ceil(total/pageSize)}页`] }
+            { key: 'a', values: ['你的漂流瓶相关内容'] },
+            { key: 'b', values: ['``'] },
+            { key: 'c', values: ['`\r你的漂流瓶列表：'] }
         ];
-        for (let item of rows) {
-            params.push({ key: 'b', values: [
-                `ID:${item.plp_id}\r内容:${item.text}\r时间:${item.create_time.toLocaleString?.() || item.create_time}`
-            ] })
+        rows.forEach((item, idx) => {
+            params.push({ key: 'd', values: [
+                `【漂流瓶 ${idx+1}】ID: ${item.plp_id}\r` +
+                `内容：${item.status === '审核中' ? '（审核中，暂不可见）' : item.text}\r` +
+                `时间：${item.create_time}\r` +
+                `状态：${item.status === '审核中' ? '⏳审核中' : (item.status === '已通过' ? '✅已通过' : '❌已拒绝')}`
+            ]});
+        });
+        params.push({ key: 'e', values: ['你的漂流瓶评论：'] });
+        // 查询别人对我所有漂流瓶的评论
+        const plpIds = rows.map(item => item.plp_id);
+        let commentList = [];
+        if (plpIds.length > 0) {
+            const [comments] = await bottlePool.query(
+                `SELECT * FROM plp_comments WHERE plp_id IN (${plpIds.map(()=>'?').join(',')}) AND user_id != ? ORDER BY create_time DESC`,
+                [...plpIds, e.user_id]
+            );
+            commentList = comments;
+        }
+        if (commentList.length > 0) {
+            commentList.forEach(item => {
+                params.push({ key: 'f', values: [
+                    `ID:${item.plp_id} 评论：${item.message}（${item.create_time ? (typeof item.create_time === 'string' ? item.create_time : item.create_time.toLocaleString?.() || item.create_time) : ''}）`
+                ] });
+            });
+        } else {
+            params.push({ key: 'f', values: ['暂无评论'] });
         }
         let navBtns = [];
         if (page > 1) navBtns.push({ text: '上一页', input: `我的漂流瓶 ${page-1}`, clicked_text: '上一页' });
         if (page * pageSize < total) navBtns.push({ text: '下一页', input: `我的漂流瓶 ${page+1}`, clicked_text: '下一页' });
         const buttons = [
             [
-                { text: '扔漂流瓶', callback: '扔漂流瓶', clicked_text: '扔漂流瓶' },
+                { text: '扔漂流瓶', input: '扔漂流瓶', clicked_text: '扔漂流瓶' },
                 { text: '捡漂流瓶', callback: '捡漂流瓶', clicked_text: '捡漂流瓶' },
                 { text: '我的漂流瓶', callback: '我的漂流瓶', clicked_text: '我的漂流瓶' }
             ]
@@ -464,12 +481,55 @@ export class plp extends plugin {
         await replyMarkdownButton(e, params, defaultButtons())
         return true
     }
+    async delBottle(e) {
+        // #删除漂流瓶 123456
+        const match = e.msg.match(/删除漂流瓶\s*(\d+)/)
+        if (!match) return false;
+        const plp_id = match[1]
+        // 检查漂流瓶是否存在且属于本人
+        let bottleRow
+        try {
+            const [rows] = await bottlePool.query('SELECT * FROM plp_bottle WHERE plp_id = ?', [plp_id])
+            if (!rows || rows.length === 0) {
+                await replyMarkdownButton(e, [
+                    { key: 'a', values: ['没有找到你说的这个漂流瓶哦，请检查漂流瓶ID是否正确~'] }
+                ], defaultButtons())
+                return true
+            }
+            bottleRow = rows[0]
+        } catch {
+            await replyMarkdownButton(e, [
+                { key: 'a', values: ['数据库查询失败'] }
+            ], defaultButtons())
+            return true
+        }
+        if (bottleRow.user_id != e.user_id && !e.isMaster) {
+            await replyMarkdownButton(e, [
+                { key: 'a', values: ['你只能删除自己的漂流瓶哦~'] }
+            ], defaultButtons())
+            return true
+        }
+        try {
+            await bottlePool.query('DELETE FROM plp_bottle WHERE plp_id = ?', [plp_id])
+            await bottlePool.query('DELETE FROM plp_comments WHERE plp_id = ?', [plp_id])
+            await bottlePool.query('DELETE FROM plp_id_map WHERE plp_id = ?', [plp_id])
+            await redis.del(`Yunzai:giplugin_plp_${plp_id}`)
+            await replyMarkdownButton(e, [
+                { key: 'a', values: ['漂流瓶及相关评论已成功删除~'] }
+            ], defaultButtons())
+        } catch (err) {
+            await replyMarkdownButton(e, [
+                { key: 'a', values: ['删除失败：' + err.message] }
+            ], defaultButtons())
+        }
+        return true
+    }
 }
 
 // 工具函数：默认按钮
 function defaultButtons() {
     return [[
-        { text: '扔漂流瓶', callback: '扔漂流瓶', clicked_text: '扔漂流瓶' },
+        { text: '扔漂流瓶', input: '扔漂流瓶', clicked_text: '扔漂流瓶' },
         { text: '捡漂流瓶', callback: '捡漂流瓶', clicked_text: '捡漂流瓶' },
         { text: '我的漂流瓶', callback: '我的漂流瓶', clicked_text: '我的漂流瓶' }
     ]]
