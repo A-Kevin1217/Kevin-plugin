@@ -419,7 +419,7 @@ export class plp extends plugin {
                 });
             });
         } else {
-            params.push({ key: 'f', values: ['暂无评论'] });
+            params.push({ key: 'f', values: ['暂无评论\r'] });
         }
         let navBtns = [];
         if (page > 1) navBtns.push({ text: '上一页', input: `我的漂流瓶 ${page - 1}`, clicked_text: '上一页' });
