@@ -1,4 +1,3 @@
-import plugin from '../../lib/plugins/plugin.js';
 import { segment } from "oicq";
 import os from 'os';
 import fs from 'fs';
