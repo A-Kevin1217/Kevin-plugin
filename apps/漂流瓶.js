@@ -33,8 +33,8 @@ const config = {
 export class plp extends plugin {
     constructor() {
         super({
-            name: 'Gi互动:漂流瓶',
-            dsc: 'Gi互动:漂流瓶',
+            name: '漂流瓶',
+            dsc: '漂流瓶',
             event: 'message',
             priority: 500,
             rule: [
@@ -213,7 +213,7 @@ export class plp extends plugin {
         await replyMarkdownButton(e, [
             { key: 'a', values: ['你的漂流瓶成功扔出去了~'] }
         ], defaultButtons())
-        logger.mark(`[Gi互动:扔漂流瓶]用户${e.user_id}一步扔了一个漂流瓶【${plp}】`)
+        logger.mark(`[扔漂流瓶]用户${e.user_id}一步扔了一个漂流瓶【${plp}】`)
         return true;
     }
     async 捡漂流瓶(e) {
@@ -266,6 +266,12 @@ export class plp extends plugin {
             await redis.set(`giplugin_pdb:${e.user_id}`, JSON.stringify(userPDBnumber))
         }
         let plp_id1 = plpid[Math.floor(Math.random() * plpid.length)]
+        if (!plp_id1) {
+            await replyMarkdownButton(e, [
+                { key: 'a', values: ['海里空空的，没有漂流瓶呢~'] }
+            ], defaultButtons())
+            return true;
+        }
         let plpcontent
         try {
             const [rows] = await bottlePool.query('SELECT * FROM plp_bottle WHERE plp_id = ?', [plp_id1.number])
