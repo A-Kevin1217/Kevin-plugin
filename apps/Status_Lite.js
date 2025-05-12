@@ -16,7 +16,7 @@ const latencyTestUrls = [
 const deviceScaleFactor = 1.5; // 设备缩放因子 (Increased for potentially sharper image)
 
 // 背景图片 URL
-const backgroundImageUrl = 'https://gitee.com/T060925ZX/iloli-plugin/raw/main/resources/image/nh.webp'; // 设置为用户提供的 Gitee 图片 URL
+const backgroundImageUrl = 'https://sky.res.netease.com/pc/gw/20221215171426/img/bg_0040d9d.jpg'; // 设置为用户提供的 Gitee 图片 URL
 
 
 // Embed the HTML template directly as a string
@@ -614,30 +614,30 @@ export class CPUSTATE extends plugin {
      */
     registerHandlebarsHelpers() {
         // Helper to parse percentage string to float
-        Handlebars.registerHelper('parseFloat', function(percentageStr) {
+        Handlebars.registerHelper('parseFloat', function (percentageStr) {
             if (typeof percentageStr === 'string') {
-                 return parseFloat(percentageStr.replace('%', ''));
+                return parseFloat(percentageStr.replace('%', ''));
             }
             return parseFloat(percentageStr); // Handle numbers directly
         });
 
         // Helper for greater than comparison
-        Handlebars.registerHelper('gt', function(a, b) {
+        Handlebars.registerHelper('gt', function (a, b) {
             return a > b;
         });
 
-         // Helper for not equal comparison
-         Handlebars.registerHelper('ne', function(a, b) {
-             return a !== b;
-         });
+        // Helper for not equal comparison
+        Handlebars.registerHelper('ne', function (a, b) {
+            return a !== b;
+        });
 
-         // Helper to replace substring
-         Handlebars.registerHelper('replace', function(str, find, replace) {
-             if (typeof str === 'string') {
-                 return str.replace(new RegExp(find, 'g'), replace);
-             }
-             return str; // Return original if not a string
-         });
+        // Helper to replace substring
+        Handlebars.registerHelper('replace', function (str, find, replace) {
+            if (typeof str === 'string') {
+                return str.replace(new RegExp(find, 'g'), replace);
+            }
+            return str; // Return original if not a string
+        });
     }
 
 
@@ -716,12 +716,12 @@ export class CPUSTATE extends plugin {
                 return (bytes / Math.pow(1024, unitIndex)).toFixed(2) + ' ' + units[unitIndex];
             };
 
-             const formatSpeed = bytesPerSecond => {
-                 if (bytesPerSecond === 0 || !isFinite(bytesPerSecond)) return '0 B/s'; // Handle non-finite values
-                 const units = ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s'];
-                 const unitIndex = Math.floor(Math.log(bytesPerSecond) / Math.log(1024));
-                 return (bytesPerSecond / Math.pow(1024, unitIndex)).toFixed(2) + ' ' + units[unitIndex];
-             };
+            const formatSpeed = bytesPerSecond => {
+                if (bytesPerSecond === 0 || !isFinite(bytesPerSecond)) return '0 B/s'; // Handle non-finite values
+                const units = ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s'];
+                const unitIndex = Math.floor(Math.log(bytesPerSecond) / Math.log(1024));
+                return (bytesPerSecond / Math.pow(1024, unitIndex)).toFixed(2) + ' ' + units[unitIndex];
+            };
 
 
             const formatPercentage = (numerator, denominator) => {
@@ -792,23 +792,23 @@ export class CPUSTATE extends plugin {
                                 freeMemAdjusted = freeBAvailable; // Use available from free -b
                             }
                         } else if (parts.length >= 6) { // Fallback if 'available' column is missing
-                             const freeBTotal = parseInt(parts[1]);
-                             const freeBUsed = parseInt(parts[2]);
-                             const freeBFree = parseInt(parts[3]);
-                             cacheBufferMem = parseInt(parts[5]);
+                            const freeBTotal = parseInt(parts[1]);
+                            const freeBUsed = parseInt(parts[2]);
+                            const freeBFree = parseInt(parts[3]);
+                            cacheBufferMem = parseInt(parts[5]);
 
-                             if (freeBTotal > 0) {
-                                 usedMem = freeBUsed;
-                                 // Approximate available as free + buff/cache if 'available' column is missing
-                                 freeMemAdjusted = freeBFree + cacheBufferMem;
-                             }
+                            if (freeBTotal > 0) {
+                                usedMem = freeBUsed;
+                                // Approximate available as free + buff/cache if 'available' column is missing
+                                freeMemAdjusted = freeBFree + cacheBufferMem;
+                            }
                         }
                     }
                 } catch (err) {
-                     logger.error('Failed to get detailed memory info using free -b:', err.message); // Use global logger
-                     // If free -b fails, fall back to os module data, cacheBufferMem remains 0
-                     usedMem = totalMem - os.freemem();
-                     freeMemAdjusted = os.freemem();
+                    logger.error('Failed to get detailed memory info using free -b:', err.message); // Use global logger
+                    // If free -b fails, fall back to os module data, cacheBufferMem remains 0
+                    usedMem = totalMem - os.freemem();
+                    freeMemAdjusted = os.freemem();
                 }
             }
 
@@ -841,7 +841,7 @@ export class CPUSTATE extends plugin {
                 used: '未知',
                 free: '未知',
                 usedPercentage: '未知%',
-                 // Data for Swap pie chart (default to 0%)
+                // Data for Swap pie chart (default to 0%)
                 usedDashArray: `0 ${circumference}`,
                 freeDashArray: `${circumference}`, // Only need free segment length and full circumference
                 usedColor: '#3b82f6', // Default color (Blue)
@@ -850,40 +850,40 @@ export class CPUSTATE extends plugin {
 
             if (os.platform() === 'linux') {
                 try {
-                     const freeOutput = execSync('free -b').toString(); // Use -b for bytes
-                     const lines = freeOutput.split('\n');
-                     const swapLine = lines.find(line => line.match(/^Swap:/) || line.match(/^交换:/));
+                    const freeOutput = execSync('free -b').toString(); // Use -b for bytes
+                    const lines = freeOutput.split('\n');
+                    const swapLine = lines.find(line => line.match(/^Swap:/) || line.match(/^交换:/));
 
-                     if (swapLine) {
-                         const parts = swapLine.trim().split(/\s+/).filter(Boolean);
-                         // Expected parts: [label, total, used, free]
-                         if (parts.length >= 4) {
-                             const totalSwap = parseInt(parts[1]);
-                             const usedSwap = parseInt(parts[2]);
-                             const freeSwap = parseInt(parts[3]);
+                    if (swapLine) {
+                        const parts = swapLine.trim().split(/\s+/).filter(Boolean);
+                        // Expected parts: [label, total, used, free]
+                        if (parts.length >= 4) {
+                            const totalSwap = parseInt(parts[1]);
+                            const usedSwap = parseInt(parts[2]);
+                            const freeSwap = parseInt(parts[3]);
 
-                             if (totalSwap > 0) { // Only show if Swap is available
-                                 const usedSwapPercentage = (usedSwap / totalSwap) * 100;
-                                 const freeSwapPercentage = (freeSwap / totalSwap) * 100;
+                            if (totalSwap > 0) { // Only show if Swap is available
+                                const usedSwapPercentage = (usedSwap / totalSwap) * 100;
+                                const freeSwapPercentage = (freeSwap / totalSwap) * 100;
 
-                                 swapInfo = {
-                                     available: true,
-                                     total: formatBytes(totalSwap),
-                                     used: formatBytes(usedSwap),
-                                     free: formatBytes(freeSwap),
-                                     usedPercentage: usedSwapPercentage.toFixed(2) + '%',
-                                     freePercentage: freeSwapPercentage.toFixed(2) + '%',
-                                     // Data for Swap pie chart
-                                     usedDashArray: `${(usedSwapPercentage / 100) * circumference} ${circumference}`, // Used segment length and full circumference
-                                     // Free segment will use the background color
-                                     usedOffset: 0, // Used starts at the top
-                                 };
-                             }
-                         }
-                     }
+                                swapInfo = {
+                                    available: true,
+                                    total: formatBytes(totalSwap),
+                                    used: formatBytes(usedSwap),
+                                    free: formatBytes(freeSwap),
+                                    usedPercentage: usedSwapPercentage.toFixed(2) + '%',
+                                    freePercentage: freeSwapPercentage.toFixed(2) + '%',
+                                    // Data for Swap pie chart
+                                    usedDashArray: `${(usedSwapPercentage / 100) * circumference} ${circumference}`, // Used segment length and full circumference
+                                    // Free segment will use the background color
+                                    usedOffset: 0, // Used starts at the top
+                                };
+                            }
+                        }
+                    }
                 } catch (err) {
-                     logger.error('Failed to get swap info:', err.message); // Use global logger
-                     // swapInfo remains unavailable: false
+                    logger.error('Failed to get swap info:', err.message); // Use global logger
+                    // swapInfo remains unavailable: false
                 }
             }
 
@@ -913,7 +913,7 @@ export class CPUSTATE extends plugin {
             }));
 
             // Store current network stats for next calculation
-             this.networkStats = networkInfoRaw;
+            this.networkStats = networkInfoRaw;
 
 
             // Perform latency tests using tcping
@@ -974,18 +974,18 @@ export class CPUSTATE extends plugin {
             // Wait for the container element to be available
             const container = await page.waitForSelector('#container', { timeout: 10000 });
 
-             if (!container) {
-                 logger.error('Failed to find container element after setContent.'); // Use global logger
-                 await e.reply('页面加载失败，无法找到容器元素');
-                 return;
+            if (!container) {
+                logger.error('Failed to find container element after setContent.'); // Use global logger
+                await e.reply('页面加载失败，无法找到容器元素');
+                return;
             }
 
             // Set viewport for screenshot, using deviceScaleFactor
-             await page.setViewport({
-                 width: 600, // Match max-width of container
-                 height: 800, // Initial height, will be overridden by fullPage
-                 deviceScaleFactor: deviceScaleFactor,
-             });
+            await page.setViewport({
+                width: 600, // Match max-width of container
+                height: 800, // Initial height, will be overridden by fullPage
+                deviceScaleFactor: deviceScaleFactor,
+            });
 
 
             // Take the screenshot of the full page
@@ -1092,7 +1092,7 @@ export class CPUSTATE extends plugin {
                         if (!isNaN(size) && size > 0) {
                             const used = size - freeSpace;
                             const usePercentage = ((used / size) * 100).toFixed(2) + '%';
-                             result.push({
+                            result.push({
                                 fs: fs,
                                 size: size, // Keep as bytes for formatting later
                                 used: used, // Keep as bytes for formatting later
@@ -1125,16 +1125,16 @@ export class CPUSTATE extends plugin {
                     }
                 });
 
-                 // Filter out redundant entries for the same mount point (e.g., docker overlays)
-                 const uniqueMounts = {};
-                 result.forEach(disk => {
-                     // Prioritize non-overlay filesystems if multiple entries for the same mount point exist
-                     if (!uniqueMounts[disk.mounted] || !disk.fs.includes('overlay')) {
-                          uniqueMounts[disk.mounted] = disk;
-                     }
-                 });
+                // Filter out redundant entries for the same mount point (e.g., docker overlays)
+                const uniqueMounts = {};
+                result.forEach(disk => {
+                    // Prioritize non-overlay filesystems if multiple entries for the same mount point exist
+                    if (!uniqueMounts[disk.mounted] || !disk.fs.includes('overlay')) {
+                        uniqueMounts[disk.mounted] = disk;
+                    }
+                });
 
-                 return Object.values(uniqueMounts);
+                return Object.values(uniqueMounts);
             }
 
 
@@ -1154,44 +1154,44 @@ export class CPUSTATE extends plugin {
             this.lastNetworkTime = currentTime; // Store current time for next calculation
 
             if (os.platform() === 'win32') {
-                 // Windows: Use netstat -e to get byte counts
-                 // Note: This does not give per-interface stats easily or real-time speed without sampling
-                 try {
-                     const output = execSync('netstat -e').toString();
-                     const lines = output.trim().split('\n');
-                     // Look for lines like "Bytes Received" and "Bytes Sent"
-                     let rxTotal = 0;
-                     let txTotal = 0;
+                // Windows: Use netstat -e to get byte counts
+                // Note: This does not give per-interface stats easily or real-time speed without sampling
+                try {
+                    const output = execSync('netstat -e').toString();
+                    const lines = output.trim().split('\n');
+                    // Look for lines like "Bytes Received" and "Bytes Sent"
+                    let rxTotal = 0;
+                    let txTotal = 0;
 
-                     lines.forEach(line => {
-                         if (line.includes('Bytes Received')) {
-                             const match = line.match(/Bytes Received:\s+(\d+)/);
-                             if (match && match[1]) rxTotal = parseInt(match[1]);
-                         } else if (line.includes('Bytes Sent')) {
-                             const match = line.match(/Bytes Sent:\s+(\d+)/);
-                              if (match && match[1]) txTotal = parseInt(match[1]);
-                         }
-                     });
+                    lines.forEach(line => {
+                        if (line.includes('Bytes Received')) {
+                            const match = line.match(/Bytes Received:\s+(\d+)/);
+                            if (match && match[1]) rxTotal = parseInt(match[1]);
+                        } else if (line.includes('Bytes Sent')) {
+                            const match = line.match(/Bytes Sent:\s+(\d+)/);
+                            if (match && match[1]) txTotal = parseInt(match[1]);
+                        }
+                    });
 
-                     // Calculate speed based on total bytes if previous stats exist
-                     let rxSpeed = 0;
-                     let txSpeed = 0;
-                     if (previousStats['total'] && timeDiff > 0) {
-                         rxSpeed = (rxTotal - previousStats['total'].rxTotal) / timeDiff;
-                         txSpeed = (txTotal - previousStats['total'].txTotal) / timeDiff;
-                     }
+                    // Calculate speed based on total bytes if previous stats exist
+                    let rxSpeed = 0;
+                    let txSpeed = 0;
+                    if (previousStats['total'] && timeDiff > 0) {
+                        rxSpeed = (rxTotal - previousStats['total'].rxTotal) / timeDiff;
+                        txSpeed = (txTotal - previousStats['total'].txTotal) / timeDiff;
+                    }
 
-                     networkInfo['Total'] = { // Group all traffic under 'Total' for simplicity on Windows
-                         rxTotal: rxTotal,
-                         txTotal: txTotal,
-                         rxSpeed: rxSpeed,
-                         txSpeed: txSpeed,
-                     };
+                    networkInfo['Total'] = { // Group all traffic under 'Total' for simplicity on Windows
+                        rxTotal: rxTotal,
+                        txTotal: txTotal,
+                        rxSpeed: rxSpeed,
+                        txSpeed: txSpeed,
+                    };
 
-                 } catch (err) {
-                     logger.error('Failed to get network info on Windows:', err.message);
-                     // Return empty if command fails
-                 }
+                } catch (err) {
+                    logger.error('Failed to get network info on Windows:', err.message);
+                    // Return empty if command fails
+                }
 
             } else { // Assume Linux or similar
                 // Get current network stats from /proc/net/dev
@@ -1206,10 +1206,10 @@ export class CPUSTATE extends plugin {
                         const name = parts[0].replace(':', '');
                         // Filter out loopback interface
                         if (name !== 'lo') {
-                             currentStats[name] = {
-                                 rxTotal: parseInt(parts[1]), // Receive bytes
-                                 txTotal: parseInt(parts[9])  // Transmit bytes
-                             };
+                            currentStats[name] = {
+                                rxTotal: parseInt(parts[1]), // Receive bytes
+                                txTotal: parseInt(parts[9])  // Transmit bytes
+                            };
                         }
                     }
                 });
@@ -1287,15 +1287,15 @@ export class CPUSTATE extends plugin {
                     } else if (error.message.includes('ECONNREFUSED')) {
                         errorMessage = 'Connection Refused';
                     } else if (error.message.includes('EHOSTUNREACH')) {
-                         errorMessage = 'Unreachable';
+                        errorMessage = 'Unreachable';
                     } else if (error.message.includes('ENOTFOUND')) {
-                         errorMessage = 'Not Found';
+                        errorMessage = 'Not Found';
                     } else if (error.message.includes('EAI_AGAIN')) {
-                         errorMessage = 'DNS Error';
+                        errorMessage = 'DNS Error';
                     } else if (error.message.includes('EACCES')) {
-                         errorMessage = 'Permission Denied';
+                        errorMessage = 'Permission Denied';
                     } else if (error.message.includes('EPERM')) {
-                          errorMessage = 'Operation not permitted';
+                        errorMessage = 'Operation not permitted';
                     }
 
 
@@ -1309,11 +1309,11 @@ export class CPUSTATE extends plugin {
             } catch (error) {
                 // This catch block might be redundant with the promise catch, but kept for safety
                 logger.error(`TCPing promise setup failed for ${host}:${port}:`, error);
-                 results.push({
-                     host: `${host}:${port}`,
-                     result: 'Setup Error',
-                     statusClass: 'latency-fail'
-                 });
+                results.push({
+                    host: `${host}:${port}`,
+                    result: 'Setup Error',
+                    statusClass: 'latency-fail'
+                });
             }
         }
         return results;
@@ -1380,24 +1380,24 @@ export class CPUSTATE extends plugin {
                     };
 
                 } catch (err) {
-                     logger.error('Failed to get detailed process info on Windows:', err.message);
-                     // Fallback to just total count if tasklist fails
-                     try {
-                         const totalOutput = execSync('tasklist').toString();
-                         const totalCount = totalOutput.trim().split('\n').length - 1;
-                         return {
-                             count: totalCount,
-                             states: { Total: totalCount, Running: '未知', Blocked: '未知', Sleeping: '未知', Unknown: '未知' },
-                             topProcessesList: []
-                         };
-                     } catch (e) {
-                         logger.error('Failed to get total process count on Windows:', e.message);
-                         return {
-                             count: '未知',
-                             states: { Total: '未知', Running: '未知', Blocked: '未知', Sleeping: '未知', Unknown: '未知' },
-                             topProcessesList: []
-                         };
-                     }
+                    logger.error('Failed to get detailed process info on Windows:', err.message);
+                    // Fallback to just total count if tasklist fails
+                    try {
+                        const totalOutput = execSync('tasklist').toString();
+                        const totalCount = totalOutput.trim().split('\n').length - 1;
+                        return {
+                            count: totalCount,
+                            states: { Total: totalCount, Running: '未知', Blocked: '未知', Sleeping: '未知', Unknown: '未知' },
+                            topProcessesList: []
+                        };
+                    } catch (e) {
+                        logger.error('Failed to get total process count on Windows:', e.message);
+                        return {
+                            count: '未知',
+                            states: { Total: '未知', Running: '未知', Blocked: '未知', Sleeping: '未知', Unknown: '未知' },
+                            topProcessesList: []
+                        };
+                    }
                 }
 
             } else { // Assume Linux or similar
@@ -1433,29 +1433,29 @@ export class CPUSTATE extends plugin {
 
                 processLines.forEach(line => {
                     const parts = line.trim().split(/\s+/);
-                     if (parts.length >= 3) {
-                         // The command might have spaces, so take the first two as CPU and MEM, rest as command
-                         const cpu = parseFloat(parts[parts.length - 2]);
-                         const mem = parseFloat(parts[parts.length - 1]);
-                         const name = parts.slice(0, parts.length - 2).join(' '); // Reconstruct command
+                    if (parts.length >= 3) {
+                        // The command might have spaces, so take the first two as CPU and MEM, rest as command
+                        const cpu = parseFloat(parts[parts.length - 2]);
+                        const mem = parseFloat(parts[parts.length - 1]);
+                        const name = parts.slice(0, parts.length - 2).join(' '); // Reconstruct command
 
-                         if (processMap.has(name)) {
-                             const existing = processMap.get(name);
-                             existing.count++;
-                             existing.cpu += cpu; // Sum CPU usage (approximation for group)
-                             existing.mem += mem; // Sum MEM usage (approximation for group)
-                             processMap.set(name, existing);
-                         } else {
-                             processMap.set(name, {
-                                 name: name,
-                                 count: 1,
-                                 cpu: cpu,
-                                 mem: mem,
-                             });
-                         }
-                     } else {
-                          logger.warn(`Failed to parse process list line (unexpected format): ${line}`);
-                     }
+                        if (processMap.has(name)) {
+                            const existing = processMap.get(name);
+                            existing.count++;
+                            existing.cpu += cpu; // Sum CPU usage (approximation for group)
+                            existing.mem += mem; // Sum MEM usage (approximation for group)
+                            processMap.set(name, existing);
+                        } else {
+                            processMap.set(name, {
+                                name: name,
+                                count: 1,
+                                cpu: cpu,
+                                mem: mem,
+                            });
+                        }
+                    } else {
+                        logger.warn(`Failed to parse process list line (unexpected format): ${line}`);
+                    }
                 });
 
                 // Convert map to array, sort, format, and limit
@@ -1486,41 +1486,6 @@ export class CPUSTATE extends plugin {
                 states: { Total: '未知', Running: '未知', Blocked: '未知', Sleeping: '未知', Unknown: '未知' },
                 topProcessesList: []
             };
-        }
-    }
-
-
-    getTemperatureInfo() {
-        // Temperature info is highly OS and hardware dependent and not easily available cross-platform via simple commands
-        return null; // Indicate not available
-    }
-
-    isInContainer() {
-        try {
-            if (os.platform() === 'linux') {
-                // Check /.dockerenv file
-                if (fs.existsSync('/.dockerenv')) return true;
-
-                // Check cgroup information
-                if (fs.existsSync('/proc/1/cgroup')) {
-                    const cgroup = fs.readFileSync('/proc/1/cgroup', 'utf8');
-                    if (cgroup.includes('docker') || cgroup.includes('lxc') || cgroup.includes('containerd')) {
-                        return true;
-                    }
-                }
-            } else if (os.platform() === 'win32') {
-                // Basic check for some container environments on Windows (e.g., Docker Desktop)
-                // This is not exhaustive and might not detect all container types
-                if (process.env.hasOwnProperty('DOTNET_RUNNING_IN_CONTAINER') || process.env.hasOwnProperty('CONTAINER_HOST')) {
-                    return true;
-                }
-                 // Check for specific files or registry keys if needed (more complex)
-            }
-
-            return false;
-        } catch (err) {
-            logger.error('检查容器环境失败:', err); // Use global logger
-            return false;
         }
     }
 }
