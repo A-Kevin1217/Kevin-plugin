@@ -946,8 +946,6 @@ export class CPUSTATE extends plugin {
                 latencyResults, // Added latency test results
                 loadInfo,
                 processInfo, // Now includes count, states, and topProcessesList
-                tempInfo,
-                containerInfo, // Pass boolean flag
                 backgroundImageUrl: backgroundImageUrl // Pass background image URL to template
             };
 
