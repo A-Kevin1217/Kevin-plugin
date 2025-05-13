@@ -5,6 +5,8 @@ import { execSync } from 'child_process';
 import puppeteer from 'puppeteer';
 import Handlebars from 'handlebars'; // Import Handlebars
 import net from 'net'; // Import Node.js net module for tcping
+import path from 'path';
+import axios from 'axios';
 
 // 硬编码需要进行延迟测试的网站列表 (格式: 'host:port' 或 'host')
 const latencyTestUrls = [
@@ -652,14 +654,26 @@ export class CPUSTATE extends plugin {
         const startTime = Date.now();
         let browser;
         let page;
-
+        // 临时图片路径
+        const tmpBgPath = path.join(os.tmpdir(), `status_bg_${Date.now()}.jpg`);
+        let dataUrl = '';
+        try {
+            // 用axios下载图片到临时文件
+            const response = await axios.get(backgroundImageUrl, { responseType: 'arraybuffer', timeout: 10000 });
+            fs.writeFileSync(tmpBgPath, response.data);
+            // 读取图片转base64
+            const imgBuffer = fs.readFileSync(tmpBgPath);
+            dataUrl = `data:image/jpeg;base64,${imgBuffer.toString('base64')}`;
+        } catch (err) {
+            logger.error('背景图片下载或转码失败:', err);
+            dataUrl = backgroundImageUrl; // 失败则用原始URL兜底
+        }
         try {
             browser = await this.initBrowser();
             if (!browser) {
                 await e.reply('Puppeteer浏览器启动失败，无法生成图片');
                 return;
             }
-
             page = await browser.newPage();
 
             // Helper functions for formatting
@@ -879,7 +893,7 @@ export class CPUSTATE extends plugin {
                 diskInfo,
                 latencyResults, // Added latency test results
                 processInfo, // Now includes count, states, and topProcessesList
-                backgroundImageUrl: backgroundImageUrl // Pass background image URL to template
+                backgroundImageUrl: dataUrl // 用dataUrl替换
             };
 
             // Compile the Handlebars template
@@ -936,6 +950,11 @@ export class CPUSTATE extends plugin {
                 await page.close().catch(e => logger.error('Error closing page:', e)); // Use global logger
             }
             await e.reply('获取系统状态时出错，请检查日志');
+        } finally {
+            // 删除临时图片
+            if (fs.existsSync(tmpBgPath)) {
+                fs.unlink(tmpBgPath, () => {});
+            }
         }
     }
 
