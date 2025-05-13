@@ -7,6 +7,10 @@ import Handlebars from 'handlebars'; // Import Handlebars
 import net from 'net'; // Import Node.js net module for tcping
 import https from 'https'; // 新增用于下载图片
 import path from 'path'; // 新增用于拼接本地路径
+import { fileURLToPath } from 'url'; // 兼容ESM获取__dirname
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // 硬编码需要进行延迟测试的网站列表 (格式: 'host:port' 或 'host')
 const latencyTestUrls = [
