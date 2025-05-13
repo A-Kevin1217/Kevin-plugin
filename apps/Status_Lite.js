@@ -436,8 +436,6 @@ const htmlTemplate = `
                  <p class="mt-4"><strong>CPU型号:</strong> {{cpuInfo.model}}</p>
                  <p><strong>CPU核心数:</strong> {{cpuInfo.cores}}</p>
                  {{#if cpuInfo.architecture}}<p><strong>架构:</strong> {{cpuInfo.architecture}}</p>{{/if}}
-                 {{#if cpuInfo.mhz}}<p><strong>当前频率:</strong> {{cpuInfo.mhz}}</p>{{/if}}
-                 {{#if cpuInfo.l3Cache}}<p><strong>三级缓存:</strong> {{cpuInfo.l3Cache}}</p>{{/if}}
                  {{#if memoryInfo.cacheBufferAvailable}}
                  <p><strong>缓存/缓冲:</strong> {{memoryInfo.cacheBuffer}}</p>
                  {{/if}}
@@ -468,33 +466,6 @@ const htmlTemplate = `
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-title">网络信息</div>
-            <div class="card-content">
-                {{#if networkInfo.length}}
-                    {{#each networkInfo}}
-                     <div class="network-item">
-                         <strong>{{this.name}}</strong>
-                         <div class="network-speed">
-                             <span class="upload-speed"><span class="network-icon">↑</span> {{this.txSpeed}}/s</span>
-                             <span class="download-speed"><span class="network-icon">↓</span> {{this.rxSpeed}}/s</span>
-                         </div>
-                     </div>
-                     <div class="network-item">
-                         <strong>流量</strong>
-                         <div class="network-total">
-                              <span class="upload-total"><span class="network-icon">↑</span> {{this.txTotal}}</span>
-                              <span class="download-total"><span class="network-icon">↓</span> {{this.rxTotal}}</span>
-                         </div>
-                     </div>
-                     {{#unless @last}}<hr class="my-4 border-gray-300">{{/unless}} {{!-- Add separator between interfaces --}}
-                    {{/each}}
-                {{else}}
-                <p>网络信息: 未知</p>
-                {{/if}}
-            </div>
-        </div>
-
          <div class="card">
              <div class="card-title">网络延迟测试</div>
              <div class="card-content">
@@ -511,16 +482,6 @@ const htmlTemplate = `
                  {{/if}}
              </div>
          </div>
-
-
-        <div class="card">
-            <div class="card-title">系统负载</div>
-            <div class="card-content">
-                <p><strong>1分钟负载:</strong> {{loadInfo.min1}}</p>
-                <p><strong>5分钟负载:</strong> {{loadInfo.min5}}</p>
-                <p><strong>15分钟负载:</strong> {{loadInfo.min15}}</p>
-            </div>
-        </div>
 
         <div class="card">
             <div class="card-title">进程信息</div>
@@ -902,30 +863,8 @@ export class CPUSTATE extends plugin {
                 };
             });
 
-            // Network information
-            const networkInfoRaw = this.getNetworkInfo();
-            const networkInfo = Object.entries(networkInfoRaw).map(([name, stats]) => ({
-                name,
-                rxTotal: formatBytes(stats.rxTotal),
-                txTotal: formatBytes(stats.txTotal),
-                rxSpeed: formatSpeed(stats.rxSpeed),
-                txSpeed: formatSpeed(stats.txSpeed),
-            }));
-
-            // Store current network stats for next calculation
-            this.networkStats = networkInfoRaw;
-
-
             // Perform latency tests using tcping
             const latencyResults = await this.performLatencyTests();
-
-            // Load average
-            const loadavg = os.loadavg();
-            const loadInfo = {
-                min1: loadavg[0].toFixed(2),
-                min5: loadavg[1].toFixed(2),
-                min15: loadavg[2].toFixed(2),
-            };
 
             // Process information
             const processInfo = this.getProcessInfo(); // Get detailed process info
@@ -938,9 +877,7 @@ export class CPUSTATE extends plugin {
                 memoryInfo, // Includes pie chart data for Memory (RAM) and cache/buffer
                 swapInfo, // Includes pie chart data and availability flag
                 diskInfo,
-                networkInfo, // Updated network info with speed and total
                 latencyResults, // Added latency test results
-                loadInfo,
                 processInfo, // Now includes count, states, and topProcessesList
                 backgroundImageUrl: backgroundImageUrl // Pass background image URL to template
             };
@@ -1131,105 +1068,6 @@ export class CPUSTATE extends plugin {
         }
     }
 
-    getNetworkInfo() {
-        try {
-            const networkInfo = {};
-            const previousStats = this.networkStats; // Get previous stats stored in the instance
-            const currentTime = Date.now();
-            const timeDiff = (currentTime - (this.lastNetworkTime || currentTime)) / 1000; // Time difference in seconds
-            this.lastNetworkTime = currentTime; // Store current time for next calculation
-
-            if (os.platform() === 'win32') {
-                // Windows: Use netstat -e to get byte counts
-                // Note: This does not give per-interface stats easily or real-time speed without sampling
-                try {
-                    const output = execSync('netstat -e').toString();
-                    const lines = output.trim().split('\n');
-                    // Look for lines like "Bytes Received" and "Bytes Sent"
-                    let rxTotal = 0;
-                    let txTotal = 0;
-
-                    lines.forEach(line => {
-                        if (line.includes('Bytes Received')) {
-                            const match = line.match(/Bytes Received:\s+(\d+)/);
-                            if (match && match[1]) rxTotal = parseInt(match[1]);
-                        } else if (line.includes('Bytes Sent')) {
-                            const match = line.match(/Bytes Sent:\s+(\d+)/);
-                            if (match && match[1]) txTotal = parseInt(match[1]);
-                        }
-                    });
-
-                    // Calculate speed based on total bytes if previous stats exist
-                    let rxSpeed = 0;
-                    let txSpeed = 0;
-                    if (previousStats['total'] && timeDiff > 0) {
-                        rxSpeed = (rxTotal - previousStats['total'].rxTotal) / timeDiff;
-                        txSpeed = (txTotal - previousStats['total'].txTotal) / timeDiff;
-                    }
-
-                    networkInfo['Total'] = { // Group all traffic under 'Total' for simplicity on Windows
-                        rxTotal: rxTotal,
-                        txTotal: txTotal,
-                        rxSpeed: rxSpeed,
-                        txSpeed: txSpeed,
-                    };
-
-                } catch (err) {
-                    logger.error('Failed to get network info on Windows:', err.message);
-                    // Return empty if command fails
-                }
-
-            } else { // Assume Linux or similar
-                // Get current network stats from /proc/net/dev
-                const output = execSync('cat /proc/net/dev').toString();
-                const lines = output.split('\n').slice(2);
-                const currentStats = {};
-
-                lines.forEach(line => {
-                    if (!line) return;
-                    const parts = line.trim().split(/\s+/);
-                    if (parts.length >= 10 && parts[0].endsWith(':')) {
-                        const name = parts[0].replace(':', '');
-                        // Filter out loopback interface
-                        if (name !== 'lo') {
-                            currentStats[name] = {
-                                rxTotal: parseInt(parts[1]), // Receive bytes
-                                txTotal: parseInt(parts[9])  // Transmit bytes
-                            };
-                        }
-                    }
-                });
-
-
-                for (const name in currentStats) {
-                    const current = currentStats[name];
-                    const previous = previousStats[name];
-
-                    let rxSpeed = 0;
-                    let txSpeed = 0;
-
-                    if (previous && timeDiff > 0) {
-                        // Calculate speed if previous stats exist and time difference is positive
-                        rxSpeed = (current.rxTotal - previous.rxTotal) / timeDiff;
-                        txSpeed = (current.txTotal - previous.txTotal) / timeDiff;
-                    }
-
-                    networkInfo[name] = {
-                        rxTotal: current.rxTotal,
-                        txTotal: current.txTotal,
-                        rxSpeed: rxSpeed,
-                        txSpeed: txSpeed,
-                    };
-                }
-            }
-
-            return networkInfo;
-
-        } catch (err) {
-            logger.error('获取网络信息失败:', err); // Use global logger
-            return {};
-        }
-    }
 
     async performLatencyTests() {
         const results = [];
