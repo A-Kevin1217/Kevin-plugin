@@ -930,14 +930,6 @@ export class CPUSTATE extends plugin {
             // Process information
             const processInfo = this.getProcessInfo(); // Get detailed process info
 
-
-            // Temperature information (if available)
-            const tempInfoRaw = this.getTemperatureInfo();
-            const tempInfo = tempInfoRaw ? tempInfoRaw.map(temp => ({
-                label: temp.label,
-                value: temp.value + '°C',
-            })) : null;
-
             // Container information
             const containerInfo = this.isInContainer(); // Get boolean flag
 
