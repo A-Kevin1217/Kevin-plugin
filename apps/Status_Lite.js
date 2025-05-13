@@ -930,10 +930,6 @@ export class CPUSTATE extends plugin {
             // Process information
             const processInfo = this.getProcessInfo(); // Get detailed process info
 
-            // Container information
-            const containerInfo = this.isInContainer(); // Get boolean flag
-
-
             // Combine data for the template
             const renderData = {
                 systemInfo,
