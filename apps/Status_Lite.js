@@ -5,12 +5,6 @@ import { execSync } from 'child_process';
 import puppeteer from 'puppeteer';
 import Handlebars from 'handlebars'; // Import Handlebars
 import net from 'net'; // Import Node.js net module for tcping
-import https from 'https'; // 新增用于下载图片
-import path from 'path'; // 新增用于拼接本地路径
-import { fileURLToPath } from 'url'; // 兼容ESM获取__dirname
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // 硬编码需要进行延迟测试的网站列表 (格式: 'host:port' 或 'host')
 const latencyTestUrls = [
@@ -22,8 +16,7 @@ const latencyTestUrls = [
 const deviceScaleFactor = 1.5; // 设备缩放因子 (Increased for potentially sharper image)
 
 // 背景图片 URL
-const BACKGROUND_IMG_URL = 'https://sky.res.netease.com/pc/gw/20221215171426/img/bg_0040d9d.jpg';
-const BACKGROUND_IMG_PATH = path.join(__dirname, 'background_cache.jpg');
+const backgroundImageUrl = 'https://t.alcy.cc/ysz'; // 设置为用户提供的 Gitee 图片 URL
 
 
 // Embed the HTML template directly as a string
@@ -575,9 +568,6 @@ export class CPUSTATE extends plugin {
 
         // Register Handlebars helpers
         this.registerHandlebarsHelpers();
-
-        // 检查并准备本地背景图
-        this.prepareBackgroundImage();
     }
 
     /**
@@ -611,28 +601,6 @@ export class CPUSTATE extends plugin {
         });
     }
 
-    /**
-     * 检查本地是否有背景图，没有则下载
-     */
-    prepareBackgroundImage() {
-        if (fs.existsSync(BACKGROUND_IMG_PATH)) return;
-        // 下载图片
-        const file = fs.createWriteStream(BACKGROUND_IMG_PATH);
-        https.get(BACKGROUND_IMG_URL, (res) => {
-            if (res.statusCode !== 200) {
-                logger.error('背景图下载失败，状态码:', res.statusCode);
-                file.close();
-                fs.unlinkSync(BACKGROUND_IMG_PATH);
-                return;
-            }
-            res.pipe(file);
-            file.on('finish', () => file.close());
-        }).on('error', (err) => {
-            logger.error('背景图下载异常:', err);
-            file.close();
-            fs.unlinkSync(BACKGROUND_IMG_PATH);
-        });
-    }
 
     /**
      * Initialize Puppeteer browser
@@ -901,16 +869,6 @@ export class CPUSTATE extends plugin {
             // Process information
             const processInfo = this.getProcessInfo(); // Get detailed process info
 
-            // 读取本地图片并转为base64
-            let backgroundImageUrl = '';
-            try {
-                const imgBuffer = fs.readFileSync(BACKGROUND_IMG_PATH);
-                backgroundImageUrl = 'data:image/jpeg;base64,' + imgBuffer.toString('base64');
-            } catch (err) {
-                logger.error('读取本地背景图失败，使用默认远程图片:', err);
-                backgroundImageUrl = BACKGROUND_IMG_URL;
-            }
-
             // Combine data for the template
             const renderData = {
                 systemInfo,
@@ -921,7 +879,7 @@ export class CPUSTATE extends plugin {
                 diskInfo,
                 latencyResults, // Added latency test results
                 processInfo, // Now includes count, states, and topProcessesList
-                backgroundImageUrl // 用本地base64或远程url
+                backgroundImageUrl: backgroundImageUrl // Pass background image URL to template
             };
 
             // Compile the Handlebars template
