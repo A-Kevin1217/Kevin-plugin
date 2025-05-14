@@ -864,8 +864,10 @@ export class 光遇_身高查询 extends plugin {
                     { key: 'a', values: [`##`] },
                     { key: 'b', values: [` 该群已经开放过了，可以查询啦~`] }
                 ], [
-                    { text: '查国服身高', callback: '国服身高查询', clicked_text: '正在查询国服身高' },
-                    { text: '国际服身高', callback: '国际服身高查询', clicked_text: '正在查询国际服身高' }
+                    [
+                        { text: '查国服身高', callback: '国服身高查询', clicked_text: '正在查询国服身高' },
+                        { text: '国际服身高', callback: '国际服身高查询', clicked_text: '正在查询国际服身高' }
+                    ]
                 ]);
             }
 
@@ -877,8 +879,10 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'a', values: [`##`] },
                 { key: 'b', values: [` 该群已开放！可以查询啦~\r`] }
             ], [
-                { text: '查国服身高', callback: '国服身高查询', clicked_text: '正在查询国服身高' },
-                { text: '国际服身高', callback: '国际服身高查询', clicked_text: '正在查询国际服身高' }
+                [
+                    { text: '查国服身高', callback: '国服身高查询', clicked_text: '正在查询国服身高' },
+                    { text: '国际服身高', callback: '国际服身高查询', clicked_text: '正在查询国际服身高' }
+                ]
             ]);
 
         } catch (error) {
