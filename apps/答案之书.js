@@ -11,7 +11,7 @@ export class example extends plugin {
             priority: 1,
             rule: [
                 {
-                    reg: /^(#|\/)?答案之书$/,
+                    reg: /^(#|\/)?答案之书(.*)?$/,
                     fnc: 'AnswersBook'
                 }
             ]
