@@ -168,7 +168,7 @@ export class 猫猫糕 extends plugin {
                 { text: '今日猫猫糕', callback: '今日猫猫糕', clicked_text: '正在获取今日猫猫糕' }
             ],
             [
-                { text: '联系主人', input: '/联系主人', clicked_text: '正在联系主人' }
+                { text: '联系主人', input: '/联系主人 （内容）', clicked_text: '正在联系主人' }
             ]
         ]
         await replyMarkdownButton(e, md, btn);
