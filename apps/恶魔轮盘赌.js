@@ -949,7 +949,7 @@ export class DemonRoulette extends plugin {
       const playerId = String(p.id).split(':').pop();
       return [
         { key: ['e', 'g'][index], values: [`![玩家 #25px #25px](https://q.qlogo.cn/qqapp/102059511/${playerId}/640`] },
-        { key: ['f', 'h'][index], values: [`)] (${p.hp}❤️)`] }
+        { key: ['f', 'h'][index], values: [`)(${p.hp}❤️)`] }
       ];
     }).flat();
 
