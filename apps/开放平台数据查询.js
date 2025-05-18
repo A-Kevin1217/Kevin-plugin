@@ -238,18 +238,30 @@ export class robot_data extends plugin {
         dauCount++;
       }
       let avgDAU = dauCount ? Math.round(totalDAU / dauCount) : 0;
+      
       let resultArr = [];
-      for (let i = 0; i < Math.min(showDays, msgDataArr.length); i++) {
-        resultArr.push(formatDayDataV2(msgDataArr, groupDataArr, friendDataArr, i));
+      let contentText = '';
+      let titleText = '';
+      
+      if (showDays === 0) {
+        contentText = `没办法啊，你自己要显示0天的`;
+        titleText = `${msgDataArr.length}日平均DAU：${avgDAU}`;
+      } else {
+        for (let i = 0; i < Math.min(showDays, msgDataArr.length); i++) {
+          resultArr.push(formatDayDataV2(msgDataArr, groupDataArr, friendDataArr, i));
+        }
+        contentText = resultArr.join('\r\r——————\r');
+        titleText = `最近${resultArr.length}日汇总如下\r${msgDataArr.length}日平均DAU：${avgDAU}`;
       }
+      
       return replyMarkdownButton(e, [
         { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
         { key: 'b', values: ['#'] },
         { key: 'c', values: ['Bot数据'] },
-        { key: 'd', values: [`\r> 最近${resultArr.length}日汇总如下\r${msgDataArr.length}日平均DAU：${avgDAU}\r`] },
+        { key: 'd', values: [`\r> ${titleText}\r`] },
         { key: 'e', values: ['***'] },
         { key: 'f', values: ['\r\r``'] },
-        { key: 'g', values: [`\`\r${resultArr.join('\r\r——————\r')}`] },
+        { key: 'g', values: [`\`\r${contentText}`] },
         { key: 'h', values: ['``'] },
         { key: 'i', values: ['`'] }
       ], commonButtons)
