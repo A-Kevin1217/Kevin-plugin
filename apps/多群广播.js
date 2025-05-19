@@ -149,7 +149,7 @@ export class example extends plugin {
       // 发送消息到所有目标群
       const sendToGroup = async (groupId, retryCount = 0) => {
         try {
-          const group = Bot[3631285827].pickGroup(groupId);
+          const group = Bot[207327108].pickGroup(groupId);
           await group.sendMsg(forwardMsg);
           return true;
         } catch (error) {
@@ -228,7 +228,7 @@ export class example extends plugin {
     // 重试发送
     for (const groupId of groups) {
       try {
-        const group = Bot[3631285827].pickGroup(groupId);
+        const group = Bot[207327108].pickGroup(groupId);
         await group.sendMsg(message);
         successGroups.push(groupId);
       } catch (error) {
@@ -274,10 +274,10 @@ export class example extends plugin {
     }
     const { destinationGroupIds } = data;
     for (const groupId of destinationGroupIds) {
-      await Bot[3631285827].pickGroup(groupId).muteAll(true);  // 开启全员禁言
+      await Bot[207327108].pickGroup(groupId).muteAll(true);  // 开启全员禁言
     }
     for (const groupId of destinationGroupIds) {
-      await Bot[3631285827].pickGroup(groupId).sendMsg('狂欢结束~ 大家保持安静🤫');
+      await Bot[207327108].pickGroup(groupId).sendMsg('狂欢结束~ 大家保持安静🤫');
     }
   }
 
@@ -292,7 +292,7 @@ export class example extends plugin {
       await Bot.pickGroup(groupId).muteAll(false);  // 关闭全员禁言
     }
     for (const groupId of destinationGroupIds) {
-      await Bot[3631285827].pickGroup(groupId).sendMsg('❗欢呼吧！在接下来的时间里，聚集地的所有人都能无限制的发布且能看到你发的信息');
+      await Bot[207327108].pickGroup(groupId).sendMsg('❗欢呼吧！在接下来的时间里，聚集地的所有人都能无限制的发布且能看到你发的信息');
     }
   }
 
