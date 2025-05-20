@@ -268,7 +268,7 @@ export class robot_data extends plugin {
         { key: 'd', values: [`\r> ${titleText}\r`] },
         { key: 'e', values: ['***'] },
         { key: 'f', values: ['\r\r``'] },
-        { key: 'g', values: [`\`\r${contentText}`] },
+        { key: 'g', values: [`\`\r${contentText}\r`] },
         { key: 'h', values: ['``'] },
         { key: 'i', values: ['`'] }
       ], commonButtons)
