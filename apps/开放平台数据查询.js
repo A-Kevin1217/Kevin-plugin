@@ -252,7 +252,7 @@ export class robot_data extends plugin {
       
       if (showDays === 0) {
         contentText = `没办法啊，你自己要显示0天的`;
-        titleText = `${msgDataArr.length}日平均DAU：${avgDAU}`;
+        titleText = `最近${resultArr.length}日汇总如下\r${msgDataArr.length}日平均DAU：${avgDAU}`;
       } else {
         for (let i = 0; i < Math.min(showDays, msgDataArr.length); i++) {
           resultArr.push(formatDayDataV2(msgDataArr, groupDataArr, friendDataArr, i));
