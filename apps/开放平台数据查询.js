@@ -224,10 +224,17 @@ export class robot_data extends plugin {
     try {
       // 获取展示天数
       let match = e.msg?.match(/bot数据(\d*)/);
-      let showDays = 4;
-      if (match && match[1]) {
-        showDays = parseInt(match[1], 10) || 4;
+      let showDays = 4; // Default to 4 days if no valid number is provided
+
+      if (match && match[1] !== undefined) {
+        let parsedDays = parseInt(match[1], 10);
+        if (!isNaN(parsedDays)) {
+          showDays = parsedDays;
+        }
+        // If parsedDays is NaN (e.g., bot数据abc or bot数据), showDays remains the default 4
       }
+      // If match or match[1] is undefined (e.g., bot数据), showDays remains the default 4
+
       let msgDataArr = data1.data.msg_data || [];
       let groupDataArr = data2.data.group_data || [];
       let friendDataArr = data3.data.friend_data || [];
