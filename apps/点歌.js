@@ -214,7 +214,7 @@ export class MusicShare extends plugin {
         
         if (coverData.songs && coverData.songs[0] && coverData.songs[0].al && coverData.songs[0].al.picUrl) {
           // 如果获取到封面，替换"请稍候..."
-          replyContent[5] = { key: 'f', values: [`\r![封面 #100px #100px]`] }
+          replyContent[5] = { key: 'f', values: [`\r![封面 #300px #300px]`] }
           replyContent.push({ key: 'g', values: [`(${coverData.songs[0].al.picUrl})`] })
         }
       } catch (err) {
