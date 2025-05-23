@@ -194,14 +194,36 @@ export class MusicShare extends plugin {
 
     // 发送正在获取音乐的提示
     if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
-    await replyMarkdownButton(e, [
+    
+    // 初始化回复内容
+    let replyContent = [
       { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
       { key: 'b', values: ['#'] },
       { key: 'c', values: ['正在获取音乐'] },
       { key: 'd', values: [`\r> ${songName} - ${artist}\r\r`] },
       { key: 'e', values: ['***\r'] },
       { key: 'f', values: ['\r请稍候...'] }
-    ])
+    ]
+    
+    // 如果是网易云音乐，尝试获取封面
+    if (type === 'wangyiyun') {
+      try {
+        let ids = String(song.id)
+        let coverResponse = await fetch(`https://163music.kevcore.cn/song/detail?ids=${ids}`)
+        let coverData = await coverResponse.json()
+        
+        if (coverData.songs && coverData.songs[0] && coverData.songs[0].al && coverData.songs[0].al.picUrl) {
+          // 如果获取到封面，替换"请稍候..."
+          replyContent[5] = { key: 'f', values: [`\r![封面 #100px #100px]`] }
+          replyContent.push({ key: 'g', values: [`(${coverData.songs[0].al.picUrl})`] })
+        }
+      } catch (err) {
+        console.log('获取封面失败:', err)
+        // 获取封面失败，保持原样
+      }
+    }
+    
+    await replyMarkdownButton(e, replyContent)
 
     try {
       if (type === 'wangyiyun') {
