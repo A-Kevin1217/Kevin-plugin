@@ -32,41 +32,11 @@ export class 猫猫糕 extends plugin {
             '今日份猫猫糕，软萌上线，快来rua一口！',
             '猫猫糕已就位，愿你今天甜甜的，喵~'
         ]
-        this.repoDir = path.join(process.cwd(), 'plugins/Kevin-plugin/resources/orange-example')
-        this.countPath = path.join(this.repoDir, 'json/猫猫糕数量.json')
-        this.imgDir = path.join(this.repoDir, 'images/猫猫糕')
-        this.repoUrl = 'https://gitcode.com/Kevin1217/orange-example'
-        this.cloning = false
-        this.ensureRepoAsync()
-        // 每小时自动拉取仓库更新
-        setInterval(() => {
-            this.pullRepo()
-        }, 1000 * 60 * 60)
-    }
-
-    ensureRepoAsync() {
-        if (!fs.existsSync(this.repoDir) && !this.cloning) {
-            this.cloning = true
-            logger.info('[猫猫糕] orange-example资源未检测到，正在异步clone...')
-            const git = spawn('git', ['clone', this.repoUrl, this.repoDir])
-            git.on('close', code => {
-                if (code === 0) {
-                    logger.info('[猫猫糕] orange-example资源clone完成')
-                } else {
-                    logger.error('[猫猫糕] clone orange-example失败，code=' + code)
-                }
-                this.cloning = false
-            })
-        }
+        this.mmgCount = 435
     }
 
     async getTotalCount() {
-        if (!fs.existsSync(this.countPath)) {
-            throw new Error('资源正在初始化，请稍后再试')
-        }
-        const data = JSON.parse(fs.readFileSync(this.countPath, 'utf8'))
-        if (!data['猫猫糕数量']) throw new Error('猫猫糕数量字段缺失')
-        return data['猫猫糕数量']
+        return this.mmgCount
     }
 
     async getMMGPath(idx) {
@@ -237,19 +207,5 @@ export class 猫猫糕 extends plugin {
             return
         }
         await this.sendMMG(e, imgPath, idx)
-    }
-
-    pullRepo() {
-        if (fs.existsSync(this.repoDir)) {
-            logger.info('[猫猫糕] 正在自动pull orange-example资源...')
-            const git = spawn('git', ['-C', this.repoDir, 'pull'])
-            git.on('close', code => {
-                if (code === 0) {
-                    logger.info('[猫猫糕] orange-example资源pull完成')
-                } else {
-                    logger.error('[猫猫糕] pull orange-example失败，code=' + code)
-                }
-            })
-        }
     }
 }

@@ -42,10 +42,10 @@ export class example extends plugin {
       return false;
     }
     await replyMarkdownButton(e, [
-      { key: 'a', values: ['用户名：[点击此处输入](mqqapi://aio/inlinecmd?command=我的用户名是：&reply=true&enter=true'] },
-      { key: 'b', values: [')'] },
-      { key: 'c', values: ['\r小尾巴：[点击此处输入](mqqapi://aio/inlinecmd?command=我的小尾巴是：&reply=true&enter=true'] },
-      { key: 'd', values: [')'] }
+      { key: 'a', values: ['用户名：[点击此处输入]'] },
+      { key: 'b', values: ['(mqqapi://aio/inlinecmd?command=我的用户名是：&reply=true&enter=true)'] },
+      { key: 'c', values: ['\r小尾巴：[点击此处输入]'] },
+      { key: 'd', values: ['(mqqapi://aio/inlinecmd?command=我的小尾巴是：&reply=true&enter=true)'] }
     ]);
   }
 
