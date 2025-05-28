@@ -668,45 +668,78 @@ export class 光遇_身高查询 extends plugin {
 
         let URL = `${API_GUO_JI}?key=${KEY_1}&id=${SKY_UID}`;
 
-        const URL_DATA = await (await fetch(URL)).json();
-        const CODE = URL_DATA['code'];
-        const TIME = URL_DATA['time'];
-
-        if (CODE === 200) {
-            const { scale, height, maxHeight, minHeight, currentHeight } = URL_DATA['data'];
-            const { hair, horn, mask, neck, pants, cloak, prop } = URL_DATA['adorn'];
-            const { voice, attitude } = URL_DATA['action'];
-
-            return setTimeout(() => {
-                replyMarkdownButton(e, [
-                    { key: 'a', values: [`<@${USER_ID}>`] },
-                    { key: 'b', values: [`\r# 这里是国际服数据，请查收\r> ${TIME}\r\r`] },
-                    { key: 'c', values: ["``"] },
-                    { key: 'd', values: [`\`\r————用户身高————\r🍊体型S值是：${parseFloat(scale).toFixed(5)}\r🍊身高H值是：${parseFloat(height).toFixed(5)}\r🍊最高是：${parseFloat(maxHeight).toFixed(5)}\r🍊最矮是：${parseFloat(minHeight).toFixed(5)}\r🍊目前身高：${parseFloat(currentHeight).toFixed(5)}`] },
-                    { key: 'e', values: [`\r————用户装扮————\r🍊发型：${hair}\r🍊头饰：${horn}\r🍊面具：${mask}\r🍊项链：${neck}\r🍊裤子：${pants}\r🍊斗篷：${cloak}\r🍊背饰：${prop}`] },
-                    { key: 'f', values: [`\r————用户状态————\r🍊叫声：${voice}\r🍊站姿：${attitude}\r————橙子BOT———\`\``] },
-                    { key: 'g', values: ['`'] }
+        try {
+            const response = await fetch(URL);
+            const responseText = await response.text();
+            
+            let URL_DATA;
+            try {
+                URL_DATA = JSON.parse(responseText);
+            } catch (parseError) {
+                logger.error(`[光遇身高查询] JSON解析错误: ${parseError.message}, 响应内容: ${responseText.substring(0, 100)}`);
+                return replyMarkdownButton(e, [
+                    { key: 'a', values: [`##`] },
+                    { key: 'b', values: [` 查询失败，接口返回数据格式错误`] },
+                    { key: 'c', values: [`\r> 请稍后重试或联系管理员检查API状态`] },
                 ], [
                     [
-                        { text: '再次查询', callback: '国际服身高查询' },
+                        { text: '重新查询', callback: '国际服身高查询', clicked_text: '正在重新查询' },
+                        { text: '联系主人', link: 'https://qm.qq.com/q/Mfra27jTmQ', clicked_text: '正在跳转' },
                     ]
                 ]);
-            });
-        } else if (CODE === 201) {
+            }
+            
+            const CODE = URL_DATA['code'];
+            const TIME = URL_DATA['time'];
+
+            if (CODE === 200) {
+                const { scale, height, maxHeight, minHeight, currentHeight } = URL_DATA['data'];
+                const { hair, horn, mask, neck, pants, cloak, prop } = URL_DATA['adorn'];
+                const { voice, attitude } = URL_DATA['action'];
+
+                return setTimeout(() => {
+                    replyMarkdownButton(e, [
+                        { key: 'a', values: [`<@${USER_ID}>`] },
+                        { key: 'b', values: [`\r# 这里是国际服数据，请查收\r> ${TIME}\r\r`] },
+                        { key: 'c', values: ["``"] },
+                        { key: 'd', values: [`\`\r————用户身高————\r🍊体型S值是：${parseFloat(scale).toFixed(5)}\r🍊身高H值是：${parseFloat(height).toFixed(5)}\r🍊最高是：${parseFloat(maxHeight).toFixed(5)}\r🍊最矮是：${parseFloat(minHeight).toFixed(5)}\r🍊目前身高：${parseFloat(currentHeight).toFixed(5)}`] },
+                        { key: 'e', values: [`\r————用户装扮————\r🍊发型：${hair}\r🍊头饰：${horn}\r🍊面具：${mask}\r🍊项链：${neck}\r🍊裤子：${pants}\r🍊斗篷：${cloak}\r🍊背饰：${prop}`] },
+                        { key: 'f', values: [`\r————用户状态————\r🍊叫声：${voice}\r🍊站姿：${attitude}\r————橙子BOT———\`\``] },
+                        { key: 'g', values: ['`'] }
+                    ], [
+                        [
+                            { text: '再次查询', callback: '国际服身高查询' },
+                        ]
+                    ]);
+                });
+            } else if (CODE === 201) {
+                return replyMarkdownButton(e, [
+                    { key: 'a', values: [`##`] },
+                    { key: 'b', values: [` ID错误，请重新绑定`] },
+                ], [
+                    [
+                        { text: '绑定国际服ID', input: '国际服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx', clicked_text: '正在绑定国际服ID' },
+                        { text: '如何获取ID', link: 'https://pan.t1qq.com/view.php/70256ea206338d7268a43ab682d9bdf7.jpg', clicked_text: '正在跳转' },
+                    ]
+                ]);
+            } else {
+                return replyMarkdownButton(e, [
+                    { key: 'a', values: [`##`] },
+                    { key: 'b', values: [` 接口返回异常:${CODE}`] },
+                    { key: 'c', values: [`\r> 请联系主人反馈问题`] },
+                ], [
+                    [
+                        { text: '重新查询', callback: '国际服身高查询', clicked_text: '正在重新查询' },
+                        { text: '联系主人', link: 'https://qm.qq.com/q/Mfra27jTmQ', clicked_text: '正在跳转' },
+                    ]
+                ]);
+            }
+        } catch (error) {
+            logger.error(`[光遇身高查询] 国际服查询失败: ${error.message}`);
             return replyMarkdownButton(e, [
                 { key: 'a', values: [`##`] },
-                { key: 'b', values: [` ID错误，请重新绑定`] },
-            ], [
-                [
-                    { text: '绑定国际服ID', input: '国际服绑定xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx', clicked_text: '正在绑定国际服ID' },
-                    { text: '如何获取ID', link: 'https://pan.t1qq.com/view.php/70256ea206338d7268a43ab682d9bdf7.jpg', clicked_text: '正在跳转' },
-                ]
-            ]);
-        } else {
-            return replyMarkdownButton(e, [
-                { key: 'a', values: [`##`] },
-                { key: 'b', values: [` 接口返回异常:${CODE}`] },
-                { key: 'c', values: [`\r> 请联系主人反馈问题`] },
+                { key: 'b', values: [` 查询失败，网络请求错误`] },
+                { key: 'c', values: [`\r> 请检查API或网络连接状态`] },
             ], [
                 [
                     { text: '重新查询', callback: '国际服身高查询', clicked_text: '正在重新查询' },
