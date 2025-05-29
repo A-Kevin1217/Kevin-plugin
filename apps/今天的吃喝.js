@@ -131,7 +131,7 @@ export class example extends plugin {
 
   async randomFood(e) {
     if (!isQQBot(e)) {
-      await e.reply('请艾特橙子BOT使用')
+      await e.reply('请艾特六阶堂穗玉使用')
       return false
     }
     const isFood = e.msg.includes('吃什么')
@@ -167,7 +167,7 @@ export class example extends plugin {
 
   async addItem(e) {
     if (!isQQBot(e)) {
-      await e.reply('请艾特橙子BOT使用')
+      await e.reply('请艾特六阶堂穗玉使用')
       return false
     }
     const isFood = e.msg.includes('食物')
@@ -212,7 +212,7 @@ export class example extends plugin {
 
   async listItems(e) {
     if (!isQQBot(e)) {
-      await e.reply('请艾特橙子BOT使用')
+      await e.reply('请艾特六阶堂穗玉使用')
       return false
     }
     const isFood = e.msg.includes('食物')
@@ -269,7 +269,7 @@ export class example extends plugin {
 
   async listPending(e) {
     if (!isQQBot(e)) {
-      await e.reply('请艾特橙子BOT使用')
+      await e.reply('请艾特六阶堂穗玉使用')
       return false
     }
     const isFood = e.msg.includes('食物')
@@ -289,7 +289,7 @@ export class example extends plugin {
 
   async approveItem(e) {
     if (!isQQBot(e)) {
-      await e.reply('请艾特橙子BOT使用')
+      await e.reply('请艾特六阶堂穗玉使用')
       return false
     }
     const isFood = e.msg.includes('食物')
@@ -339,7 +339,7 @@ export class example extends plugin {
 
   async deleteItem(e) {
     if (!isQQBot(e)) {
-      await e.reply('请艾特橙子BOT使用')
+      await e.reply('请艾特六阶堂穗玉使用')
       return false
     }
     const isFood = e.msg.includes('食物')
@@ -375,7 +375,7 @@ export class example extends plugin {
 
   async checkAllDuplicates(e) {
     if (!isQQBot(e)) {
-      await e.reply('请艾特橙子BOT使用')
+      await e.reply('请艾特六阶堂穗玉使用')
       return false
     }
     const data = this.loadData()

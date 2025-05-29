@@ -135,7 +135,7 @@ export class 光遇_身高查询 extends plugin {
     }
 
     async QUERY_ID(e) {
-        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+        if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
         const USER_ID = e.user_id?.slice(11);
         const USER_FILE_DATA = await GD(USER_FILE);
@@ -208,7 +208,7 @@ export class 光遇_身高查询 extends plugin {
     }
 
     async GFBINDING(e) {
-        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+        if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
         if (await this.WF(e) !== 0) return
 
@@ -262,7 +262,7 @@ export class 光遇_身高查询 extends plugin {
         ]);
     }
     async HYBINDING(e) {
-        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+        if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
         if (await this.WF(e) !== 0) return
 
@@ -314,7 +314,7 @@ export class 光遇_身高查询 extends plugin {
     }
 
     async GJFBINDING(e) {
-        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+        if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
         if (await this.WF(e) !== 0) return
 
@@ -363,7 +363,7 @@ export class 光遇_身高查询 extends plugin {
     }
 
     async QUERY_GF(e) {
-        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+        if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
         if (await this.WF(e) !== 0) return;
 
@@ -503,7 +503,7 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'c', values: ["``"] },
                 { key: 'd', values: [`\`\r————用户身高————\r🍊体型S值是：${parseFloat(scale).toFixed(5)}\r🍊身高H值是：${parseFloat(height).toFixed(5)}\r🍊最高是：${parseFloat(maxHeight).toFixed(5)}\r🍊最矮是：${parseFloat(minHeight).toFixed(5)}\r🍊目前身高：${parseFloat(currentHeight).toFixed(5)}\r🍊剩余查询次数：${displayTimes}${nextExpiry}`] },
                 { key: 'e', values: [`\r————用户装扮————\r🍊发型：${hair}\r🍊头饰：${hat}\r🍊面具：${mask}\r🍊面饰：${face}\r🍊耳饰：${horn}\r🍊颈部：${neck}\r🍊裤子：${body}\r🍊鞋子：${feet}\r🍊斗篷：${wing}\r🍊背饰：${prop}`] },
-                { key: 'f', values: ['\r————橙子BOT————``'] },
+                { key: 'f', values: ['\r————六阶堂穗玉————``'] },
                 { key: 'g', values: ['`'] }
             ], [
                 [
@@ -527,7 +527,7 @@ export class 光遇_身高查询 extends plugin {
     }
 
     async FRIEND_CODE_RESULT(e) {
-        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+        if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
         if (await this.WF(e) !== 0) return;
 
@@ -609,7 +609,7 @@ export class 光遇_身高查询 extends plugin {
                 { key: 'c', values: ["``"] },
                 { key: 'd', values: [`\`\r————用户身高————\r🍊体型S值是：${parseFloat(scale).toFixed(5)}\r🍊身高H值是：${parseFloat(height).toFixed(5)}\r🍊最高是：${parseFloat(maxHeight).toFixed(5)}\r🍊最矮是：${parseFloat(minHeight).toFixed(5)}\r🍊目前身高：${parseFloat(currentHeight).toFixed(5)}\r🍊剩余查询次数：${displayTimes}`] },
                 { key: 'e', values: [`\r————用户装扮————\r🍊发型：${hair}\r🍊头饰：${hat}\r🍊面具：${mask}\r🍊面饰：${face}\r🍊耳饰：${horn}\r🍊颈部：${neck}\r🍊裤子：${body}\r🍊鞋子：${feet}\r🍊斗篷：${wing}\r🍊背饰：${prop}`] },
-                { key: 'f', values: ['\r————橙子BOT————``'] },
+                { key: 'f', values: ['\r————六阶堂穗玉————``'] },
                 { key: 'g', values: ['`'] }
             ], [
                 [
@@ -633,7 +633,7 @@ export class 光遇_身高查询 extends plugin {
     }
 
     async QUERY_GJF(e) {
-        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+        if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
         if (await this.WF(e) !== 0) return;
 
@@ -704,7 +704,7 @@ export class 光遇_身高查询 extends plugin {
                         { key: 'c', values: ["``"] },
                         { key: 'd', values: [`\`\r————用户身高————\r🍊体型S值是：${parseFloat(scale).toFixed(5)}\r🍊身高H值是：${parseFloat(height).toFixed(5)}\r🍊最高是：${parseFloat(maxHeight).toFixed(5)}\r🍊最矮是：${parseFloat(minHeight).toFixed(5)}\r🍊目前身高：${parseFloat(currentHeight).toFixed(5)}`] },
                         { key: 'e', values: [`\r————用户装扮————\r🍊发型：${hair}\r🍊头饰：${horn}\r🍊面具：${mask}\r🍊项链：${neck}\r🍊裤子：${pants}\r🍊斗篷：${cloak}\r🍊背饰：${prop}`] },
-                        { key: 'f', values: [`\r————用户状态————\r🍊叫声：${voice}\r🍊站姿：${attitude}\r————橙子BOT———\`\``] },
+                        { key: 'f', values: [`\r————用户状态————\r🍊叫声：${voice}\r🍊站姿：${attitude}\r————六阶堂穗玉———\`\``] },
                         { key: 'g', values: ['`'] }
                     ], [
                         [
@@ -750,7 +750,7 @@ export class 光遇_身高查询 extends plugin {
     }
 
     async GENERATE_GFREDEMPTION_CODE(e) {
-        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+        if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
         const times = parseFloat(e.msg.replace(/#|\/|生成国服次数\*/g, '').trim())
         if (!times) return e.reply('不是纯数字')
@@ -815,7 +815,7 @@ export class 光遇_身高查询 extends plugin {
     }
 
     async USE_GFCDKEY(e) {
-        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+        if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
         if (await this.WF(e) !== 0) return
 
@@ -873,7 +873,7 @@ export class 光遇_身高查询 extends plugin {
     async OPEN_GROUP(e) {
         logger.info('[光遇身高查询] 开始处理开放群聊请求');
 
-        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+        if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
         try {
             const GROUP_ID = e.group_id;
@@ -925,7 +925,7 @@ export class 光遇_身高查询 extends plugin {
     }
 
     async BUY_TIMES(e) {
-        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+        if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
         if (await this.WF(e) !== 0) return;
 
@@ -949,7 +949,7 @@ export class 光遇_身高查询 extends plugin {
     }
 
     async CHECK_TOTAL_TIMES(e) {
-        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+        if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
         // 检查是否为主人
         if (!e.isMaster) {
@@ -993,7 +993,7 @@ export class 光遇_身高查询 extends plugin {
     }
 
     async SEND_FESTIVAL_TIMES(e) {
-        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+        if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
         // 检查是否为主人
         if (!e.isMaster) {
@@ -1094,7 +1094,7 @@ export class 光遇_身高查询 extends plugin {
     }
 
     async SEND_FESTIVAL_REISSUE(e) {
-        if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+        if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
         // 检查是否为主人
         if (!e.isMaster) {
             return replyMarkdownButton(e, [

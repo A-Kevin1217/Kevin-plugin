@@ -36,7 +36,7 @@ export class robot_data extends plugin {
   }
 
   async login(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
     let user = e.user_id
     this.user[user] = { type: 'login' }
     let data = await (await fetch(loginurl)).json()
@@ -49,7 +49,7 @@ export class robot_data extends plugin {
       { key: 'c', values: ['QQ开发平台管理端登录'] },
       { key: 'd', values: [`\r> 登录具有时效性，请尽快登录\r\r`] },
       { key: 'e', values: [`***`] },
-      { key: 'f', values: [`\r> 当你选择登录，代表你已经同意将数据托管给橙子BOT。`] }
+      { key: 'f', values: [`\r> 当你选择登录，代表你已经同意将数据托管给六阶堂穗玉。`] }
     ];
     let buttonArr = [
       [
@@ -100,7 +100,7 @@ export class robot_data extends plugin {
   }
 
   async get_message(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
     let user = e.user_id
     try { this.user = JSON.parse(fs.readFileSync(file, 'utf-8')) } catch { }
     if (!this.user[user]) {
@@ -146,7 +146,7 @@ export class robot_data extends plugin {
   }
 
   async get_botlist(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
     let user = e.user_id
     try { this.user = JSON.parse(fs.readFileSync(file, 'utf-8')) } catch { }
     if (!this.user[user]) {
@@ -193,7 +193,7 @@ export class robot_data extends plugin {
   }
 
   async get_botdata(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
     let user = e.user_id
     try { this.user = JSON.parse(fs.readFileSync(file, 'utf-8')) } catch { }
     if (!this.user[user]) {

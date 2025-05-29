@@ -20,7 +20,7 @@ export class example extends plugin {
 
     async AnswersBook(e) {
         if (!isQQBot(e)) {
-            await e.reply('请艾特橙子BOT使用')
+            await e.reply('请艾特六阶堂穗玉使用')
             return false
         }
         try {

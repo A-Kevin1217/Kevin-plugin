@@ -116,7 +116,7 @@ export class 猫猫糕 extends plugin {
 
     async sendMMG(e, imgPath, idx) {
         if (!isQQBot(e)) {
-            await e.reply('请艾特橙子BOT使用')
+            await e.reply('请艾特六阶堂穗玉使用')
             return false
         }
         const cuteText = this.getRandomCuteText()

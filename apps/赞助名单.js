@@ -108,7 +108,7 @@ export class 赞助名单 extends plugin {
           members: [
             { person: '阿哈', info: '提供猫猫糕图库 435 张', account: 'QQ：1700286611', showAccount: false },
             { person: '奕酒离', info: '纯手工绘制橙子宠物系统小宠物', account: 'QQ：1702049170', showAccount: false },
-            { person: '星川尘心', info: '制作橙子BOT使用文档', account: 'QQ：1625840361', showAccount: false }
+            { person: '星川尘心', info: '制作六阶堂穗玉使用文档', account: 'QQ：1625840361', showAccount: false }
           ]
         }
       ]

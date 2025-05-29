@@ -49,7 +49,7 @@ export class MusicShare extends plugin {
   }
 
   async txck(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
     let config = YAML.parse(fs.readFileSync(CONFIG_PATH, 'utf8'))
     let ck = e.msg.replace(/#填写网易ck/g, "").trim()
     config.wyck = ck
@@ -64,7 +64,7 @@ export class MusicShare extends plugin {
   }
 
   async searchMusic(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
     let msg = e.msg.replace(/\s*/g, "")
     let keyword = msg.replace(/^#?点歌/, "").trim()
     if (!keyword) {
@@ -166,7 +166,7 @@ export class MusicShare extends plugin {
 
   async playMusic(e) {
     if (!UserMusicResults[e.user_id]) {
-      if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+      if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
       return replyMarkdownButton(e, [
         { key: 'a', values: ['#'] },
         { key: 'b', values: [` <@${e.user_id?.slice(11)}>\r`] },
@@ -179,7 +179,7 @@ export class MusicShare extends plugin {
     let { type, songs } = UserMusicResults[e.user_id]
 
     if (index < 0 || index >= songs.length) {
-      if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+      if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
       return replyMarkdownButton(e, [
         { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
         { key: 'b', values: ['#'] },
@@ -193,7 +193,7 @@ export class MusicShare extends plugin {
     let artist = type === 'kugou' ? song.singername : type === 'qq' ? song.singers : song.artists[0].name
 
     // 发送正在获取音乐的提示
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
     
     // 初始化回复内容
     let replyContent = [
@@ -252,7 +252,7 @@ export class MusicShare extends plugin {
           let msg = await segment.record(url)
           await e.reply(msg)
         } catch (err) {
-          if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+          if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
           return replyMarkdownButton(e, [
             { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
             { key: 'b', values: ['#'] },
@@ -280,7 +280,7 @@ export class MusicShare extends plugin {
           let msg = await segment.record(data.data.music)
           await e.reply(msg)
         } catch (err) {
-          if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+          if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
           return replyMarkdownButton(e, [
             { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
             { key: 'b', values: ['#'] },
@@ -314,7 +314,7 @@ export class MusicShare extends plugin {
           let msg = await segment.record(data[3])
           await e.reply(msg)
         } catch (err) {
-          if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+          if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
           return replyMarkdownButton(e, [
             { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
             { key: 'b', values: ['#'] },
@@ -335,7 +335,7 @@ export class MusicShare extends plugin {
 
     } catch (err) {
       console.log(err)
-      if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+      if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
       return replyMarkdownButton(e, [
         { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
         { key: 'b', values: ['#'] },
@@ -393,7 +393,7 @@ export class MusicShare extends plugin {
     let result = core.pb.decode(payload)
 
     if (result[3] != 0) {
-      if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+      if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
       return replyMarkdownButton(e, [
         { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r`] },
         { key: 'b', values: ['#'] },

@@ -22,7 +22,7 @@ export class example extends plugin {
     async F1(e) {
         const platform = e.bot?.adapter?.name || e.platform || '未知'
         if (platform !== 'QQBot') {
-            await e.reply('请艾特橙子BOT使用')
+            await e.reply('请艾特六阶堂穗玉使用')
             return false
         }
         /** 用户ID */
@@ -102,7 +102,7 @@ export class example extends plugin {
     async F2(e) {
         const platform = e.bot?.adapter?.name || e.platform || '未知'
         if (platform !== 'QQBot') {
-            await e.reply('请艾特橙子BOT使用')
+            await e.reply('请艾特六阶堂穗玉使用')
             return false
         }
         const groupId = e.group_id;
@@ -169,7 +169,7 @@ export class example extends plugin {
     async F3(e) {
         const platform = e.bot?.adapter?.name || e.platform || '未知'
         if (platform !== 'QQBot') {
-            await e.reply('请艾特橙子BOT使用')
+            await e.reply('请艾特六阶堂穗玉使用')
             return false
         }
         const userId = e.user_id?.slice(11)
@@ -214,7 +214,7 @@ export class example extends plugin {
     async F4(e) {
         const platform = e.bot?.adapter?.name || e.platform || '未知'
         if (platform !== 'QQBot') {
-            await e.reply('请艾特橙子BOT使用')
+            await e.reply('请艾特六阶堂穗玉使用')
             return false
         }
         const userId = e.user_id?.slice(11);

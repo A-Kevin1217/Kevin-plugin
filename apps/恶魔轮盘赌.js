@@ -90,7 +90,7 @@ export class DemonRoulette extends plugin {
   }
 
   async startGame(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
     const groupId = e.group_id;
     if (DemonGame[groupId]) {
@@ -134,7 +134,7 @@ export class DemonRoulette extends plugin {
   }
 
   async joinGame(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
     const groupId = e.group_id;
     const session = DemonGame[groupId];
@@ -221,7 +221,7 @@ export class DemonRoulette extends plugin {
   }
 
   async shoot(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
     const groupId = e.group_id;
     const session = DemonGame[groupId];
@@ -384,7 +384,7 @@ export class DemonRoulette extends plugin {
   }
 
   async useItem(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
     const itemName = e.msg.replace(/^(#|\/)?\s*使用道具\s*/, '').trim();
     if (!itemName) {
@@ -705,7 +705,7 @@ export class DemonRoulette extends plugin {
   }
 
   async showItemButtons(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
     const groupId = e.group_id;
     const session = DemonGame[groupId];
@@ -778,7 +778,7 @@ export class DemonRoulette extends plugin {
   }
 
   async selectItemToSteal(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
     const groupId = e.group_id;
     const session = DemonGame[groupId];
@@ -830,7 +830,7 @@ export class DemonRoulette extends plugin {
   }
 
   async surrender(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
     const groupId = e.group_id;
     const session = DemonGame[groupId];
@@ -865,7 +865,7 @@ export class DemonRoulette extends plugin {
   }
 
   async requestEndGame(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
     const groupId = e.group_id;
     const session = DemonGame[groupId];
@@ -906,7 +906,7 @@ export class DemonRoulette extends plugin {
   }
 
   async acceptEndGame(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
     const groupId = e.group_id;
     const session = DemonGame[groupId];
@@ -968,7 +968,7 @@ export class DemonRoulette extends plugin {
   }
 
   async rejectEndGame(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
     const groupId = e.group_id;
     const session = DemonGame[groupId];
@@ -995,7 +995,7 @@ export class DemonRoulette extends plugin {
   }
 
   async showRules(e) {
-    if (!isQQBot(e)) { await e.reply('请艾特橙子BOT使用'); return false }
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
     const rules = [
       '🎯 游戏规则',

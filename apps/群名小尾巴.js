@@ -38,7 +38,7 @@ export class example extends plugin {
 
   async 开始制作群名小尾巴(e) {
     if (!isQQBot(e)) {
-      await e.reply('请艾特橙子BOT使用');
+      await e.reply('请艾特六阶堂穗玉使用');
       return false;
     }
     await replyMarkdownButton(e, [
@@ -51,7 +51,7 @@ export class example extends plugin {
 
   async 设置用户名和小尾巴(e) {
     if (!isQQBot(e)) {
-      await e.reply('请艾特橙子BOT使用');
+      await e.reply('请艾特六阶堂穗玉使用');
       return false;
     }
     const userId = e.user_id; // 假设 e 对象中有 user_id 属性

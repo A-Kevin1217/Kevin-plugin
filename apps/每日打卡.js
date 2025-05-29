@@ -20,7 +20,7 @@ export class example extends plugin {
   async meiridaka3qn(e) {
     const platform = e.bot?.adapter?.name || e.platform || '未知'
         if (platform !== 'QQBot') {
-            await e.reply('请艾特橙子BOT使用')
+            await e.reply('请艾特六阶堂穗玉使用')
             return false
         }
     //获取当前日期
@@ -72,7 +72,7 @@ export class example extends plugin {
   async todayohuang(e) {
     const platform = e.bot?.adapter?.name || e.platform || '未知'
         if (platform !== 'QQBot') {
-            await e.reply('请艾特橙子BOT使用')
+            await e.reply('请艾特六阶堂穗玉使用')
             return false
         }
     // 获取当前日期

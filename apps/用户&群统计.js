@@ -60,7 +60,7 @@ export class example extends plugin {
         const [groupRows] = await pool.query('SELECT COUNT(*) as count FROM bot_groups');
         const groupCount = groupRows[0].count;
         await e.reply([
-            `📊 橙子BOT统计信息：`,
+            `📊 六阶堂穗玉统计信息：`,
             `👤 用户总数：${userCount}`,
             `👥 群组总数：${groupCount}`
         ].join('\n'));
@@ -92,7 +92,7 @@ export class example extends plugin {
             await replyMarkdownButton(e, [
                 { key: 'a', values: [`![头像 #640px #640px](${avatarUrl}`] },
                 { key: 'b', values: [')\r\r> 欢迎'] },
-                { key: 'c', values: [`<@${userId}>使用「橙子BOT」`] },
+                { key: 'c', values: [`<@${userId}>使用「六阶堂穗玉」`] },
                 { key: 'd', values: [`\r您是 **${userCount}** 位用户！\r\r`] },
                 { key: 'e', values: ['***'] },
                 { key: 'f', values: [`\r> 更多功能请回复"菜单"查看详情\r\r`] }
