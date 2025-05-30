@@ -666,7 +666,8 @@ export class 光遇_身高查询 extends plugin {
 
         e.reply('正在查询，请耐心等待！', false, { recallMsg: 10 });
 
-        let URL = `${API_GUO_JI}?key=${KEY_1}&id=${SKY_UID}`;
+        // 使用新的API接口URL
+        let URL = `https://data.skykws.top/wx/api/gjfsg/ori?user=${SKY_UID}&slogan=Jiaozi`;
 
         try {
             const response = await fetch(URL);
@@ -690,12 +691,22 @@ export class 光遇_身高查询 extends plugin {
             }
             
             const CODE = URL_DATA['code'];
-            const TIME = URL_DATA['time'];
+            const TIME = new Date().toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
 
             if (CODE === 200) {
+                // 适配新的JSON结构
                 const { scale, height, maxHeight, minHeight, currentHeight } = URL_DATA['data'];
-                const { hair, horn, mask, neck, pants, cloak, prop } = URL_DATA['adorn'];
-                const { voice, attitude } = URL_DATA['action'];
+                const { wing, prop, neck, mask, horn, hat, hair, feet, body, face } = URL_DATA['remote'];
+                const attitude = URL_DATA['attitude'];
+                const voice = URL_DATA['voice'];
 
                 return setTimeout(() => {
                     replyMarkdownButton(e, [
@@ -703,7 +714,7 @@ export class 光遇_身高查询 extends plugin {
                         { key: 'b', values: [`\r# 这里是国际服数据，请查收\r> ${TIME}\r\r`] },
                         { key: 'c', values: ["``"] },
                         { key: 'd', values: [`\`\r————用户身高————\r🍊体型S值是：${parseFloat(scale).toFixed(5)}\r🍊身高H值是：${parseFloat(height).toFixed(5)}\r🍊最高是：${parseFloat(maxHeight).toFixed(5)}\r🍊最矮是：${parseFloat(minHeight).toFixed(5)}\r🍊目前身高：${parseFloat(currentHeight).toFixed(5)}`] },
-                        { key: 'e', values: [`\r————用户装扮————\r🍊发型：${hair}\r🍊头饰：${horn}\r🍊面具：${mask}\r🍊项链：${neck}\r🍊裤子：${pants}\r🍊斗篷：${cloak}\r🍊背饰：${prop}`] },
+                        { key: 'e', values: [`\r————用户装扮————\r🍊发型：${hair}\r🍊头饰：${hat}\r🍊面具：${mask}\r🍊面饰：${face || "未穿戴"}\r🍊耳饰：${horn}\r🍊颈部：${neck}\r🍊裤子：${body}\r🍊鞋子：${feet}\r🍊斗篷：${wing}\r🍊背饰：${prop}`] },
                         { key: 'f', values: [`\r————用户状态————\r🍊叫声：${voice}\r🍊站姿：${attitude}\r————六阶堂穗玉———\`\``] },
                         { key: 'g', values: ['`'] }
                     ], [
