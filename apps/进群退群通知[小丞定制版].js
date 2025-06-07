@@ -81,7 +81,7 @@ export class DuplicateJoinDetector extends plugin {
       ].join('\n');
 
       // 发送警告消息
-      await this.reply([
+      await bot[430860145].pickGroup(this.e.group_id).sendMsg([
         segment.at(userId),
         msg
       ])
@@ -93,7 +93,7 @@ export class DuplicateJoinDetector extends plugin {
         `当前加入：${currentGroupName}(${groupId})`,
         `已加入的群：\n${groupList}`
       ].join('\n');
-      await Bot.pickGroup(634644457).sendMsg(auditMsg);
+      await bot[430860145].pickGroup(634644457).sendMsg(auditMsg);
     } else {
       // 发送欢迎消息
       const welcomeMsg = `加入光之子的聚集地！在和其他光之子把翼言欢前，请知悉以下群规，不然会收获退群飞机票一张
@@ -111,15 +111,15 @@ export class DuplicateJoinDetector extends plugin {
 
       // 检查是否为第七个群
       if (groupId !== 640946244) {  // 640946244 是第七个群的 ID
-        await this.reply(['欢迎',
+        await bot[430860145].pickGroup(this.e.group_id).sendMsg(['欢迎',
           segment.at(userId),
           welcomeMsg
         ])
-        await this.reply([
+        await bot[430860145].pickGroup(this.e.group_id).sendMsg([
           additionalMessage
         ])
       } else {
-        await this.reply(['欢迎',
+        await bot[430860145].pickGroup(this.e.group_id).sendMsg(['欢迎',
           segment.at(userId),
           welcomeMsg
         ])
@@ -163,6 +163,6 @@ export class outNotice extends plugin {
       msg = `${this.e.user_id} ${this.tips}`
     }
     logger.mark(`[退出通知]${this.e.logText} ${msg}`)
-    await this.reply(msg)
+    await bot[430860145].pickGroup(this.e.group_id).sendMsg(msg)
   }
 }
