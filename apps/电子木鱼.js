@@ -145,10 +145,10 @@ export class example extends plugin {
         filteredRankingData.sort((a, b) => b.A - a.A);
         const topRankingData = filteredRankingData.slice(0, 10);
         
-        let replyMsg = [`${!rankingType ? '' : rankingType}功德榜\r***\r> `];
+        let replyMsg = `${!rankingType ? '' : rankingType}功德榜\r***\r> `;
         
         for (let i = 0; i < topRankingData.length; i++) {
-            replyMsg.push(`Top${i + 1}. ${topRankingData[i]['C']}\r功德: [${topRankingData[i]['A']}]\r`);
+            replyMsg += `Top${i + 1}. ${topRankingData[i]['C']}\r功德: [${topRankingData[i]['A']}]\r`;
         }
         e.reply([segment.markdown({
             custom_template_id: "102059511_1713948595",
