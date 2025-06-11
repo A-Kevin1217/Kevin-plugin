@@ -314,19 +314,21 @@ export class robot_data extends plugin {
     let max = res.data.max_msg_tpl_count
     let tplContent = []
     
-    tplContent.push(`[${data.uin}](${appId})\r模板使用：${apps.length}/${max}`)
+    tplContent.push(`账号：${data.uin}\rAppId：${appId}\r模板使用：${apps.length}/${max}`)
     
     for (let j = 0; j < apps.length; j++) {
       if (j > 0) tplContent.push('——————')
       let t = ['', '按钮', 'Markdown']
       let s = ['', '未提审', '审核中', '已通过', '未通过']
-      tplContent.push(`模板ID:${apps[j].tpl_id}`)
-      tplContent.push(`模板名字:${apps[j].tpl_name}`)
-      tplContent.push(`模板类型:${t[apps[j].tpl_type]}`)
-      tplContent.push(`状态:${s[apps[j].status]}`)
+      tplContent.push(`模板ID：${apps[j].tpl_id}`)
+      tplContent.push(`模板名字：${apps[j].tpl_name}`)
+      tplContent.push(`模板类型：${t[apps[j].tpl_type]}`)
+      tplContent.push(`状态：${s[apps[j].status]}`)
     }
 
-    return replyMarkdownButton(e, [
+    console.log('Template Content:', tplContent)
+    
+    let replyArr = [
       { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
       { key: 'b', values: ['#'] },
       { key: 'c', values: ['Bot模板列表'] },
@@ -336,7 +338,11 @@ export class robot_data extends plugin {
       { key: 'g', values: [`\`\`\r${tplContent.join('\r')}`] },
       { key: 'h', values: ['``'] },
       { key: 'i', values: ['`'] }
-    ], commonButtons)
+    ]
+    
+    console.log('Reply Array:', replyArr)
+    
+    return replyMarkdownButton(e, replyArr, commonButtons)
   }
 }
 
