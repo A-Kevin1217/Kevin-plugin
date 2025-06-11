@@ -32,7 +32,7 @@ export class robot_data extends plugin {
         { reg: "^(#|\/)?bot列表$", fnc: 'get_botlist' },
         { reg: "^(#|\/)?bot数据(\\d*)?$", fnc: 'get_botdata' },
         { reg: "^(#|\/)?bot模板$", fnc: 'get_bottpl' },
-        { reg: "^(#|\/)?bot模板详情(\\d*)?$", fnc: 'get_bottpl_m' },
+        { reg: "^(#|\/)?bot模板详情(\\d+_\\d+)$", fnc: 'get_bottpl_m' },
       ]
     });
     this.user = {}
@@ -365,7 +365,8 @@ export class robot_data extends plugin {
     }
 
     let data = this.user[user]
-    let tplid = e.msg.replace('bot模板详情', '').trim()
+    let match = e.msg.match(/(\\d+_\\d+)$/)
+    let tplid = match ? match[1] : ''
     let res = await (await fetch(`${tpl_list}?appid=${data.appId}&uin=${data.uin}&ticket=${data.ticket}&developerId=${data.developerId}`)).json()
     
     if (res.retcode != 0) {
