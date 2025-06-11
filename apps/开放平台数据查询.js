@@ -17,6 +17,10 @@ const commonButtons = [
     { text: '通知', callback: 'bot通知', clicked_text: '正在获取通知' },
     { text: '数据', callback: 'bot数据', clicked_text: '正在获取数据' },
     { text: '列表', callback: 'bot列表', clicked_text: '正在获取列表' }
+  ],
+  [
+    { text: '模板', callback: 'bot模板', clicked_text: '正在获取模板' },
+    { text: '模板详情', input: 'bot模板详情', clicked_text: '正在获取模板详情' }
   ]
 ];
 
