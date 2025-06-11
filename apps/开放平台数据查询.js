@@ -406,18 +406,7 @@ export class robot_data extends plugin {
 模板内容：
 ${targetTemplate.text || '无内容'}`
 
-    const _path = process.cwd()
-    const image = await puppeteer.screenshot('bot/template_detail', {
-      tplFile: `${_path}/plugins/Kevin-plugin/resources/bot/template_detail.html`,
-      saveId: 'template_detail',
-      quality: 100,
-      pluResPath: `${_path}/plugins/Kevin-plugin/resources/`,
-      _res_path: `../../../../../plugins/Kevin-plugin/resources/`,
-      defaultLayout: `${_path}/plugins/Kevin-plugin/resources/common/layout/default.html`,
-      elemLayout: `${_path}/plugins/Kevin-plugin/resources/common/layout/elem.html`,
-      sys: {
-        scale: 1.2
-      },
+    const image = await e.runtime.render('Kevin-plugin', '/bot/template_detail', {
       data: {
         uin: data.uin,
         appId: data.appId,
@@ -429,6 +418,8 @@ ${targetTemplate.text || '无内容'}`
           content: targetTemplate.text || '无内容'
         }
       }
+    }, {
+      retType: 'base64'
     })
 
     const message = [image]
