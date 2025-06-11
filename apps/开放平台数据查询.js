@@ -314,7 +314,7 @@ export class robot_data extends plugin {
     let max = res.data.max_msg_tpl_count
     let tplContent = []
     
-    tplContent.push(`账号：${data.uin}\rAppId：${appId}\r模板使用：${apps.length}/${max}`)
+    tplContent.push(`模板使用：${apps.length}/${max}`)
     
     for (let j = 0; j < apps.length; j++) {
       if (j > 0) tplContent.push('——————')
@@ -332,7 +332,7 @@ export class robot_data extends plugin {
       { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
       { key: 'b', values: ['#'] },
       { key: 'c', values: ['Bot模板列表'] },
-      { key: 'd', values: [`\r> 当前账户的模板列表如下\r\r`] },
+      { key: 'd', values: [`\r账号：${data.uin}\rAppId：${appId}\r> 当前账户的模板列表如下\r\r`] },
       { key: 'e', values: [`***\r`] },
       { key: 'f', values: ['`'] },
       { key: 'g', values: [`\`\`\r${tplContent.join('\r')}`] },
