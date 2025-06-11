@@ -422,19 +422,14 @@ ${targetTemplate.text || '无内容'}`
       retType: 'base64'
     })
 
-    const message = [image]
-
-    if (isQQBot(e)) {
       const button = segment.button([
         [
           { text: '返回列表', callback: 'bot模板', clicked_text: '正在返回列表' },
           { text: '复制模板', input: templateDetail, clicked_text: '正在复制模板' }
         ]
       ])
-      message.push(button)
-    }
 
-    return await e.reply(message)
+    return await e.reply(image, button)
   }
 }
 
