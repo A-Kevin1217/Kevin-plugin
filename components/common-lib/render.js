@@ -6,8 +6,8 @@ export default async function (path, params, cfg) {
   if (!e.runtime) {
     console.log('未找到e.runtime，请升级至最新版Yunzai')
   }
-  const image = await e.runtime.render('Kevin-plugin', path, params, {
-    retType: 'base64',
+  return e.runtime.render('Kevin-plugin', path, params, {
+    retType: cfg.retMsgId ? 'msgId' : 'default',
     beforeRender ({ data }) {
       let resPath = data.pluResPath
       const layoutPath = process.cwd() + '/plugins/Kevin-plugin/resources/common/layout/'
@@ -25,12 +25,4 @@ export default async function (path, params, cfg) {
       }
     }
   })
-
-  const message = [image]
-  
-  if (cfg.button) {
-    message.push(cfg.button)
-  }
-
-  return e.reply(message)
 }
