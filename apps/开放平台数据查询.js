@@ -368,10 +368,6 @@ export class robot_data extends plugin {
     let match = e.msg.match(/(\d+_\d+)$/)
     let tplid = match ? match[1] : ''
     
-    console.log('Message:', e.msg)  // 调试日志
-    console.log('Match result:', match)  // 调试日志
-    console.log('Template ID:', tplid)  // 调试日志
-
     let res = await (await fetch(`${tpl_list}?appid=${data.appId}&uin=${data.uin}&ticket=${data.ticket}&developerId=${data.developerId}`)).json()
     
     if (res.retcode != 0) {
@@ -410,7 +406,7 @@ export class robot_data extends plugin {
 模板内容：
 ${targetTemplate.text || '无内容'}`
 
-    return await e.runtime.render('Kevin-plugin', '/bot/template_detail', {
+    const image = await e.runtime.render('Kevin-plugin', '/bot/template_detail', {
       data: {
         uin: data.uin,
         appId: data.appId,
@@ -425,11 +421,16 @@ ${targetTemplate.text || '无内容'}`
     }, {
       e,
       scale: 1.2
-    }, '', [
-      [
-        { text: '返回列表', callback: 'bot模板', clicked_text: '正在返回列表' },
-        { text: '复制模板', input: templateDetail, clicked_text: '正在复制模板' }
-      ]
+    })
+
+    return await e.reply([
+      image,
+      segment.button([
+        [
+          { text: '返回列表', callback: 'bot模板', clicked_text: '正在返回列表' },
+          { text: '复制模板', input: templateDetail, clicked_text: '正在复制模板' }
+        ]
+      ])
     ])
   }
 }
