@@ -365,8 +365,13 @@ export class robot_data extends plugin {
     }
 
     let data = this.user[user]
-    let match = e.msg.match(/(\\d+_\\d+)$/)
+    let match = e.msg.match(/(\d+_\d+)$/)
     let tplid = match ? match[1] : ''
+    
+    console.log('Message:', e.msg)  // 调试日志
+    console.log('Match result:', match)  // 调试日志
+    console.log('Template ID:', tplid)  // 调试日志
+
     let res = await (await fetch(`${tpl_list}?appid=${data.appId}&uin=${data.uin}&ticket=${data.ticket}&developerId=${data.developerId}`)).json()
     
     if (res.retcode != 0) {
