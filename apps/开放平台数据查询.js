@@ -424,7 +424,7 @@ ${targetTemplate.text || '无内容'}`
     })
 
     return await e.reply([
-      image,
+      segment.image(image),
       segment.button([
         [
           { text: '返回列表', callback: 'bot模板', clicked_text: '正在返回列表' },
