@@ -329,15 +329,13 @@ export class robot_data extends plugin {
     console.log('Template Content:', tplContent)
     
     let replyArr = [
-      { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
-      { key: 'b', values: ['#'] },
-      { key: 'c', values: ['Bot模板列表'] },
-      { key: 'd', values: [`\r账号：${data.uin}\rAppId：${appId}\r\r> 当前账户的模板列表如下\r\r`] },
-      { key: 'e', values: [`***\r`] },
-      { key: 'f', values: ['`'] },
-      { key: 'g', values: [`\`\`\r${tplContent.join('\r')}`] },
-      { key: 'h', values: ['``'] },
-      { key: 'i', values: ['`'] }
+      { key: 'a', values: ['\r\r#Bot模板列表'] },
+      { key: 'b', values: [`\r账号：${data.uin}\rAppId：${appId}\r\r> 当前账户的模板列表如下\r\r`] },
+      { key: 'c', values: [`***\r`] },
+      { key: 'd', values: ['`'] },
+      { key: 'e', values: [`\`\`\r${tplContent.join('\r')}`] },
+      { key: 'f', values: ['``'] },
+      { key: 'g', values: ['`'] }
     ]
     
     console.log('Reply Array:', replyArr)
