@@ -406,7 +406,10 @@ export class robot_data extends plugin {
 模板内容：
 ${targetTemplate.text || '无内容'}`
 
-    const image = await e.runtime.render('Kevin-plugin', '/bot/template_detail', {
+    const image = await puppeteer.screenshot('bot/template_detail', {
+      saveId: 'template_detail',
+      tplFile: './plugins/Kevin-plugin/resources/bot/template_detail.html',
+      _plugin: 'Kevin-plugin',
       data: {
         uin: data.uin,
         appId: data.appId,
@@ -418,18 +421,16 @@ ${targetTemplate.text || '无内容'}`
           content: targetTemplate.text || '无内容'
         }
       }
-    }, {
-      retType: 'base64'
     })
 
-      const button = segment.button([
-        [
-          { text: '返回列表', callback: 'bot模板', clicked_text: '正在返回列表' },
-          { text: '复制模板', input: templateDetail, clicked_text: '正在复制模板' }
-        ]
-      ])
+    const button = segment.button([
+      [
+        { text: '返回列表', callback: 'bot模板', clicked_text: '正在返回列表' },
+        { text: '复制模板', input: templateDetail, clicked_text: '正在复制模板' }
+      ]
+    ])
 
-    return await e.reply(image, button)
+    return await e.reply([image, button])
   }
 }
 
