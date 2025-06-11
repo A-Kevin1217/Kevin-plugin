@@ -1,9 +1,20 @@
 import { createCanvas, loadImage } from 'canvas';
 
 export async function renderTemplateDetail(data) {
-  // 创建画布
-  const canvas = createCanvas(800, 600);
+  // 增加画布尺寸和缩放比例以提高清晰度
+  const scale = 2; // 2倍缩放提高清晰度
+  const width = 800 * scale;
+  const height = 600 * scale;
+  
+  const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
+  
+  // 应用缩放以提高清晰度
+  ctx.scale(scale, scale);
+
+  // 启用抗锯齿
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 
   // 设置背景
   ctx.fillStyle = 'rgba(245, 245, 245, 0.9)';
@@ -14,13 +25,25 @@ export async function renderTemplateDetail(data) {
   roundRect(ctx, 20, 20, 760, 560, 15);
   ctx.fill();
 
+  // 添加阴影效果
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 2;
+
   // 绘制标题区域
   ctx.fillStyle = '#333';
-  ctx.font = 'bold 24px 微软雅黑';
+  ctx.font = 'bold 28px 微软雅黑';
   ctx.fillText('Bot模板详情', 40, 60);
 
+  // 重置阴影
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+
   // 绘制账号和AppId
-  ctx.font = '14px 微软雅黑';
+  ctx.font = '16px 微软雅黑';
   ctx.fillStyle = '#666';
   ctx.fillText(`账号：${data.uin}`, 40, 90);
   ctx.fillText(`AppId：${data.appId}`, 200, 90);
@@ -50,11 +73,12 @@ export async function renderTemplateDetail(data) {
 
     // 绘制标签
     ctx.fillStyle = '#666';
-    ctx.font = '14px 微软雅黑';
+    ctx.font = 'bold 16px 微软雅黑';
     ctx.fillText(item.label, 50, y + 25);
 
     // 绘制值
     ctx.fillStyle = getStatusColor(item.label === '审核状态' ? item.value : null);
+    ctx.font = '16px 微软雅黑';
     ctx.fillText(item.value, 150, y + 25);
 
     y += 50;
@@ -67,7 +91,7 @@ export async function renderTemplateDetail(data) {
 
   // 绘制内容标题
   ctx.fillStyle = '#333';
-  ctx.font = 'bold 16px 微软雅黑';
+  ctx.font = 'bold 18px 微软雅黑';
   ctx.fillText('模板内容', 50, y + 45);
 
   // 绘制分割线
@@ -80,10 +104,10 @@ export async function renderTemplateDetail(data) {
 
   // 绘制内容文本
   ctx.fillStyle = '#333';
-  ctx.font = '14px 微软雅黑';
-  wrapText(ctx, data.template.content, 50, y + 85, 700, 20);
+  ctx.font = '16px 微软雅黑';
+  wrapText(ctx, data.template.content, 50, y + 85, 700, 24);
 
-  return canvas.toBuffer();
+  return canvas.toBuffer('image/png', { quality: 1, compressionLevel: 0 });
 }
 
 // 辅助函数：绘制圆角矩形
