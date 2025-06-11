@@ -406,10 +406,18 @@ export class robot_data extends plugin {
 模板内容：
 ${targetTemplate.text || '无内容'}`
 
-    const image = await puppeteer.screenshot('bot/template_detail.html', {
-      tplFile: './plugins/Kevin-plugin/resources/bot/template_detail.html',
+    const _path = process.cwd()
+    const image = await puppeteer.screenshot('bot/template_detail', {
+      tplFile: `${_path}/plugins/Kevin-plugin/resources/bot/template_detail.html`,
       saveId: 'template_detail',
       quality: 100,
+      pluResPath: `${_path}/plugins/Kevin-plugin/resources/`,
+      _res_path: `../../../../../plugins/Kevin-plugin/resources/`,
+      defaultLayout: `${_path}/plugins/Kevin-plugin/resources/common/layout/default.html`,
+      elemLayout: `${_path}/plugins/Kevin-plugin/resources/common/layout/elem.html`,
+      sys: {
+        scale: 1.2
+      },
       data: {
         uin: data.uin,
         appId: data.appId,
@@ -425,13 +433,15 @@ ${targetTemplate.text || '无内容'}`
 
     const message = [image]
 
-    const button = segment.button([
-      [
-        { text: '返回列表', callback: 'bot模板', clicked_text: '正在返回列表' },
-        { text: '复制模板', input: templateDetail, clicked_text: '正在复制模板' }
-      ]
-    ])
-    message.push(button)
+    if (isQQBot(e)) {
+      const button = segment.button([
+        [
+          { text: '返回列表', callback: 'bot模板', clicked_text: '正在返回列表' },
+          { text: '复制模板', input: templateDetail, clicked_text: '正在复制模板' }
+        ]
+      ])
+      message.push(button)
+    }
 
     return await e.reply(message)
   }
