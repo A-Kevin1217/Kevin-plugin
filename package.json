@@ -25,6 +25,7 @@
     "cos-nodejs-sdk-v5": "^2.12.10",
     "archiver": "^5.3.2",
     "mysql2": "^3.9.7",
-    "handlebars": "*"
+    "handlebars": "*",
+    "canvas": "^2.11.0"
   }
 }

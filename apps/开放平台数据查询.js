@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import fs from 'fs';
 import { isQQBot, replyMarkdownButton } from '../components/CommonReplyUtil.js'
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
+import { renderTemplateDetail } from '../resources/bot/template_detail_canvas.js'
 
 const base = 'https://191800.xyz/bot'
 const loginurl = `${base}/get_login.php`
@@ -410,23 +411,24 @@ export class robot_data extends plugin {
 模板内容：
 ${targetTemplate.text || '无内容'}`
 
-    const image = await puppeteer.screenshot('bot/template_detail', {
-      saveId: 'template_detail',
-      tplFile: './plugins/Kevin-plugin/resources/bot/template_detail.html',
-      _plugin: 'Kevin-plugin',
-      data: {
-        uin: data.uin,
-        appId: data.appId,
-        template: {
-          id: targetTemplate.tpl_id,
-          name: targetTemplate.tpl_name,
-          type: t[targetTemplate.tpl_type],
-          status: s[targetTemplate.status],
-          content: targetTemplate.text || '无内容'
-        }
+    // 使用canvas渲染生成图片
+    const imageBuffer = await renderTemplateDetail({
+      uin: data.uin,
+      appId: data.appId,
+      template: {
+        id: targetTemplate.tpl_id,
+        name: targetTemplate.tpl_name,
+        type: t[targetTemplate.tpl_type],
+        status: s[targetTemplate.status],
+        content: targetTemplate.text || '无内容'
       }
-    })
+    });
 
+    // 保存图片
+    const imagePath = `./plugins/Kevin-plugin/resources/bot/template_detail_${tplid}.png`;
+    fs.writeFileSync(imagePath, imageBuffer);
+
+    const image = segment.image(imagePath);
     const button = segment.button(
       [
         { text: '返回列表', callback: 'bot模板', clicked_text: '正在返回列表' },
