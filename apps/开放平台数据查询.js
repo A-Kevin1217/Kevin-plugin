@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import fs from 'fs';
 import { isQQBot, replyMarkdownButton } from '../components/CommonReplyUtil.js'
-import puppeteer from 'puppeteer';
+import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 
 const base = 'https://191800.xyz/bot'
 const loginurl = `${base}/get_login.php`
@@ -406,8 +406,10 @@ export class robot_data extends plugin {
 模板内容：
 ${targetTemplate.text || '无内容'}`
 
-    const image = await puppeteer.screenshot('bot/template_detail', {
+    const image = await puppeteer.screenshot('bot/template_detail.html', {
       tplFile: './plugins/Kevin-plugin/resources/bot/template_detail.html',
+      saveId: 'template_detail',
+      quality: 100,
       data: {
         uin: data.uin,
         appId: data.appId,
