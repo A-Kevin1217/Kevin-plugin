@@ -32,6 +32,7 @@ export class robot_data extends plugin {
         { reg: "^(#|\/)?bot列表$", fnc: 'get_botlist' },
         { reg: "^(#|\/)?bot数据(\\d*)?$", fnc: 'get_botdata' },
         { reg: "^(#|\/)?bot模板$", fnc: 'get_bottpl' },
+        { reg: "^(#|\/)?bot模板详情(\\d*)?$", fnc: 'get_bottpl_m' },
       ]
     });
     this.user = {}
@@ -337,10 +338,93 @@ export class robot_data extends plugin {
       { key: 'f', values: ['``'] },
       { key: 'g', values: ['`'] }
     ]
+
+    let buttonArr = [
+      [
+        { text: '模板详情', input: 'bot模板详情', clicked_text: '正在获取模板详情' }
+      ]
+    ]
     
     console.log('Reply Array:', replyArr)
     
-    return replyMarkdownButton(e, replyArr, commonButtons)
+    return replyMarkdownButton(e, replyArr, buttonArr)
+  }
+
+  async get_bottpl_m(e) {
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
+    let user = e.user_id
+    try { this.user = JSON.parse(fs.readFileSync(file, 'utf-8')) } catch { }
+    if (!this.user[user]) {
+      return replyMarkdownButton(e, [
+        { key: 'a', values: [`未查询到你的登录信息`] }
+      ], [
+        [
+          { text: '登录', callback: '管理登录', clicked_text: '正在登录' }
+        ]
+      ])
+    }
+
+    let data = this.user[user]
+    let tplid = e.msg.replace('bot模板详情', '').trim()
+    let res = await (await fetch(`${tpl_list}?appid=${data.appId}&uin=${data.uin}&ticket=${data.ticket}&developerId=${data.developerId}`)).json()
+    
+    if (res.retcode != 0) {
+      return replyMarkdownButton(e, [
+        { key: 'a', values: [`登录状态失效`] }
+      ], [
+        [
+          { text: '登录', callback: '管理登录', clicked_text: '正在登录' }
+        ]
+      ])
+    }
+
+    let apps = res.data.list
+    let targetTemplate = apps.find(app => app.tpl_id == tplid)
+    
+    if (!targetTemplate) {
+      return replyMarkdownButton(e, [
+        { key: 'a', values: ['\r\r#Bot模板详情'] },
+        { key: 'b', values: [`\r未找到ID为 ${tplid} 的模板`] }
+      ], [
+        [
+          { text: '返回列表', callback: 'bot模板', clicked_text: '正在返回列表' }
+        ]
+      ])
+    }
+
+    let t = ['', '按钮', 'Markdown']
+    let s = ['', '未提审', '审核中', '已通过', '未通过']
+
+    // 构建模板详情文本
+    let templateDetail = `模板ID：${targetTemplate.tpl_id}
+模板名字：${targetTemplate.tpl_name}
+模板类型：${t[targetTemplate.tpl_type]}
+状态：${s[targetTemplate.status]}
+——————
+模板内容：
+${targetTemplate.text || '无内容'}`
+
+    return await e.runtime.render('Kevin-plugin', '/bot/template_detail', {
+      data: {
+        uin: data.uin,
+        appId: data.appId,
+        template: {
+          id: targetTemplate.tpl_id,
+          name: targetTemplate.tpl_name,
+          type: t[targetTemplate.tpl_type],
+          status: s[targetTemplate.status],
+          content: targetTemplate.text || '无内容'
+        }
+      }
+    }, {
+      e,
+      scale: 1.2
+    }, '', [
+      [
+        { text: '返回列表', callback: 'bot模板', clicked_text: '正在返回列表' },
+        { text: '复制模板', input: templateDetail, clicked_text: '正在复制模板' }
+      ]
+    ])
   }
 }
 

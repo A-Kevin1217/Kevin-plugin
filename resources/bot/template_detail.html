@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+  <link rel="shortcut icon" href="#"/>
+  <link rel="stylesheet" type="text/css" href="{{_res_path}}/common/common.css"/>
+  <link rel="stylesheet" type="text/css" href="{{_res_path}}/bot/template.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">Bot模板详情</div>
+      <div class="subtitle">
+        <div class="account">账号：{{data.uin}}</div>
+        <div class="appid">AppId：{{data.appId}}</div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="info-item">
+        <div class="label">模板ID</div>
+        <div class="value">{{data.template.id}}</div>
+      </div>
+      <div class="info-item">
+        <div class="label">模板名称</div>
+        <div class="value">{{data.template.name}}</div>
+      </div>
+      <div class="info-item">
+        <div class="label">模板类型</div>
+        <div class="value">{{data.template.type}}</div>
+      </div>
+      <div class="info-item">
+        <div class="label">审核状态</div>
+        <div class="value {{data.template.status}}">{{data.template.status}}</div>
+      </div>
+      <div class="template-content">
+        <div class="content-title">模板内容</div>
+        <div class="content-box">{{data.template.content}}</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html> 
