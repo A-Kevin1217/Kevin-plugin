@@ -332,7 +332,7 @@ export class robot_data extends plugin {
       { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
       { key: 'b', values: ['#'] },
       { key: 'c', values: ['Bot模板列表'] },
-      { key: 'd', values: [`\r账号：${data.uin}\rAppId：${appId}\r> 当前账户的模板列表如下\r\r`] },
+      { key: 'd', values: [`\r账号：${data.uin}\rAppId：${appId}\r\r> 当前账户的模板列表如下\r\r`] },
       { key: 'e', values: [`***\r`] },
       { key: 'f', values: ['`'] },
       { key: 'g', values: [`\`\`\r${tplContent.join('\r')}`] },
