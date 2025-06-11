@@ -1,7 +1,6 @@
 import fetch from 'node-fetch';
 import fs from 'fs';
 import { isQQBot, replyMarkdownButton } from '../components/CommonReplyUtil.js'
-import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 
 const base = 'https://191800.xyz/bot'
 const loginurl = `${base}/get_login.php`
@@ -368,7 +367,6 @@ export class robot_data extends plugin {
     let data = this.user[user]
     let match = e.msg.match(/(\d+_\d+)$/)
     let tplid = match ? match[1] : ''
-    
     let res = await (await fetch(`${tpl_list}?appid=${data.appId}&uin=${data.uin}&ticket=${data.ticket}&developerId=${data.developerId}`)).json()
     
     if (res.retcode != 0) {
@@ -407,9 +405,15 @@ export class robot_data extends plugin {
 模板内容：
 ${targetTemplate.text || '无内容'}`
 
-    const image = await puppeteer.screenshot('bot/template_detail', {
-      tplFile: 'plugins/Kevin-plugin/resources/bot/template_detail.html',
-      saveId: targetTemplate.tpl_id,
+    // 创建按钮
+    const button = segment.button([
+      [
+        { text: '返回列表', callback: 'bot模板', clicked_text: '正在返回列表' },
+        { text: '复制模板', input: templateDetail, clicked_text: '正在复制模板' }
+      ]
+    ])
+
+    return await e.runtime.render('Kevin-plugin', '/bot/template_detail', {
       data: {
         uin: data.uin,
         appId: data.appId,
@@ -421,17 +425,11 @@ ${targetTemplate.text || '无内容'}`
           content: targetTemplate.text || '无内容'
         }
       }
+    }, {
+      e,
+      scale: 1.2,
+      button
     })
-
-    return await e.reply([
-      segment.image(image),
-      segment.button([
-        [
-          { text: '返回列表', callback: 'bot模板', clicked_text: '正在返回列表' },
-          { text: '复制模板', input: templateDetail, clicked_text: '正在复制模板' }
-        ]
-      ])
-    ])
   }
 }
 
