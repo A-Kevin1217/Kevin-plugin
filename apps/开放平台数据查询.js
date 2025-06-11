@@ -423,14 +423,13 @@ ${targetTemplate.text || '无内容'}`
       }
     })
 
-    const button = segment.button([
+
+    return await e.reply([image, segment.button([
       [
         { text: '返回列表', callback: 'bot模板', clicked_text: '正在返回列表' },
         { text: '复制模板', input: templateDetail, clicked_text: '正在复制模板' }
       ]
-    ])
-
-    return await e.reply([image, button])
+    ])])
   }
 }
 
