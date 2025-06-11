@@ -31,6 +31,7 @@ export class robot_data extends plugin {
         { reg: "^(#|\/)?bot通知$", fnc: 'get_message' },
         { reg: "^(#|\/)?bot列表$", fnc: 'get_botlist' },
         { reg: "^(#|\/)?bot数据(\\d*)?$", fnc: 'get_botdata' },
+        { reg: "^(#|\/)?bot模板$", fnc: 'get_bottpl' },
       ]
     });
     this.user = {}
