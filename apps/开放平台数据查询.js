@@ -2,12 +2,13 @@ import fetch from 'node-fetch';
 import fs from 'fs';
 import { isQQBot, replyMarkdownButton } from '../components/CommonReplyUtil.js'
 
-const base = 'https://i.elaina.vin/bot'
+const base = 'https://191800.xyz/bot'
 const loginurl = `${base}/get_login.php`
 const get_login = `${base}/robot.php`
 const message = `${base}/message.php`
 const botlist = `${base}/bot_list.php`
 const botdata = `${base}/bot_data.php`
+const tpl_list = `${base}/msg_tpl_list.php`
 const file = `${process.cwd().replace(/\\/g, '/')}/data/robot.json`
 
 const commonButtons = [
@@ -278,6 +279,63 @@ export class robot_data extends plugin {
         { key: 'a', values: [`数据处理出错，请稍后再试`] }
       ], commonButtons)
     }
+  }
+
+  async get_bottpl(e) {
+    if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
+    let user = e.user_id
+    try { this.user = JSON.parse(fs.readFileSync(file, 'utf-8')) } catch { }
+    if (!this.user[user]) {
+      return replyMarkdownButton(e, [
+        { key: 'a', values: [`未查询到你的登录信息`] }
+      ], [
+        [
+          { text: '登录', callback: '管理登录', clicked_text: '正在登录' }
+        ]
+      ])
+    }
+
+    let data = this.user[user]
+    let appId = e.msg.replace('bot模板', '') || data.appId
+    let res = await (await fetch(`${tpl_list}?appid=${appId}&uin=${data.uin}&ticket=${data.ticket}&developerId=${data.developerId}`)).json()
+    
+    if (res.retcode != 0) {
+      return replyMarkdownButton(e, [
+        { key: 'a', values: [`登录状态失效`] }
+      ], [
+        [
+          { text: '登录', callback: '管理登录', clicked_text: '正在登录' }
+        ]
+      ])
+    }
+
+    let apps = res.data.list
+    let max = res.data.max_msg_tpl_count
+    let tplContent = []
+    
+    tplContent.push(`[${data.uin}](${appId})\r模板使用：${apps.length}/${max}`)
+    
+    for (let j = 0; j < apps.length; j++) {
+      if (j > 0) tplContent.push('——————')
+      let t = ['', '按钮', 'Markdown']
+      let s = ['', '未提审', '审核中', '已通过', '未通过']
+      tplContent.push(`模板ID:${apps[j].tpl_id}`)
+      tplContent.push(`模板名字:${apps[j].tpl_name}`)
+      tplContent.push(`模板类型:${t[apps[j].tpl_type]}`)
+      tplContent.push(`状态:${s[apps[j].status]}`)
+    }
+
+    return replyMarkdownButton(e, [
+      { key: 'a', values: [`<@${user?.slice(11)}>\r`] },
+      { key: 'b', values: ['#'] },
+      { key: 'c', values: ['Bot模板列表'] },
+      { key: 'd', values: [`\r> 当前账户的模板列表如下\r\r`] },
+      { key: 'e', values: [`***\r`] },
+      { key: 'f', values: ['`'] },
+      { key: 'g', values: [`\`\`\r${tplContent.join('\r')}`] },
+      { key: 'h', values: ['``'] },
+      { key: 'i', values: ['`'] }
+    ], commonButtons)
   }
 }
 
