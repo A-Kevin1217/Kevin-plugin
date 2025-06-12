@@ -326,8 +326,6 @@ export class robot_data extends plugin {
     let max = res.data.max_msg_tpl_count
     let tplContent = []
     
-    tplContent.push(`模板使用：${apps.length}/${max}`)
-    
       for (let j = 0; j < apps.length; j++) {
       if (j > 0) tplContent.push('——————')
         let t = ['', '按钮', 'Markdown']
@@ -343,7 +341,7 @@ export class robot_data extends plugin {
     
     let replyArr = [
       { key: 'a', values: ['\r\r#Bot模板列表'] },
-      { key: 'b', values: [`\r账号：${data.uin}\rAppId：${appId}\r\r> 当前账户的模板列表如下\r\r`] },
+      { key: 'b', values: [`\r账号：${data.uin}\rAppId：${appId}\r\r> 当前账户的模板列表如下\r模板使用：${apps.length}/${max}\r\r`] },
       { key: 'c', values: [`***\r`] },
       { key: 'd', values: ['`'] },
       { key: 'e', values: [`\`\`\r${tplContent.join('\r')}`] },
