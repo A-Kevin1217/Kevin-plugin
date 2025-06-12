@@ -557,7 +557,7 @@ export class CPUSTATE extends plugin {
             priority: 100,
             rule: [
                 {
-                    reg: '^#?(运行|系统)?状态$', // Updated regex
+                    reg: '^#?(运行|系统)?状态lite$', // Updated regex
                     fnc: 'getSystemStatusImage'
                 }
             ]
