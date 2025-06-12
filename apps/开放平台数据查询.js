@@ -36,7 +36,7 @@ export class robot_data extends plugin {
         { reg: "^(#|\/)?bot通知$", fnc: 'get_message' },
         { reg: "^(#|\/)?bot列表$", fnc: 'get_botlist' },
         { reg: "^(#|\/)?bot数据(\\d*)?$", fnc: 'get_botdata' },
-        { reg: "^(#|\/)?bot模板$", fnc: 'get_bottpl' },
+        { reg: "^(#|\/)?bot模板(\\d*)$", fnc: 'get_bottpl' },
         { reg: "^(#|\/)?bot模板详情(\\d+_\\d+)$", fnc: 'get_bottpl_m' },
       ]
     });
@@ -303,7 +303,13 @@ export class robot_data extends plugin {
     }
 
     let data = this.user[user]
-    let appId = e.msg.replace('bot模板', '') || data.appId
+    let appId = e.msg.replace(/^(#|\/)?bot模板(\d*)$/, '') || data.appId
+    // 获取页码，默认为1
+    let currentPage = 1
+    let match = e.msg.match(/^(#|\/)?bot模板(\d*)$/)
+    if (match && match[2]) {
+      currentPage = parseInt(match[2]) || 1
+    }
     let res = await (await fetch(`${tpl_list}?appid=${appId}&uin=${data.uin}&ticket=${data.ticket}&developerId=${data.developerId}`)).json()
     
     if (res.retcode != 0) {
@@ -352,8 +358,9 @@ export class robot_data extends plugin {
     
     // 计算总页数
     const totalPages = Math.ceil(apps.length / TEMPLATES_PER_PAGE)
-    // 当前是第一页
-    const currentPage = 1
+    
+    // 确保当前页码在有效范围内
+    currentPage = Math.max(1, Math.min(currentPage, totalPages))
     
     // 计算当前页应显示的模板范围
     const startIdx = (currentPage - 1) * TEMPLATES_PER_PAGE
@@ -376,21 +383,50 @@ export class robot_data extends plugin {
       buttonArr.push(row)
     }
     
-    // 如果有多页，将最后一行替换为翻页按钮
-    if (totalPages > 1 && buttonArr.length === MAX_ROWS) {
-      buttonArr[MAX_ROWS - 1] = [
-        {
+    // 如果有多页，添加翻页按钮
+    if (totalPages > 1) {
+      let pageRow = []
+      
+      // 添加上一页按钮
+      if (currentPage > 1) {
+        pageRow.push({
           text: '上一页',
-          callback: 'bot模板0', // 这里0表示当前是第一页，不能往前翻
+          callback: `bot模板${currentPage - 1}`,
+          clicked_text: '正在翻到上一页'
+        })
+      } else {
+        pageRow.push({
+          text: '上一页',
+          callback: 'bot模板1',
           clicked_text: '已经是第一页了'
-        },
-        {
+        })
+      }
+      
+      // 添加下一页按钮
+      if (currentPage < totalPages) {
+        pageRow.push({
           text: '下一页',
-          callback: 'bot模板2', // 这里2表示要跳转到第2页
-          clicked_text: '正在翻页'
-        }
-      ]
+          callback: `bot模板${currentPage + 1}`,
+          clicked_text: '正在翻到下一页'
+        })
+      } else {
+        pageRow.push({
+          text: '下一页',
+          callback: `bot模板${totalPages}`,
+          clicked_text: '已经是最后一页了'
+        })
+      }
+      
+      // 如果按钮数组已满，替换最后一行；否则添加新行
+      if (buttonArr.length >= MAX_ROWS) {
+        buttonArr[MAX_ROWS - 1] = pageRow
+      } else {
+        buttonArr.push(pageRow)
+      }
     }
+    
+    // 添加当前页码信息到回复内容
+    replyArr.splice(2, 0, { key: 'page', values: [`\r第 ${currentPage}/${totalPages} 页`] })
     
     return replyMarkdownButton(e, replyArr, buttonArr)
   }
