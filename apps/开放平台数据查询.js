@@ -1,7 +1,6 @@
 import fetch from 'node-fetch';
 import fs from 'fs';
 import { isQQBot, replyMarkdownButton } from '../components/CommonReplyUtil.js'
-import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import { renderTemplateDetail } from '../resources/bot/template_detail_canvas.js'
 
 const base = 'https://191800.xyz/bot'
@@ -323,10 +322,11 @@ export class robot_data extends plugin {
     
     tplContent.push(`模板使用：${apps.length}/${max}`)
     
-    for (let j = 0; j < apps.length; j++) {
+      for (let j = 0; j < apps.length; j++) {
       if (j > 0) tplContent.push('——————')
-      let t = ['', '按钮', 'Markdown']
-      let s = ['', '未提审', '审核中', '已通过', '未通过']
+        let t = ['', '按钮', 'Markdown']
+        let s = ['', '未提审', '审核中', '已通过', '未通过']
+      tplContent.push(`模板${j + 1}`)
       tplContent.push(`模板ID：${apps[j].tpl_id}`)
       tplContent.push(`模板名字：${apps[j].tpl_name}`)
       tplContent.push(`模板类型：${t[apps[j].tpl_type]}`)
@@ -345,13 +345,52 @@ export class robot_data extends plugin {
       { key: 'g', values: ['`'] }
     ]
 
-    let buttonArr = [
-      [
-        { text: '模板详情', input: 'bot模板详情', clicked_text: '正在获取模板详情' }
-      ]
-    ]
+    let buttonArr = []
+    const BUTTONS_PER_ROW = 2
+    const MAX_ROWS = 5
+    const TEMPLATES_PER_PAGE = BUTTONS_PER_ROW * MAX_ROWS
     
-    console.log('Reply Array:', replyArr)
+    // 计算总页数
+    const totalPages = Math.ceil(apps.length / TEMPLATES_PER_PAGE)
+    // 当前是第一页
+    const currentPage = 1
+    
+    // 计算当前页应显示的模板范围
+    const startIdx = (currentPage - 1) * TEMPLATES_PER_PAGE
+    const endIdx = Math.min(startIdx + TEMPLATES_PER_PAGE, apps.length)
+    
+    // 生成当前页的按钮
+    for (let i = startIdx; i < endIdx; i += BUTTONS_PER_ROW) {
+      let row = []
+      
+      // 添加当前行的按钮（最多2个）
+      for (let j = 0; j < BUTTONS_PER_ROW && (i + j) < endIdx; j++) {
+        const templateIndex = i + j
+        row.push({
+          text: `查看模板${templateIndex + 1}`,
+          callback: `bot模板详情${apps[templateIndex].tpl_id}`,
+          clicked_text: '正在获取模板详情'
+        })
+      }
+      
+      buttonArr.push(row)
+    }
+    
+    // 如果有多页，将最后一行替换为翻页按钮
+    if (totalPages > 1 && buttonArr.length === MAX_ROWS) {
+      buttonArr[MAX_ROWS - 1] = [
+        {
+          text: '上一页',
+          callback: 'bot模板0', // 这里0表示当前是第一页，不能往前翻
+          clicked_text: '已经是第一页了'
+        },
+        {
+          text: '下一页',
+          callback: 'bot模板2', // 这里2表示要跳转到第2页
+          clicked_text: '正在翻页'
+        }
+      ]
+    }
     
     return replyMarkdownButton(e, replyArr, buttonArr)
   }
