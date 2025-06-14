@@ -37,7 +37,10 @@ async function checkDuplicateJoin(groupId, userId) {
   for (const otherGroupId of groupList) {
     if (otherGroupId !== String(groupId)) {
       try {
-        const members = await Bot.pickGroup(Number(otherGroupId)).getMemberMap();
+        if (!Bot) continue;  // 检查 Bot 是否存在
+        const group = Bot.pickGroup(Number(otherGroupId));
+        if (!group) continue;  // 检查群组是否存在
+        const members = await group.getMemberMap();
         if (members.has(userId)) {
           return {
             isDuplicate: true,
@@ -91,119 +94,139 @@ export class example2 extends plugin {
       return true;
     }
     const groupName = group_map[e.group_id] || e.group_id;
-    const userName = await e.bot.pickUser(e.user_id).getInfo().then(info => info?.nickname || e.user_id).catch(() => e.user_id);
-
-    // 检查是否在不需要检测的成员列表中
-    if (member_whitelist.includes(Number(e.user_id))) {
-      messages.push([
-        `群聊：${groupName}`,
-        segment.image(`https://q2.qlogo.cn/headimg_dl?dst_uin=${e.user_id}&spec=100`),
-        `用户：${userName}(${e.user_id})\n该用户在白名单中，已自动同意申请`
-      ]);
-      e.approve(true);
-      await Bot.pickGroup(634644457).sendMsg(await makeForwardMsg(e, messages, '✅ 新成员加群审核通过'));
-      return true; // 直接通过申请
-    }
-
-    // 新增代码：获取好友信息
-    const selectedFriend = await Bot.pickFriend(e.user_id);
-    if (!selectedFriend) {
-      await e.reply('未找到该好友。');
-      return;
-    }
-
-    const friendInfo = await this.e.friend.getInfo(selectedFriend);
-    if (!friendInfo) {
-      await e.reply('未找到该好友的信息。');
-      return;
-    }
-
-    const qqLevel = friendInfo.qqLevel;
-    const isHideQQLevel = friendInfo.isHideQQLevel;
-
-    // 处理QQ等级显示
-    let userLevel = isHideQQLevel === 1 ? '隐藏' : qqLevel;
-
-    const duplicateCheck = await checkDuplicateJoin(e.group_id, e.user_id);
-    if (duplicateCheck.isDuplicate) {
-      messages.push([
-        `群聊：${groupName}`,
-        segment.image(`https://q2.qlogo.cn/headimg_dl?dst_uin=${e.user_id}&spec=100`),
-        `用户：${userName}(${e.user_id})\n该用户已加入【${duplicateCheck.existingGroup}】，请管理员手动谨慎审核！`
-      ]);
-      e.approve(false);
-      await Bot.pickGroup(634644457).sendMsg(await makeForwardMsg(e, messages, '⚠️ 重复加群警告！请管理员注意'));
-      return false;
-    }
-
-    if (groupList.includes(String(e.group_id))) {
-      const blacklist = this.getBlacklist();
-      if (blacklist.includes(`${e.user_id}`)) {
+    
+    try {
+      const userInfo = await e.bot.pickUser(e.user_id).getInfo();
+      const userName = userInfo?.nickname || String(e.user_id);
+    
+      // 检查是否在不需要检测的成员列表中
+      if (member_whitelist.includes(Number(e.user_id))) {
         messages.push([
           `群聊：${groupName}`,
           segment.image(`https://q2.qlogo.cn/headimg_dl?dst_uin=${e.user_id}&spec=100`),
-          `用户：${userName}(${e.user_id})\n该用户在黑名单中，已自动拒绝申请`
+          `用户：${userName}(${e.user_id})\n该用户在白名单中，已自动同意申请`
+        ]);
+        e.approve(true);
+        if (e.bot) {
+          const auditGroup = e.bot.pickGroup(634644457);
+          if (auditGroup) {
+            await auditGroup.sendMsg(await makeForwardMsg(e, messages, '✅ 新成员加群审核通过'));
+          }
+        }
+        return true;
+      }
+
+      // 新增代码：获取好友信息
+      const selectedFriend = await Bot.pickFriend(e.user_id);
+      if (!selectedFriend) {
+        await e.reply('未找到该好友。');
+        return;
+      }
+
+      const friendInfo = await this.e.friend.getInfo(selectedFriend);
+      if (!friendInfo) {
+        await e.reply('未找到该好友的信息。');
+        return;
+      }
+
+      const qqLevel = friendInfo.qqLevel;
+      const isHideQQLevel = friendInfo.isHideQQLevel;
+
+      // 处理QQ等级显示
+      let userLevel = isHideQQLevel === 1 ? '隐藏' : qqLevel;
+
+      const duplicateCheck = await checkDuplicateJoin(e.group_id, e.user_id);
+      if (duplicateCheck.isDuplicate) {
+        messages.push([
+          `群聊：${groupName}`,
+          segment.image(`https://q2.qlogo.cn/headimg_dl?dst_uin=${e.user_id}&spec=100`),
+          `用户：${userName}(${e.user_id})\n该用户已加入【${duplicateCheck.existingGroup}】，请管理员手动谨慎审核！`
         ]);
         e.approve(false);
-        await Bot.pickGroup(634644457).sendMsg(await makeForwardMsg(e, messages, '⛔ 黑名单用户加群提醒'));
+        await Bot.pickGroup(634644457).sendMsg(await makeForwardMsg(e, messages, '⚠️ 重复加群警告！请管理员注意'));
         return false;
       }
 
-      messages.push([
-        `群聊：${groupName}`,
-        segment.image(`https://q2.qlogo.cn/headimg_dl?dst_uin=${e.user_id}&spec=100`),
-        `用户：${userName}(${e.user_id})\nQQ等级：${userLevel}\n${e.comment}`
-      ]);
-
-      // 新增代码：如果QQ等级被隐藏，提醒管理员处理
-      if (isHideQQLevel === 1) {
-        if (enableLevelCheck) {
-          messages.push(`用户等级被隐藏，请管理员手动处理该用户的加群申请。`);
-          await Bot.pickGroup(634644457).sendMsg(await makeForwardMsg(e, messages, '⚠️ 用户等级隐藏提醒'));
+      if (groupList.includes(String(e.group_id))) {
+        const blacklist = this.getBlacklist();
+        if (blacklist.includes(`${e.user_id}`)) {
+          messages.push([
+            `群聊：${groupName}`,
+            segment.image(`https://q2.qlogo.cn/headimg_dl?dst_uin=${e.user_id}&spec=100`),
+            `用户：${userName}(${e.user_id})\n该用户在黑名单中，已自动拒绝申请`
+          ]);
+          e.approve(false);
+          await Bot.pickGroup(634644457).sendMsg(await makeForwardMsg(e, messages, '⛔ 黑名单用户加群提醒'));
           return false;
         }
-        messages.push(`注意：用户等级已隐藏`);
-      }
 
-      let levelPass = true;  // 默认等级验证通过
-      if (enableLevelCheck) {  // 只在启用等级验证时检查
-        levelPass = userLevel !== '隐藏' && userLevel >= 16;
-        if (!levelPass) {
-          messages.push(`用户等级不足，未通过等级验证。`);
-          e.approve(false, '您的QQ等级不足。');
+        messages.push([
+          `群聊：${groupName}`,
+          segment.image(`https://q2.qlogo.cn/headimg_dl?dst_uin=${e.user_id}&spec=100`),
+          `用户：${userName}(${e.user_id})\nQQ等级：${userLevel}\n${e.comment}`
+        ]);
+
+        // 新增代码：如果QQ等级被隐藏，提醒管理员处理
+        if (isHideQQLevel === 1) {
+          if (enableLevelCheck) {
+            messages.push(`用户等级被隐藏，请管理员手动处理该用户的加群申请。`);
+            await Bot.pickGroup(634644457).sendMsg(await makeForwardMsg(e, messages, '⚠️ 用户等级隐藏提醒'));
+            return false;
+          }
+          messages.push(`注意：用户等级已隐藏`);
+        }
+
+        let levelPass = true;  // 默认等级验证通过
+        if (enableLevelCheck) {  // 只在启用等级验证时检查
+          levelPass = userLevel !== '隐藏' && userLevel >= 16;
+          if (!levelPass) {
+            messages.push(`用户等级不足，未通过等级验证。`);
+            e.approve(false, '您的QQ等级不足。');
+            await Bot.pickGroup(634644457).sendMsg(await makeForwardMsg(e, messages, '❌ 加群审核未通过提醒'));
+            return false;
+          }
+        }
+
+        // 答案验证部分保持不变
+        const userAnswer = e.comment;
+        const answerPass = ans.some(answer => exactMatch ? userAnswer.trim() === answer : userAnswer.includes(answer));
+        if (answerPass) messages.push(`答案验证通过`);
+
+        if (answerPass) {
+          messages.push(`验证通过！已自动同意申请`);
+          e.approve(true);
+          await Bot.pickGroup(634644457).sendMsg(await makeForwardMsg(e, messages, '✅ 新成员加群审核通过'));
+        } else {
+          messages.push(`验证未通过！\n答案验证:${answerPass ? '通过' : '未通过'}`);
+          e.approve(false, '答案验证未通过。');
           await Bot.pickGroup(634644457).sendMsg(await makeForwardMsg(e, messages, '❌ 加群审核未通过提醒'));
-          return false;
         }
       }
-
-      // 答案验证部分保持不变
-      const userAnswer = e.comment;
-      const answerPass = ans.some(answer => exactMatch ? userAnswer.trim() === answer : userAnswer.includes(answer));
-      if (answerPass) messages.push(`答案验证通过`);
-
-      if (answerPass) {
-        messages.push(`验证通过！已自动同意申请`);
-        e.approve(true);
-        await Bot.pickGroup(634644457).sendMsg(await makeForwardMsg(e, messages, '✅ 新成员加群审核通过'));
-      } else {
-        messages.push(`验证未通过！\n答案验证:${answerPass ? '通过' : '未通过'}`);
-        e.approve(false, '答案验证未通过。');
-        await Bot.pickGroup(634644457).sendMsg(await makeForwardMsg(e, messages, '❌ 加群审核未通过提醒'));
-      }
+    } catch (error) {
+      console.error('处理加群申请时发生错误:', error);
+      e.approve(false, '处理加群申请时发生错误。');
     }
     return false;
   }
 }
+
 async function makeForwardMsg(e, message, dec) {
   try {
-    let bot = e.bot
-    let qq = bot.uin
-    let group = bot.gl.keys().next().value;
-    logger.info(group)
+    if (!e.bot) {
+      logger.error('Bot 对象未定义');
+      return null;
+    }
+    
+    let bot = e.bot;
+    let qq = bot.uin;
+    let group = bot.gl ? bot.gl.keys().next().value : null;
+    
+    if (group) logger.info(group);
+    
     if (!Array.isArray(message)) message = [message];
     let info = {
       user_id: qq || 88888888,
-      nickname: Bot[qq]?.nickname || Bot[Bot.uin.find(i => Bot[i].adapter.name == "ICQQ")].pickUser(qq).then(info => info?.nickname) || "?"
+      nickname: bot.nickname || "未知昵称"
     }
     message = message.map(i => {
       if (!message)
@@ -217,11 +240,23 @@ async function makeForwardMsg(e, message, dec) {
         else return i
     })
     
-    let forward
-    if (e.group_id)
-      forward = await Bot[Bot.uin.find(i => Bot[i].adapter.name == "ICQQ")].pickGroup(e.group_id).raw.makeForwardMsg(message);
-    else
-      forward = await Bot[Bot.uin.find(i => Bot[i].adapter.name == "ICQQ")].pickFriend(1354903463).raw.makeForwardMsg(message);
+    let forward;
+    try {
+      if (e.group_id && e.bot) {
+        const group = e.bot.pickGroup(e.group_id);
+        if (group?.raw?.makeForwardMsg) {
+          forward = await group.raw.makeForwardMsg(message);
+        }
+      } else if (e.bot) {
+        const friend = e.bot.pickFriend(1354903463);
+        if (friend?.raw?.makeForwardMsg) {
+          forward = await friend.raw.makeForwardMsg(message);
+        }
+      }
+    } catch (err) {
+      logger.error('创建转发消息失败：', err);
+      return null;
+    }
     
     if (dec) {
       // 生成详细的标题信息，只取群聊和用户信息两行
