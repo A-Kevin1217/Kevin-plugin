@@ -1,6 +1,30 @@
 import { isQQBot, replyMarkdownButton } from '../components/CommonReplyUtil.js'
 const DemonGame = {};
 
+// Redis游戏状态管理
+class GameStateManager {
+  static getRedisKey(groupId) {
+    return `Yunzai:DemonRoulette:${groupId}`;
+  }
+
+  static async saveGameState(groupId, gameState) {
+    if (!gameState) return;
+    const redisKey = this.getRedisKey(groupId);
+    await redis.set(redisKey, JSON.stringify(gameState));
+  }
+
+  static async loadGameState(groupId) {
+    const redisKey = this.getRedisKey(groupId);
+    const data = await redis.get(redisKey);
+    return data ? JSON.parse(data) : null;
+  }
+
+  static async clearGameState(groupId) {
+    const redisKey = this.getRedisKey(groupId);
+    await redis.del(redisKey);
+  }
+}
+
 export class DemonRoulette extends plugin {
   constructor() {
     super({
@@ -93,6 +117,14 @@ export class DemonRoulette extends plugin {
     if (!isQQBot(e)) { await e.reply('请艾特六阶堂穗玉使用'); return false }
 
     const groupId = e.group_id;
+    
+    // 先从redis加载游戏状态
+    const savedGame = await GameStateManager.loadGameState(groupId);
+    if (savedGame) {
+      DemonGame[groupId] = savedGame;
+      return;
+    }
+    
     if (DemonGame[groupId]) {
       await e.reply('游戏已在进行中，无法重新创建。');
       return;
@@ -115,6 +147,9 @@ export class DemonRoulette extends plugin {
       turn: 0,
       creator: creatorId // 添加创建者标记
     };
+    
+    // 保存游戏状态到redis
+    await GameStateManager.saveGameState(groupId, DemonGame[groupId]);
 
     await e.reply('⚠️ 恶魔轮盘赌为双人对战模式，已自动加入创建者，等待另一位玩家加入...');
 
@@ -176,6 +211,9 @@ export class DemonRoulette extends plugin {
       selfEmptyShots: 0,
       deadItems: [] // 用于存储死亡时的道具
     });
+    
+    // 保存游戏状态到redis
+    await GameStateManager.saveGameState(groupId, session);
 
     // 人满自动开始
     const playerAvatars = session.players.flatMap((player, index) => {
@@ -194,6 +232,9 @@ export class DemonRoulette extends plugin {
       // 统计弹匣实弹和空弹数量
       const live = session.chamber.filter(x => x).length;
       const empty = session.chamber.length - live;
+      
+      // 保存游戏状态到redis
+      await GameStateManager.saveGameState(groupId, session);
       await replyMarkdownButton(e, [
         { key: 'a', values: ['#'] },
         { key: 'b', values: ['恶魔轮盘赌\r> 游戏人数已满，游戏开始\r'] },
@@ -202,7 +243,9 @@ export class DemonRoulette extends plugin {
         ...playerAvatars,
         { key: 'i', values: [`\r本轮弹匣：${live}发实弹，${empty}发空弹`] }
       ]);
-      await this.nextTurn(e);
+      // 保存游戏状态到redis
+    await GameStateManager.saveGameState(groupId, session);
+    await this.nextTurn(e);
       return;
     }
 
@@ -304,9 +347,14 @@ export class DemonRoulette extends plugin {
             { text: '再来一局', callback: '/恶魔轮盘赌', clicked_text: '正在重新开始' }
           ]
         ]);
+        // 清除redis中的游戏状态
+        await GameStateManager.clearGameState(groupId);
         DemonGame[groupId] = null;
         return;
       }
+      
+      // 保存游戏状态到redis
+      await GameStateManager.saveGameState(groupId, session);
     } else {
       await replyMarkdownButton(e, [
         { key: 'a', values: ['#'] },
@@ -347,6 +395,10 @@ export class DemonRoulette extends plugin {
         // 重置当前玩家的道具使用状态和放大镜标记
         Object.values(currentPlayer.items).forEach(item => item.used = false);
         currentPlayer.usedMagnifier = false;
+        
+        // 保存游戏状态到redis
+        await GameStateManager.saveGameState(groupId, session);
+        
         await replyMarkdownButton(e, [
           { key: 'a', values: ['#'] },
           { key: 'b', values: ['恶魔轮盘赌\r> 🎯 选择开枪目标\r'] },
@@ -380,6 +432,8 @@ export class DemonRoulette extends plugin {
       }
     }
 
+    // 保存游戏状态到redis
+    await GameStateManager.saveGameState(groupId, session);
     await this.nextTurn(e);
   }
 
@@ -595,6 +649,8 @@ export class DemonRoulette extends plugin {
                   { text: '再来一局', callback: '/恶魔轮盘赌', clicked_text: '正在重新开始' }
                 ]
               ]);
+              // 清除redis中的游戏状态
+              await GameStateManager.clearGameState(groupId);
               DemonGame[groupId] = null;
               return;
             }
@@ -602,6 +658,9 @@ export class DemonRoulette extends plugin {
         }
         break;
     }
+
+    // 保存游戏状态到redis
+    await GameStateManager.saveGameState(groupId, session);
 
     // 只有手铐和饮料会跳过回合，其他道具使用后继续当前回合
     if (!['手铐', '饮料'].includes(itemName)) {
@@ -635,6 +694,9 @@ export class DemonRoulette extends plugin {
     // 重置当前玩家的道具使用状态和放大镜标记
     Object.values(currentPlayer.items).forEach(item => item.used = false);
     currentPlayer.usedMagnifier = false;
+    
+    // 保存游戏状态到redis
+    await GameStateManager.saveGameState(groupId, session);
 
     // 生成所有玩家的头像和状态
     const playerAvatars = session.players.map((p, index) => {
@@ -819,6 +881,9 @@ export class DemonRoulette extends plugin {
     currentPlayer.items[itemName] = currentPlayer.items[itemName] || { count: 0, used: false };
     currentPlayer.items[itemName].count++;
 
+    // 保存游戏状态到redis
+    await GameStateManager.saveGameState(groupId, session);
+
     await replyMarkdownButton(e, [
       { key: 'a', values: ['#'] },
       { key: 'b', values: ['恶魔轮盘赌\r> 🎯 盗取成功\r'] },
@@ -861,6 +926,8 @@ export class DemonRoulette extends plugin {
       ]
     ]);
 
+    // 清除redis中的游戏状态
+    await GameStateManager.clearGameState(groupId);
     DemonGame[groupId] = null;
   }
 
@@ -964,6 +1031,8 @@ export class DemonRoulette extends plugin {
       ]
     ]);
 
+    // 清除redis中的游戏状态
+    await GameStateManager.clearGameState(groupId);
     DemonGame[groupId] = null;
   }
 
