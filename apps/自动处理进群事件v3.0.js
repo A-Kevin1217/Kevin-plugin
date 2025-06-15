@@ -117,23 +117,26 @@ export class example2 extends plugin {
       }
 
       // 新增代码：获取好友信息
-      const selectedFriend = await Bot.pickFriend(e.user_id);
-      if (!selectedFriend) {
-        await e.reply('未找到该好友。');
-        return;
+      let userLevel = '未知'; // 默认值
+      try {
+        const selectedFriend = await Bot.pickFriend(e.user_id);
+        if (!selectedFriend) {
+          console.log(`未找到用户 ${e.user_id} 作为好友`);
+          // 继续处理，不要直接返回
+        } else {
+          const friendInfo = await selectedFriend.getInfo();
+          if (friendInfo) {
+            const qqLevel = friendInfo.qqLevel;
+            const isHideQQLevel = friendInfo.isHideQQLevel;
+            
+            // 处理QQ等级显示
+            userLevel = isHideQQLevel === 1 ? '隐藏' : qqLevel;
+          }
+        }
+      } catch (error) {
+        console.error(`获取好友信息失败: ${error.message}`);
+        // 继续处理，使用默认值
       }
-
-      const friendInfo = await this.e.friend.getInfo(selectedFriend);
-      if (!friendInfo) {
-        await e.reply('未找到该好友的信息。');
-        return;
-      }
-
-      const qqLevel = friendInfo.qqLevel;
-      const isHideQQLevel = friendInfo.isHideQQLevel;
-
-      // 处理QQ等级显示
-      let userLevel = isHideQQLevel === 1 ? '隐藏' : qqLevel;
 
       const duplicateCheck = await checkDuplicateJoin(e.group_id, e.user_id);
       if (duplicateCheck.isDuplicate) {
@@ -258,13 +261,19 @@ async function makeForwardMsg(e, message, dec) {
       return null;
     }
     
+    // 检查forward是否成功创建
+    if (!forward) {
+      logger.error('转发消息创建失败，forward对象为undefined');
+      return null;
+    }
+    
     if (dec) {
       // 生成详细的标题信息，只取群聊和用户信息两行
       const firstLine = message[0]?.message?.[0] || '';  // 群聊信息
       const secondLine = message[0]?.message?.[2]?.split('\n')?.[0] || '';  // 用户信息第一行
       const detailTitle = `${firstLine}\n${secondLine}`;
       
-      if (typeof forward.data == "object") {
+      if (forward.data && typeof forward.data == "object") {
         if (forward.data?.meta?.detail) {
           forward.data.meta.detail.news = [{ text: detailTitle }]  // 使用详细信息作为标题
           forward.data.meta.detail.source = dec  // 使用传入的dec作为来源
@@ -273,7 +282,7 @@ async function makeForwardMsg(e, message, dec) {
           forward.data.meta.detail.desc = "[聚集地成员审核日志]"
           forward.data.prompt = "[聚集地成员审核日志]"
         }
-      } else {
+      } else if (forward.data) {
         forward.data = forward.data
           .replace('<?xml version="1.0" encoding="utf-8"?>', '<?xml version="1.0" encoding="utf-8" ?>')
           .replace(/\n/g, '')
