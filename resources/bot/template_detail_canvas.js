@@ -22,9 +22,9 @@ export async function renderTemplateDetail(data) {
       }
       
       if (buttonData && buttonData.rows) {
-        // 计算按钮行数，每行45px高度，最大显示10行
-        const rowCount = Math.min(buttonData.rows.length, 10);
-        const buttonAreaHeight = rowCount * 45 + 80; // 每行45px + 上下边距
+        // 计算按钮行数，每行45px高度，最大显示5行
+        const rowCount = Math.min(buttonData.rows.length, 5);
+        const buttonAreaHeight = rowCount * 45 + 100; // 每行45px + 上下边距
         dynamicHeight = baseHeight + buttonAreaHeight;
       }
     } catch (e) {
@@ -37,6 +37,9 @@ export async function renderTemplateDetail(data) {
     const estimatedHeight = Math.min(Math.max(200, Math.ceil(contentLength / 4)), 600);
     dynamicHeight = baseHeight + estimatedHeight;
   }
+  
+  // 确保最小高度
+  dynamicHeight = Math.max(dynamicHeight, 550);
   
   // 创建画布，应用缩放
   const canvas = createCanvas(width * scale, dynamicHeight * scale);
@@ -51,7 +54,7 @@ export async function renderTemplateDetail(data) {
   ctx.fillStyle = 'rgba(245, 245, 245, 0.9)';
   ctx.fillRect(0, 0, width, dynamicHeight);
 
-  // 绘制容器背景
+  // 绘制容器背景（外边框）
   ctx.fillStyle = '#fff';
   roundRect(ctx, 20, 20, width - 40, dynamicHeight - 40, 15);
   ctx.fill();
@@ -160,33 +163,40 @@ function renderButtonTemplate(ctx, content, width, startY, totalHeight) {
     }
 
     if (buttonData && buttonData.rows) {
-      // 绘制按钮预览背景
+      // 绘制按钮预览背景（内边框）
+      const contentPadding = 20; // 内边框与外边框的间距
+      const contentTop = startY + 60;
+      const contentBottom = totalHeight - 60;
+      const contentHeight = contentBottom - contentTop;
+      
       ctx.fillStyle = '#f0f0f0';
-      const contentHeight = totalHeight - startY - 80;
-      roundRect(ctx, 50, startY + 60, width - 100, contentHeight, 12);
+      roundRect(ctx, 40, contentTop, width - 80, contentHeight, 12);
       ctx.fill();
 
-      let buttonY = startY + 80;
+      // 计算按钮区域
+      const buttonAreaTop = contentTop + contentPadding;
+      const buttonAreaWidth = width - 80 - (contentPadding * 2);
+      let buttonY = buttonAreaTop;
       const rowHeight = 45; // 按钮行高度
       const buttonSpacing = 4; // 按钮间距
-      const availableWidth = width - 120; // 可用于按钮的宽度
+      const rowCount = Math.min(buttonData.rows.length, 5); // 最多显示5行
 
       // 遍历每一行按钮
       buttonData.rows.forEach((row, rowIndex) => {
-        if (rowIndex > 4) return; // 最多显示5行
+        if (rowIndex >= rowCount) return; // 最多显示5行
         
         const buttons = row.buttons || [];
         if (buttons.length === 0) return;
         
         // 计算当前行按钮数量和宽度
         const buttonCount = Math.min(buttons.length, 10); // 每行最多显示10个按钮
-        const buttonWidth = (availableWidth - (buttonCount - 1) * buttonSpacing) / buttonCount;
+        const buttonWidth = (buttonAreaWidth - (buttonCount - 1) * buttonSpacing) / buttonCount;
         
         // 绘制当前行的所有按钮
         buttons.forEach((button, buttonIndex) => {
-          if (buttonIndex >= 10) return; // 每行最多显示10个按钮
+          if (buttonIndex >= buttonCount) return;
           
-          const x = 60 + buttonIndex * (buttonWidth + buttonSpacing);
+          const x = 40 + contentPadding + buttonIndex * (buttonWidth + buttonSpacing);
           const style = button.render_data?.style || 0;
           
           // 绘制按钮
@@ -213,9 +223,13 @@ function renderButtonTemplate(ctx, content, width, startY, totalHeight) {
 // 渲染Markdown模板
 function renderMarkdownTemplate(ctx, content, width, startY, totalHeight) {
   // 为Markdown内容创建一个滚动区域
+  const contentPadding = 20; // 内边框与外边框的间距
+  const contentTop = startY + 60;
+  const contentBottom = totalHeight - 60;
+  const contentHeight = contentBottom - contentTop;
+  
   ctx.fillStyle = '#f9f9f9';
-  const contentHeight = totalHeight - startY - 80;
-  roundRect(ctx, 50, startY + 60, width - 100, contentHeight, 12);
+  roundRect(ctx, 40, contentTop, width - 80, contentHeight, 12);
   ctx.fill();
   
   // 绘制Markdown内容
@@ -224,11 +238,12 @@ function renderMarkdownTemplate(ctx, content, width, startY, totalHeight) {
   
   // 使用更小的行高以显示更多内容
   const lineHeight = 22;
-  const maxLines = Math.floor(contentHeight / lineHeight) - 1;
+  // 计算可显示的最大行数，确保底部有足够的边距
+  const maxLines = Math.floor((contentHeight - contentPadding * 2) / lineHeight);
   
   // 简单处理一些Markdown语法
   const lines = (content || '无内容').split('\n');
-  let y = startY + 85;
+  let y = contentTop + contentPadding;
   let lineCount = 0;
   
   for (const line of lines) {
@@ -274,6 +289,12 @@ function renderMarkdownTemplate(ctx, content, width, startY, totalHeight) {
     const wrappedLines = Math.ceil(metrics.width / (width - 120));
     lineCount += wrappedLines;
     y += lineHeight * wrappedLines;
+    
+    // 确保不会超出内边框底部
+    if (y + lineHeight > contentBottom - contentPadding) {
+      ctx.fillText('...（内容过长，已省略）', 60, y);
+      break;
+    }
   }
 }
 
