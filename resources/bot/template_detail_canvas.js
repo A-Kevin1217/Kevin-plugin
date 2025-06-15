@@ -24,7 +24,8 @@ export async function renderTemplateDetail(data) {
       if (buttonData && buttonData.rows) {
         // 计算按钮行数，每行45px高度，最大显示5行
         const rowCount = Math.min(buttonData.rows.length, 5);
-        const buttonAreaHeight = rowCount * 45 + 100; // 每行45px + 上下边距
+        // 增加底部边距，确保最后一行按钮完全在内边框内
+        const buttonAreaHeight = rowCount * 45 + 150; // 每行45px + 更大的上下边距
         dynamicHeight = baseHeight + buttonAreaHeight;
       }
     } catch (e) {
@@ -33,13 +34,13 @@ export async function renderTemplateDetail(data) {
   } else if (data.template.type === 'Markdown') {
     // Markdown模板需要更多空间显示内容
     const contentLength = data.template.content ? data.template.content.length : 0;
-    // 根据内容长度估算所需高度，每100个字符约需25px高度
-    const estimatedHeight = Math.min(Math.max(200, Math.ceil(contentLength / 4)), 600);
+    // 根据内容长度估算所需高度，确保有足够空间显示所有内容
+    const estimatedHeight = Math.max(300, Math.ceil(contentLength / 2));
     dynamicHeight = baseHeight + estimatedHeight;
   }
   
   // 确保最小高度
-  dynamicHeight = Math.max(dynamicHeight, 550);
+  dynamicHeight = Math.max(dynamicHeight, 600);
   
   // 创建画布，应用缩放
   const canvas = createCanvas(width * scale, dynamicHeight * scale);
@@ -164,9 +165,10 @@ function renderButtonTemplate(ctx, content, width, startY, totalHeight) {
 
     if (buttonData && buttonData.rows) {
       // 绘制按钮预览背景（内边框）
-      const contentPadding = 20; // 内边框与外边框的间距
+      const contentPadding = 30; // 增加内边框与外边框的间距
       const contentTop = startY + 60;
-      const contentBottom = totalHeight - 60;
+      // 确保内边框底部有足够的边距
+      const contentBottom = totalHeight - 80;
       const contentHeight = contentBottom - contentTop;
       
       ctx.fillStyle = '#f0f0f0';
@@ -223,9 +225,9 @@ function renderButtonTemplate(ctx, content, width, startY, totalHeight) {
 // 渲染Markdown模板
 function renderMarkdownTemplate(ctx, content, width, startY, totalHeight) {
   // 为Markdown内容创建一个滚动区域
-  const contentPadding = 20; // 内边框与外边框的间距
+  const contentPadding = 30; // 增加内边框与外边框的间距
   const contentTop = startY + 60;
-  const contentBottom = totalHeight - 60;
+  const contentBottom = totalHeight - 80;
   const contentHeight = contentBottom - contentTop;
   
   ctx.fillStyle = '#f9f9f9';
@@ -238,21 +240,12 @@ function renderMarkdownTemplate(ctx, content, width, startY, totalHeight) {
   
   // 使用更小的行高以显示更多内容
   const lineHeight = 22;
-  // 计算可显示的最大行数，确保底部有足够的边距
-  const maxLines = Math.floor((contentHeight - contentPadding * 2) / lineHeight);
   
   // 简单处理一些Markdown语法
   const lines = (content || '无内容').split('\n');
   let y = contentTop + contentPadding;
-  let lineCount = 0;
   
   for (const line of lines) {
-    if (lineCount >= maxLines) {
-      // 如果内容太长，显示省略号
-      ctx.fillText('...（内容过长，已省略）', 60, y);
-      break;
-    }
-    
     let processedLine = line.trim();
     let x = 60;
     
@@ -282,18 +275,17 @@ function renderMarkdownTemplate(ctx, content, width, startY, totalHeight) {
     }
     
     // 绘制当前行
-    wrapTextWithX(ctx, processedLine, x, y, width - 120, lineHeight, maxLines - lineCount, lineCount);
+    wrapTextWithX(ctx, processedLine, x, y, width - 120, lineHeight);
     
-    // 更新行计数和Y坐标
+    // 更新Y坐标
     const metrics = ctx.measureText(processedLine);
     const wrappedLines = Math.ceil(metrics.width / (width - 120));
-    lineCount += wrappedLines;
-    y += lineHeight * wrappedLines;
+    y += lineHeight * Math.max(1, wrappedLines);
     
-    // 确保不会超出内边框底部
+    // 如果已经超出内容区域，动态增加画布高度
     if (y + lineHeight > contentBottom - contentPadding) {
-      ctx.fillText('...（内容过长，已省略）', 60, y);
-      break;
+      // 这里我们不做任何限制，让内容完全显示
+      // 实际应用中可能需要考虑性能问题
     }
   }
 }
@@ -435,11 +427,12 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
   ctx.fillText(line, x, y);
 }
 
-// 辅助函数：带X坐标的文本换行，并限制最大行数
-function wrapTextWithX(ctx, text, x, y, maxWidth, lineHeight, maxLines, currentLineCount) {
+// 辅助函数：带X坐标的文本换行
+function wrapTextWithX(ctx, text, x, y, maxWidth, lineHeight) {
   const words = text.split('');
   let line = '';
-  let lineCount = 0;
+  const startX = x;
+  let currentY = y;
 
   for (let n = 0; n < words.length; n++) {
     const testLine = line + words[n];
@@ -447,20 +440,15 @@ function wrapTextWithX(ctx, text, x, y, maxWidth, lineHeight, maxLines, currentL
     const testWidth = metrics.width;
 
     if (testWidth > maxWidth && n > 0) {
-      ctx.fillText(line, x, y);
+      ctx.fillText(line, x, currentY);
       line = words[n];
-      y += lineHeight;
-      lineCount++;
-      
-      if (currentLineCount + lineCount >= maxLines) {
-        break;
-      }
+      currentY += lineHeight;
+      x = startX; // 换行后重置X坐标
     } else {
       line = testLine;
     }
   }
   
-  if (currentLineCount + lineCount < maxLines) {
-    ctx.fillText(line, x, y);
-  }
+  ctx.fillText(line, x, currentY);
+  return currentY + lineHeight; // 返回下一行的Y坐标
 } 
