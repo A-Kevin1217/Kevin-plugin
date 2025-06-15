@@ -3,6 +3,13 @@ import fs from 'fs';
 const gameDataPath = 'data/.AAA 电子木鱼游戏数据'
 fs.mkdirSync(`${gameDataPath}/用户`, { recursive: true });
 fs.mkdirSync(`${gameDataPath}/记录`, { recursive: true });
+// 添加用户连续敲击记录
+const userClickSessions = new Map();
+// 存储最后一次交互的e对象
+const lastInteractionE = new Map();
+// 存储消息发送时间
+const messageTimestamps = new Map();
+
 export class example extends plugin {
     constructor() {
         super({
@@ -17,6 +24,48 @@ export class example extends plugin {
                 { reg: /^(#|\/)?设置木鱼昵称\s*(.+)$/, fnc: 'F4' }
             ]
         })
+        
+        // 设置定时器清理长时间不活跃的会话
+        setInterval(() => {
+            const now = Date.now();
+            for (const [userId, session] of userClickSessions.entries()) {
+                // 检查是否需要发送新消息（每4分50秒）
+                const messageTime = messageTimestamps.get(userId) || 0;
+                if (session.count > 0 && now - messageTime >= 290000) { // 4分50秒 = 290000毫秒
+                    this.sendRefreshMessage(userId);
+                }
+                
+                // 检查是否需要结束会话（10秒无操作）
+                if (now - session.lastClickTime > 10000) {
+                    this.endClickSession(userId);
+                }
+            }
+        }, 5000); // 每5秒检查一次
+    }
+    
+    // 发送刷新消息
+    async sendRefreshMessage(userId) {
+        const session = userClickSessions.get(userId);
+        const e = lastInteractionE.get(userId);
+        if (!session || !e) return;
+        
+        e.reply([
+            segment.markdown({
+                custom_template_id: "102059511_1713948595",
+                params: [
+                    { key: 'a', values: [`<@${userId}>\r`] },
+                    { key: 'b', values: ['#'] },
+                    { key: 'c', values: [`继续敲击木鱼\r`] },
+                    { key: 'd', values: [`\r已连续敲击 ${session.count} 次\r继续点击+1按钮可以积累更多功德`] }
+                ]
+            }),
+            segment.button([
+                {text:'+1',callback:'敲木鱼',type:1}
+            ])
+        ]);
+        
+        // 更新消息时间戳
+        messageTimestamps.set(userId, Date.now());
     }
     
     async F1(e) {
@@ -39,6 +88,9 @@ export class example extends plugin {
         /** 用户数量 */
         const userNumber = fs.readdirSync(`${gameDataPath}/用户`)['length'] + 100001
 
+        // 存储最后一次交互的e对象，用于结算时发送消息
+        lastInteractionE.set(userId, e);
+
         // 判断用户是否存在，不存在创建基础信息
         if (!fs.existsSync(filePath['user'])) {
             storeJson(filePath['user'], {
@@ -60,43 +112,120 @@ export class example extends plugin {
             })
         }
 
-        /** 用户数据 */
-        const userData = await getJsonData(filePath['user'])
-        /** 今日数据 */
-        const todayData = await getJsonData(filePath['todayRecord'])
-
-        userData['total'] += 1
-        userData['Historical'][todayDate] = (userData['Historical'][todayDate] || 0) + 1
-        let Tips = ''; if (!todayData['group'].includes(groupId)) {
-            Tips = `今日第 ${todayData['group']['length'] + 1} 个敲击木鱼的群\r`
-            todayData['group'].push(groupId)
+        // 检查用户是否有正在进行的敲击会话
+        if (!userClickSessions.has(userId)) {
+            // 创建新的敲击会话
+            userClickSessions.set(userId, {
+                count: 0,
+                groupId,
+                lastClickTime: Date.now(),
+                messageId: e.message_id
+            });
+            
+            // 第一次敲击的提示
+            let Tips = '';
+            const todayData = await getJsonData(filePath['todayRecord']);
+            
+            if (!todayData['group'].includes(groupId)) {
+                Tips = `今日第 ${todayData['group']['length'] + 1} 个敲击木鱼的群\r`
+                todayData['group'].push(groupId)
+                storeJson(filePath['todayRecord'], todayData)
+            }
+            if (!todayData['user'].includes(userId)) {
+                Tips += `今日第 ${todayData['user']['length'] + 1} 位敲击木鱼的用户\r`
+                todayData['user'].push(userId)
+                storeJson(filePath['todayRecord'], todayData)
+            }
+            
+            e.reply([
+                segment.markdown({
+                    custom_template_id: "102059511_1713948595",
+                    params: [
+                        { key: 'a', values: [`<@${userId}>\r${Tips}`] },
+                        { key: 'b', values: ['#'] },
+                        { key: 'c', values: ['开始敲击木鱼\r'] },
+                        { key: 'd', values: ['连续点击+1按钮可以积累功德\r10秒内不点击将结算功德'] }
+                    ]
+                }),
+                segment.button([
+                    {text:'+1',callback:'敲木鱼',type:1}
+                ])
+            ]);
+            
+            // 记录消息发送时间
+            messageTimestamps.set(userId, Date.now());
+            
+        } else {
+            // 更新现有会话
+            const session = userClickSessions.get(userId);
+            session.count++;
+            session.lastClickTime = Date.now();
+            
+            // 不发送新消息，用户继续点击原有按钮
         }
-        if (!todayData['user'].includes(userId)) {
-            Tips += `今日第 ${todayData['user']['length'] + 1} 位敲击木鱼的用户\r`
-            todayData['user'].push(userId)
-        }
-        todayData['total'] += 1
-        storeJson(filePath['user'], userData)
-        storeJson(filePath['todayRecord'], todayData)
+    }
 
+    // 结束敲击会话并更新数据
+    async endClickSession(userId) {
+        const session = userClickSessions.get(userId);
+        if (!session || session.count === 0) {
+            userClickSessions.delete(userId);
+            lastInteractionE.delete(userId);
+            messageTimestamps.delete(userId);
+            return;
+        }
+        
+        // 获取最后一次交互的e对象
+        const e = lastInteractionE.get(userId);
+        if (!e) {
+            userClickSessions.delete(userId);
+            lastInteractionE.delete(userId);
+            messageTimestamps.delete(userId);
+            return;
+        }
+        
+        const todayDate = getTodayDate();
+        const filePath = {
+            user: `${gameDataPath}/用户/${userId}.json`,
+            todayRecord: `${gameDataPath}/记录/${todayDate}.json`
+        };
+        
+        // 更新用户数据
+        const userData = await getJsonData(filePath['user']);
+        userData['total'] += session.count;
+        userData['Historical'][todayDate] = (userData['Historical'][todayDate] || 0) + session.count;
+        storeJson(filePath['user'], userData);
+        
+        // 更新今日数据
+        const todayData = await getJsonData(filePath['todayRecord']);
+        todayData['total'] += session.count;
+        storeJson(filePath['todayRecord'], todayData);
+        
+        // 使用e.reply发送结算消息
         e.reply([
+            segment.at(userId),
             segment.markdown({
                 custom_template_id: "102059511_1713948595",
                 params: [
-                    { key: 'a', values: [`<@${e.user_id?.slice(11)}>\r${Tips}`] },
+                    { key: 'a', values: [`<@${userId}>\r`] },
                     { key: 'b', values: ['#'] },
-                    { key: 'c', values: [` 木鱼今日总敲击次数${todayData['total']}\r`] },
-                    { key: 'd', values: [`\r> 您今日已敲击 ${userData['Historical'][todayDate]} 次\r累计功德 ${userData['total']}`] }
+                    { key: 'c', values: [` 木鱼功德结算\r`] },
+                    { key: 'd', values: [`\r本次共敲击 ${session.count} 次\r今日累计 ${userData['Historical'][todayDate]} 次\r总功德 ${userData['total']}`] }
                 ]
             }),
             segment.button([
-                {text:'+1',callback:'敲木鱼',type:1}
+                {text:'再来一次',callback:'敲木鱼',type:1}
             ]),
             segment.button([
                 {text:'个人记录',callback:'木鱼记录',clicked_text:'正在获取个人记录'},
                 {text:'总榜',callback:'今日功德榜',clicked_text:'正在获取总榜'},
             ])
-        ])
+        ]);
+        
+        // 删除会话
+        userClickSessions.delete(userId);
+        lastInteractionE.delete(userId);
+        messageTimestamps.delete(userId);
     }
 
     async F2(e) {
@@ -145,7 +274,7 @@ export class example extends plugin {
         filteredRankingData.sort((a, b) => b.A - a.A);
         const topRankingData = filteredRankingData.slice(0, 10);
         
-        let replyMsg = `${!rankingType ? '' : rankingType}功德榜\r***\r> `;
+        let replyMsg = `\r\r#${!rankingType ? '' : rankingType}功德榜\r***\r> `;
         
         for (let i = 0; i < topRankingData.length; i++) {
             replyMsg += `Top${i + 1}. ${topRankingData[i]['C']}\r功德: [${topRankingData[i]['A']}]\r`;
