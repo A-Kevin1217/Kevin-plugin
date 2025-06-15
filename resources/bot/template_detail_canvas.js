@@ -84,30 +84,170 @@ export async function renderTemplateDetail(data) {
     y += 50;
   });
 
-  // 绘制模板内容区域
-  ctx.fillStyle = '#f9f9f9';
-  roundRect(ctx, 40, y + 20, 720, 200, 8);
-  ctx.fill();
-
-  // 绘制内容标题
+  // 绘制模板内容区域标题
   ctx.fillStyle = '#333';
   ctx.font = 'bold 18px 微软雅黑';
-  ctx.fillText('模板内容', 50, y + 45);
+  ctx.fillText('模板内容', 50, y + 25);
 
   // 绘制分割线
   ctx.strokeStyle = '#eee';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(50, y + 60);
-  ctx.lineTo(750, y + 60);
+  ctx.moveTo(50, y + 40);
+  ctx.lineTo(750, y + 40);
   ctx.stroke();
 
-  // 绘制内容文本
-  ctx.fillStyle = '#333';
-  ctx.font = '16px 微软雅黑';
-  wrapText(ctx, data.template.content, 50, y + 85, 700, 24);
+  // 如果是按钮模板，尝试解析并渲染按钮
+  if (data.template.type === '按钮') {
+    try {
+      // 尝试解析JSON内容
+      let buttonData = null;
+      try {
+        buttonData = JSON.parse(data.template.content);
+      } catch (e) {
+        console.error('按钮模板内容解析失败:', e);
+      }
+
+      if (buttonData && buttonData.rows) {
+        // 绘制按钮预览背景
+        ctx.fillStyle = '#f0f0f0';
+        roundRect(ctx, 50, y + 60, 700, 200, 12);
+        ctx.fill();
+
+        let buttonY = y + 80;
+        const rowHeight = 45; // 按钮行高度
+        const buttonSpacing = 4; // 按钮间距
+
+        // 遍历每一行按钮
+        buttonData.rows.forEach((row, rowIndex) => {
+          if (rowIndex > 4) return; // 最多显示5行
+          
+          const buttons = row.buttons || [];
+          if (buttons.length === 0) return;
+          
+          // 计算当前行按钮数量和宽度
+          const buttonCount = Math.min(buttons.length, 5); // 每行最多显示5个按钮
+          const buttonWidth = (700 - (buttonCount - 1) * buttonSpacing) / buttonCount;
+          
+          // 绘制当前行的所有按钮
+          buttons.forEach((button, buttonIndex) => {
+            if (buttonIndex >= 5) return; // 每行最多显示5个按钮
+            
+            const x = 50 + buttonIndex * (buttonWidth + buttonSpacing);
+            const style = button.render_data?.style || 0;
+            
+            // 绘制按钮背景
+            drawButton(ctx, x, buttonY, buttonWidth, 36, style, button.render_data?.label || '按钮');
+          });
+          
+          buttonY += rowHeight;
+        });
+      } else {
+        // 如果解析失败，显示原始内容
+        ctx.fillStyle = '#333';
+        ctx.font = '16px 微软雅黑';
+        wrapText(ctx, data.template.content, 50, y + 85, 700, 24);
+      }
+    } catch (e) {
+      console.error('渲染按钮模板失败:', e);
+      // 如果渲染失败，回退到显示原始内容
+      ctx.fillStyle = '#333';
+      ctx.font = '16px 微软雅黑';
+      wrapText(ctx, data.template.content, 50, y + 85, 700, 24);
+    }
+  } else {
+    // 如果不是按钮模板，直接显示内容文本
+    ctx.fillStyle = '#333';
+    ctx.font = '16px 微软雅黑';
+    wrapText(ctx, data.template.content, 50, y + 85, 700, 24);
+  }
 
   return canvas.toBuffer('image/png', { quality: 1, compressionLevel: 0 });
+}
+
+// 绘制按钮
+function drawButton(ctx, x, y, width, height, style, label) {
+  // 按钮样式
+  let borderColor, textColor, bgColor;
+  
+  switch (parseInt(style)) {
+    case 0: // 灰色线框
+      borderColor = '#ccc';
+      textColor = '#333';
+      bgColor = '#fff';
+      break;
+    case 1: // 蓝色线框
+      borderColor = '#12b7f5';
+      textColor = '#12b7f5';
+      bgColor = '#fff';
+      break;
+    case 2: // 智能体按钮
+      borderColor = '#ccc';
+      textColor = '#333';
+      bgColor = '#fff';
+      break;
+    case 3: // 灰线框红字
+      borderColor = '#ccc';
+      textColor = '#f24d4d';
+      bgColor = '#fff';
+      break;
+    case 4: // 蓝色背景白字
+      borderColor = '#12b7f5';
+      textColor = '#fff';
+      bgColor = '#12b7f5';
+      break;
+    default:
+      borderColor = '#ccc';
+      textColor = '#333';
+      bgColor = '#fff';
+  }
+
+  // 绘制按钮背景
+  ctx.fillStyle = bgColor;
+  roundRect(ctx, x, y, width, height, 4);
+  ctx.fill();
+  
+  // 绘制按钮边框
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = 1;
+  roundRect(ctx, x, y, width, height, 4);
+  ctx.stroke();
+  
+  // 智能体按钮特殊处理
+  if (parseInt(style) === 2) {
+    ctx.fillStyle = '#9c27b0';
+    ctx.beginPath();
+    ctx.arc(x + 15, y + height/2, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  // 绘制按钮文本
+  ctx.fillStyle = textColor;
+  ctx.font = '14px 微软雅黑';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  
+  // 如果文本过长，进行截断处理
+  const maxTextWidth = width - 20;
+  let displayText = label;
+  const metrics = ctx.measureText(displayText);
+  
+  if (metrics.width > maxTextWidth) {
+    // 文本过长，需要截断
+    let tempText = displayText;
+    while (ctx.measureText(tempText + '...').width > maxTextWidth && tempText.length > 0) {
+      tempText = tempText.substring(0, tempText.length - 1);
+    }
+    displayText = tempText + '...';
+  }
+  
+  // 智能体按钮文本位置需要右移
+  const textX = parseInt(style) === 2 ? x + width/2 + 10 : x + width/2;
+  ctx.fillText(displayText, textX, y + height/2);
+  
+  // 重置文本对齐方式
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
 }
 
 // 辅助函数：绘制圆角矩形

@@ -475,6 +475,22 @@ export class robot_data extends plugin {
     let t = ['', '按钮', 'Markdown']
     let s = ['', '未提审', '审核中', '已通过', '未通过']
 
+    // 处理模板内容
+    let templateContent = targetTemplate.text || '无内容'
+    
+    // 如果是按钮模板，尝试格式化JSON
+    let formattedContent = templateContent
+    if (targetTemplate.tpl_type === 1) { // 按钮类型
+      try {
+        // 尝试解析JSON内容
+        const buttonData = JSON.parse(templateContent)
+        formattedContent = JSON.stringify(buttonData, null, 2)
+      } catch (e) {
+        console.error('按钮模板内容解析失败:', e)
+        // 解析失败保持原样
+      }
+    }
+
     // 构建模板详情文本
     let templateDetail = `模板ID：${targetTemplate.tpl_id}
 模板名字：${targetTemplate.tpl_name}
@@ -482,7 +498,7 @@ export class robot_data extends plugin {
 状态：${s[targetTemplate.status]}
 ——————
 模板内容：
-${targetTemplate.text || '无内容'}`
+${formattedContent}`
 
     // 使用canvas渲染生成图片
     const imageBuffer = await renderTemplateDetail({
