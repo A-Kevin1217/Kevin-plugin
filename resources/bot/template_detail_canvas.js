@@ -1,15 +1,40 @@
 import { createCanvas, loadImage } from 'canvas';
 
 export async function renderTemplateDetail(data) {
-  // 增加画布尺寸和缩放比例以提高清晰度
+  // 基础尺寸设置
   const scale = 2; // 2倍缩放提高清晰度
-  const width = 800 * scale;
-  const height = 600 * scale;
+  const width = 800;
   
-  const canvas = createCanvas(width, height);
+  // 计算基础高度（不包含按钮区域）
+  const baseHeight = 350; // 基础信息区域的高度
+  
+  // 动态计算高度
+  let dynamicHeight = baseHeight;
+  
+  // 如果是按钮模板，预计算所需高度
+  if (data.template.type === '按钮') {
+    try {
+      let buttonData = null;
+      try {
+        buttonData = JSON.parse(data.template.content);
+      } catch (e) {
+        console.error('按钮模板内容解析失败:', e);
+      }
+      
+      if (buttonData && buttonData.rows) {
+        // 计算按钮行数，每行45px高度，最大显示10行
+        const rowCount = Math.min(buttonData.rows.length, 10);
+        const buttonAreaHeight = rowCount * 45 + 80; // 每行45px + 上下边距
+        dynamicHeight = baseHeight + buttonAreaHeight;
+      }
+    } catch (e) {
+      console.error('计算按钮高度失败:', e);
+    }
+  }
+  
+  // 创建画布，应用缩放
+  const canvas = createCanvas(width * scale, dynamicHeight * scale);
   const ctx = canvas.getContext('2d');
-  
-  // 应用缩放以提高清晰度
   ctx.scale(scale, scale);
 
   // 启用抗锯齿
@@ -18,11 +43,11 @@ export async function renderTemplateDetail(data) {
 
   // 设置背景
   ctx.fillStyle = 'rgba(245, 245, 245, 0.9)';
-  ctx.fillRect(0, 0, 800, 600);
+  ctx.fillRect(0, 0, width, dynamicHeight);
 
   // 绘制容器背景
   ctx.fillStyle = '#fff';
-  roundRect(ctx, 20, 20, 760, 560, 15);
+  roundRect(ctx, 20, 20, width - 40, dynamicHeight - 40, 15);
   ctx.fill();
 
   // 添加阴影效果
@@ -53,7 +78,7 @@ export async function renderTemplateDetail(data) {
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(40, 110);
-  ctx.lineTo(760, 110);
+  ctx.lineTo(width - 40, 110);
   ctx.stroke();
 
   // 绘制模板信息
@@ -68,7 +93,7 @@ export async function renderTemplateDetail(data) {
   infoItems.forEach((item, index) => {
     // 绘制信息项背景
     ctx.fillStyle = '#f9f9f9';
-    roundRect(ctx, 40, y, 720, 40, 8);
+    roundRect(ctx, 40, y, width - 80, 40, 8);
     ctx.fill();
 
     // 绘制标签
@@ -94,7 +119,7 @@ export async function renderTemplateDetail(data) {
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(50, y + 40);
-  ctx.lineTo(750, y + 40);
+  ctx.lineTo(width - 50, y + 40);
   ctx.stroke();
 
   // 如果是按钮模板，尝试解析并渲染按钮
@@ -111,7 +136,7 @@ export async function renderTemplateDetail(data) {
       if (buttonData && buttonData.rows) {
         // 绘制按钮预览背景
         ctx.fillStyle = '#f0f0f0';
-        roundRect(ctx, 50, y + 60, 700, 200, 12);
+        roundRect(ctx, 50, y + 60, width - 100, dynamicHeight - y - 100, 12);
         ctx.fill();
 
         let buttonY = y + 80;
@@ -120,14 +145,14 @@ export async function renderTemplateDetail(data) {
 
         // 遍历每一行按钮
         buttonData.rows.forEach((row, rowIndex) => {
-          if (rowIndex > 4) return; // 最多显示5行
+          if (rowIndex > 9) return; // 最多显示10行
           
           const buttons = row.buttons || [];
           if (buttons.length === 0) return;
           
           // 计算当前行按钮数量和宽度
           const buttonCount = Math.min(buttons.length, 5); // 每行最多显示5个按钮
-          const buttonWidth = (700 - (buttonCount - 1) * buttonSpacing) / buttonCount;
+          const buttonWidth = (width - 120 - (buttonCount - 1) * buttonSpacing) / buttonCount;
           
           // 绘制当前行的所有按钮
           buttons.forEach((button, buttonIndex) => {
@@ -146,20 +171,20 @@ export async function renderTemplateDetail(data) {
         // 如果解析失败，显示原始内容
         ctx.fillStyle = '#333';
         ctx.font = '16px 微软雅黑';
-        wrapText(ctx, data.template.content, 50, y + 85, 700, 24);
+        wrapText(ctx, data.template.content, 50, y + 85, width - 100, 24);
       }
     } catch (e) {
       console.error('渲染按钮模板失败:', e);
       // 如果渲染失败，回退到显示原始内容
       ctx.fillStyle = '#333';
       ctx.font = '16px 微软雅黑';
-      wrapText(ctx, data.template.content, 50, y + 85, 700, 24);
+      wrapText(ctx, data.template.content, 50, y + 85, width - 100, 24);
     }
   } else {
     // 如果不是按钮模板，直接显示内容文本
     ctx.fillStyle = '#333';
     ctx.font = '16px 微软雅黑';
-    wrapText(ctx, data.template.content, 50, y + 85, 700, 24);
+    wrapText(ctx, data.template.content, 50, y + 85, width - 100, 24);
   }
 
   return canvas.toBuffer('image/png', { quality: 1, compressionLevel: 0 });
