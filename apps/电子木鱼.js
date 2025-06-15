@@ -90,7 +90,7 @@ export class example extends plugin {
                 ]
             }),
             segment.button([
-                {text:'+1',callback:'敲木鱼'}
+                {text:'+1',callback:'敲木鱼',type:1}
             ]),
             segment.button([
                 {text:'个人记录',callback:'木鱼记录',clicked_text:'正在获取个人记录'},
@@ -156,7 +156,7 @@ export class example extends plugin {
                 { key: 'a', values: [`${replyMsg}`] }
             ]
         }),segment.button([
-            {text:'+1',callback:'敲木鱼',clicked_text:'哒哒哒'}
+            {text:'+1',callback:'敲木鱼',type:1}
         ]),segment.button([
             {text:'个人记录',callback:'木鱼记录',clicked_text:'正在获取个人记录'},
             {text:'总榜',callback:'今日功德榜',clicked_text:'正在获取总榜'},
@@ -202,7 +202,7 @@ export class example extends plugin {
             ]
         }),
         segment.button([
-            {text:'+1',callback:'敲木鱼'}
+            {text:'+1',callback:'敲木鱼',type:1}
         ]),
         segment.button([
             {text:'个人记录',callback:'木鱼记录',clicked_text:'正在获取个人记录'},
