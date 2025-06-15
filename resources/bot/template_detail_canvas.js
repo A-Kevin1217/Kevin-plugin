@@ -5,13 +5,13 @@ export async function renderTemplateDetail(data) {
   const scale = 2; // 2倍缩放提高清晰度
   const width = 800;
   
-  // 计算基础高度（不包含按钮区域）
+  // 计算基础高度（不包含内容区域）
   const baseHeight = 350; // 基础信息区域的高度
   
   // 动态计算高度
   let dynamicHeight = baseHeight;
   
-  // 如果是按钮模板，预计算所需高度
+  // 根据模板类型计算高度
   if (data.template.type === '按钮') {
     try {
       let buttonData = null;
@@ -30,6 +30,12 @@ export async function renderTemplateDetail(data) {
     } catch (e) {
       console.error('计算按钮高度失败:', e);
     }
+  } else if (data.template.type === 'Markdown') {
+    // Markdown模板需要更多空间显示内容
+    const contentLength = data.template.content ? data.template.content.length : 0;
+    // 根据内容长度估算所需高度，每100个字符约需25px高度
+    const estimatedHeight = Math.min(Math.max(200, Math.ceil(contentLength / 4)), 600);
+    dynamicHeight = baseHeight + estimatedHeight;
   }
   
   // 创建画布，应用缩放
@@ -122,72 +128,153 @@ export async function renderTemplateDetail(data) {
   ctx.lineTo(width - 50, y + 40);
   ctx.stroke();
 
-  // 如果是按钮模板，尝试解析并渲染按钮
+  // 根据模板类型渲染不同的内容
   if (data.template.type === '按钮') {
-    try {
-      // 尝试解析JSON内容
-      let buttonData = null;
-      try {
-        buttonData = JSON.parse(data.template.content);
-      } catch (e) {
-        console.error('按钮模板内容解析失败:', e);
-      }
-
-      if (buttonData && buttonData.rows) {
-        // 绘制按钮预览背景
-        ctx.fillStyle = '#f0f0f0';
-        roundRect(ctx, 50, y + 60, width - 100, dynamicHeight - y - 100, 12);
-        ctx.fill();
-
-        let buttonY = y + 80;
-        const rowHeight = 45; // 按钮行高度
-        const buttonSpacing = 4; // 按钮间距
-
-        // 遍历每一行按钮
-        buttonData.rows.forEach((row, rowIndex) => {
-          if (rowIndex > 9) return; // 最多显示10行
-          
-          const buttons = row.buttons || [];
-          if (buttons.length === 0) return;
-          
-          // 计算当前行按钮数量和宽度
-          const buttonCount = Math.min(buttons.length, 5); // 每行最多显示5个按钮
-          const buttonWidth = (width - 120 - (buttonCount - 1) * buttonSpacing) / buttonCount;
-          
-          // 绘制当前行的所有按钮
-          buttons.forEach((button, buttonIndex) => {
-            if (buttonIndex >= 5) return; // 每行最多显示5个按钮
-            
-            const x = 50 + buttonIndex * (buttonWidth + buttonSpacing);
-            const style = button.render_data?.style || 0;
-            
-            // 绘制按钮背景
-            drawButton(ctx, x, buttonY, buttonWidth, 36, style, button.render_data?.label || '按钮');
-          });
-          
-          buttonY += rowHeight;
-        });
-      } else {
-        // 如果解析失败，显示原始内容
-        ctx.fillStyle = '#333';
-        ctx.font = '16px 微软雅黑';
-        wrapText(ctx, data.template.content, 50, y + 85, width - 100, 24);
-      }
-    } catch (e) {
-      console.error('渲染按钮模板失败:', e);
-      // 如果渲染失败，回退到显示原始内容
-      ctx.fillStyle = '#333';
-      ctx.font = '16px 微软雅黑';
-      wrapText(ctx, data.template.content, 50, y + 85, width - 100, 24);
-    }
+    renderButtonTemplate(ctx, data.template.content, width, y, dynamicHeight);
+  } else if (data.template.type === 'Markdown') {
+    renderMarkdownTemplate(ctx, data.template.content, width, y, dynamicHeight);
   } else {
-    // 如果不是按钮模板，直接显示内容文本
+    // 其他类型模板，直接显示内容文本
     ctx.fillStyle = '#333';
     ctx.font = '16px 微软雅黑';
-    wrapText(ctx, data.template.content, 50, y + 85, width - 100, 24);
+    wrapText(ctx, data.template.content || '无内容', 50, y + 85, width - 100, 24);
   }
 
   return canvas.toBuffer('image/png', { quality: 1, compressionLevel: 0 });
+}
+
+// 渲染按钮模板
+function renderButtonTemplate(ctx, content, width, startY, totalHeight) {
+  try {
+    // 尝试解析JSON内容
+    let buttonData = null;
+    try {
+      buttonData = JSON.parse(content);
+    } catch (e) {
+      console.error('按钮模板内容解析失败:', e);
+      // 解析失败，显示原始内容
+      ctx.fillStyle = '#333';
+      ctx.font = '16px 微软雅黑';
+      wrapText(ctx, content || '无内容', 50, startY + 85, width - 100, 24);
+      return;
+    }
+
+    if (buttonData && buttonData.rows) {
+      // 绘制按钮预览背景
+      ctx.fillStyle = '#f0f0f0';
+      const contentHeight = totalHeight - startY - 80;
+      roundRect(ctx, 50, startY + 60, width - 100, contentHeight, 12);
+      ctx.fill();
+
+      let buttonY = startY + 80;
+      const rowHeight = 45; // 按钮行高度
+      const buttonSpacing = 4; // 按钮间距
+      const availableWidth = width - 120; // 可用于按钮的宽度
+
+      // 遍历每一行按钮
+      buttonData.rows.forEach((row, rowIndex) => {
+        if (rowIndex > 4) return; // 最多显示5行
+        
+        const buttons = row.buttons || [];
+        if (buttons.length === 0) return;
+        
+        // 计算当前行按钮数量和宽度
+        const buttonCount = Math.min(buttons.length, 10); // 每行最多显示10个按钮
+        const buttonWidth = (availableWidth - (buttonCount - 1) * buttonSpacing) / buttonCount;
+        
+        // 绘制当前行的所有按钮
+        buttons.forEach((button, buttonIndex) => {
+          if (buttonIndex >= 10) return; // 每行最多显示10个按钮
+          
+          const x = 60 + buttonIndex * (buttonWidth + buttonSpacing);
+          const style = button.render_data?.style || 0;
+          
+          // 绘制按钮
+          drawButton(ctx, x, buttonY, buttonWidth, 36, style, button.render_data?.label || '按钮');
+        });
+        
+        buttonY += rowHeight;
+      });
+    } else {
+      // 无有效按钮数据
+      ctx.fillStyle = '#333';
+      ctx.font = '16px 微软雅黑';
+      ctx.fillText('未找到有效的按钮数据', 60, startY + 100);
+    }
+  } catch (e) {
+    console.error('渲染按钮模板失败:', e);
+    // 如果渲染失败，回退到显示原始内容
+    ctx.fillStyle = '#333';
+    ctx.font = '16px 微软雅黑';
+    wrapText(ctx, content || '无内容', 50, startY + 85, width - 100, 24);
+  }
+}
+
+// 渲染Markdown模板
+function renderMarkdownTemplate(ctx, content, width, startY, totalHeight) {
+  // 为Markdown内容创建一个滚动区域
+  ctx.fillStyle = '#f9f9f9';
+  const contentHeight = totalHeight - startY - 80;
+  roundRect(ctx, 50, startY + 60, width - 100, contentHeight, 12);
+  ctx.fill();
+  
+  // 绘制Markdown内容
+  ctx.fillStyle = '#333';
+  ctx.font = '16px 微软雅黑';
+  
+  // 使用更小的行高以显示更多内容
+  const lineHeight = 22;
+  const maxLines = Math.floor(contentHeight / lineHeight) - 1;
+  
+  // 简单处理一些Markdown语法
+  const lines = (content || '无内容').split('\n');
+  let y = startY + 85;
+  let lineCount = 0;
+  
+  for (const line of lines) {
+    if (lineCount >= maxLines) {
+      // 如果内容太长，显示省略号
+      ctx.fillText('...（内容过长，已省略）', 60, y);
+      break;
+    }
+    
+    let processedLine = line.trim();
+    let x = 60;
+    
+    // 简单处理Markdown标题
+    if (processedLine.startsWith('# ')) {
+      ctx.font = 'bold 20px 微软雅黑';
+      processedLine = processedLine.substring(2);
+    } else if (processedLine.startsWith('## ')) {
+      ctx.font = 'bold 18px 微软雅黑';
+      processedLine = processedLine.substring(3);
+    } else if (processedLine.startsWith('### ')) {
+      ctx.font = 'bold 16px 微软雅黑';
+      processedLine = processedLine.substring(4);
+    } else if (processedLine.startsWith('- ')) {
+      // 简单处理列表
+      processedLine = '• ' + processedLine.substring(2);
+      x += 10; // 缩进列表项
+    } else {
+      ctx.font = '16px 微软雅黑';
+    }
+    
+    // 处理粗体
+    if (processedLine.includes('**')) {
+      // 这里简化处理，实际上需要更复杂的解析
+      ctx.font = 'bold 16px 微软雅黑';
+      processedLine = processedLine.replace(/\*\*/g, '');
+    }
+    
+    // 绘制当前行
+    wrapTextWithX(ctx, processedLine, x, y, width - 120, lineHeight, maxLines - lineCount, lineCount);
+    
+    // 更新行计数和Y坐标
+    const metrics = ctx.measureText(processedLine);
+    const wrappedLines = Math.ceil(metrics.width / (width - 120));
+    lineCount += wrappedLines;
+    y += lineHeight * wrappedLines;
+  }
 }
 
 // 绘制按钮
@@ -325,4 +412,34 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
     }
   }
   ctx.fillText(line, x, y);
+}
+
+// 辅助函数：带X坐标的文本换行，并限制最大行数
+function wrapTextWithX(ctx, text, x, y, maxWidth, lineHeight, maxLines, currentLineCount) {
+  const words = text.split('');
+  let line = '';
+  let lineCount = 0;
+
+  for (let n = 0; n < words.length; n++) {
+    const testLine = line + words[n];
+    const metrics = ctx.measureText(testLine);
+    const testWidth = metrics.width;
+
+    if (testWidth > maxWidth && n > 0) {
+      ctx.fillText(line, x, y);
+      line = words[n];
+      y += lineHeight;
+      lineCount++;
+      
+      if (currentLineCount + lineCount >= maxLines) {
+        break;
+      }
+    } else {
+      line = testLine;
+    }
+  }
+  
+  if (currentLineCount + lineCount < maxLines) {
+    ctx.fillText(line, x, y);
+  }
 } 
