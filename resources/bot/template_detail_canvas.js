@@ -164,24 +164,31 @@ function renderButtonTemplate(ctx, content, width, startY, totalHeight) {
     }
 
     if (buttonData && buttonData.rows) {
-      // 绘制按钮预览背景（内边框）
-      const contentPadding = 30; // 增加内边框与外边框的间距
-      const contentTop = startY + 60;
-      // 确保内边框底部有足够的边距
-      const contentBottom = totalHeight - 80;
-      const contentHeight = contentBottom - contentTop;
+      // 计算需要显示的行数
+      const rowCount = Math.min(buttonData.rows.length, 5); // 最多显示5行
       
+      // 计算内边框的高度
+      const contentPadding = 30; // 内边框与外边框的间距
+      const rowHeight = 45; // 按钮行高度
+      
+      // 根据按钮行数计算内容区域的高度
+      const contentAreaHeight = (rowCount * rowHeight) + (contentPadding * 2);
+      
+      // 确保内容区域不会超出画布
+      const contentTop = startY + 60;
+      const maxContentHeight = totalHeight - contentTop - 60;
+      const finalContentHeight = Math.min(contentAreaHeight, maxContentHeight);
+      
+      // 绘制按钮预览背景（内边框）
       ctx.fillStyle = '#f0f0f0';
-      roundRect(ctx, 40, contentTop, width - 80, contentHeight, 12);
+      roundRect(ctx, 40, contentTop, width - 80, finalContentHeight, 12);
       ctx.fill();
 
       // 计算按钮区域
       const buttonAreaTop = contentTop + contentPadding;
       const buttonAreaWidth = width - 80 - (contentPadding * 2);
       let buttonY = buttonAreaTop;
-      const rowHeight = 45; // 按钮行高度
       const buttonSpacing = 4; // 按钮间距
-      const rowCount = Math.min(buttonData.rows.length, 5); // 最多显示5行
 
       // 遍历每一行按钮
       buttonData.rows.forEach((row, rowIndex) => {
